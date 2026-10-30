@@ -35,7 +35,7 @@ class ContactRequest extends Model
      */
     public function sender(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'sender_id');
+        return $this->belongsTo(User::class, 'sender_id')->withTrashed();
     }
 
     /**
@@ -43,7 +43,7 @@ class ContactRequest extends Model
      */
     public function recipient(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'recipient_id');
+        return $this->belongsTo(User::class, 'recipient_id')->withTrashed();
     }
 
     /**

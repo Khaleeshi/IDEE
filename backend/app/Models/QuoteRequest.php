@@ -39,7 +39,7 @@ class QuoteRequest extends Model
      */
     public function client(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'client_id');
+        return $this->belongsTo(User::class, 'client_id')->withTrashed();
     }
 
     /**
@@ -47,7 +47,7 @@ class QuoteRequest extends Model
      */
     public function expert(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'expert_id');
+        return $this->belongsTo(User::class, 'expert_id')->withTrashed();
     }
 
     /**

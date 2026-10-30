@@ -68,6 +68,14 @@
         @endif
 
         {{ $slot }}
+
+        {{-- Section 9 : mentions légales accessibles depuis toutes les pages. --}}
+        <footer class="mt-10 border-t border-stone-200 pt-4 text-center text-xs text-stone-500">
+            <a href="{{ route('legal.notice') }}" class="inline-block px-2 py-2 underline">Mentions légales</a>
+            <a href="{{ route('legal.terms') }}" class="inline-block px-2 py-2 underline">Conditions</a>
+            <a href="{{ route('legal.privacy') }}" class="inline-block px-2 py-2 underline">Confidentialité</a>
+            <a href="{{ route('legal.charter') }}" class="inline-block px-2 py-2 underline">Charte</a>
+        </footer>
     </main>
 
     @auth

@@ -48,6 +48,23 @@ void main() {
     );
   });
 
+  test('la suppression du compte envoie la confirmation', () async {
+    late http.Request sent;
+    final api = ApiClient(
+      baseUrl: 'https://idee.test',
+      client: MockClient((request) async {
+        sent = request;
+        return http.Response('', 204);
+      }),
+    )..token = 'jeton';
+
+    await api.delete('me', {'confirmation': 'SUPPRIMER'});
+
+    expect(sent.method, 'DELETE');
+    expect(sent.url.toString(), 'https://idee.test/api/me');
+    expect(jsonDecode(sent.body), {'confirmation': 'SUPPRIMER'});
+  });
+
   test('une session expirée est signalée', () async {
     final api = ApiClient(baseUrl: 'https://idee.test', client: MockClient((_) async => http.Response('{"message":"Unauthenticated."}', 401)));
 

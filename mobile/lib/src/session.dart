@@ -18,6 +18,9 @@ class Session extends ChangeNotifier {
   Member? user;
   bool ready = false;
 
+  /// Conditions d'utilisation et charte acceptées dans leur version en vigueur.
+  bool termsAccepted = true;
+
   bool get isSignedIn => api.token != null;
 
   /// Reprend la session enregistrée, si le jeton est encore valable.
@@ -25,7 +28,7 @@ class Session extends ChangeNotifier {
     api.token = await _storage.read(key: _tokenKey);
     if (api.token != null) {
       try {
-        user = Member.fromJson((await api.get('me'))['data'] as Map<String, dynamic>);
+        _signedIn((await api.get('me'))['data'] as Map<String, dynamic>);
       } on ApiException catch (error) {
         if (error.statusCode == 401) {
           await _forget();
@@ -51,7 +54,7 @@ class Session extends ChangeNotifier {
       'device_name': 'Application IDEE',
     });
     api.token = response['token'] as String;
-    user = Member.fromJson(response['user'] as Map<String, dynamic>);
+    _signedIn(response['user'] as Map<String, dynamic>);
     await _storage.write(key: _tokenKey, value: api.token);
     notifyListeners();
   }
@@ -64,6 +67,25 @@ class Session extends ChangeNotifier {
     }
     await _forget();
     notifyListeners();
+  }
+
+  /// Accepte les conditions d'utilisation et la charte communautaire.
+  Future<void> acceptTerms() async {
+    await api.post('me/terms', {'accept': true});
+    termsAccepted = true;
+    notifyListeners();
+  }
+
+  /// Supprime le compte sur le serveur, puis oublie la session sur le téléphone.
+  Future<void> deleteAccount(String confirmation) async {
+    await api.delete('me', {'confirmation': confirmation});
+    await _forget();
+    notifyListeners();
+  }
+
+  void _signedIn(Map<String, dynamic> profile) {
+    user = Member.fromJson(profile);
+    termsAccepted = profile['terms_accepted'] != false;
   }
 
   Future<void> _forget() async {

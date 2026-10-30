@@ -104,6 +104,8 @@ return [
     'moderation' => [
         'suspension_days' => (int) env('IDEE_SUSPENSION_DAYS', 30),
         'appeal_days' => (int) env('IDEE_APPEAL_DAYS', 14),
+        // Section 8 : suspension préventive après ce nombre de signalements de personnes différentes.
+        'reports_before_suspension' => (int) env('IDEE_REPORTS_BEFORE_SUSPENSION', 3),
     ],
 
     // CF-02 : durée de validité d'une vérification d'identité (en mois).
@@ -187,6 +189,17 @@ return [
         'address' => env('IDEE_COMPANY_ADDRESS'),
         'ninea' => env('IDEE_COMPANY_NINEA'),
         'rccm' => env('IDEE_COMPANY_RCCM'),
+        'email' => env('IDEE_CONTACT_EMAIL'),
+        'publisher' => env('IDEE_PUBLISHER'),
+        'host' => env('IDEE_HOST'),
+    ],
+
+    // Section 9 : conditions d'utilisation, confidentialité et charte communautaire.
+    // Changer la version demande à chaque membre d'accepter de nouveau les textes.
+    'legal' => [
+        'version' => '2026-10',
+        // Passe à true quand un avocat a validé les textes : le bandeau « provisoire » disparaît.
+        'validated' => (bool) env('IDEE_LEGAL_VALIDATED', false),
     ],
 
     // Code de connexion à usage unique (section 10).

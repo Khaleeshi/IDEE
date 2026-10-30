@@ -38,6 +38,9 @@ class ApiClient {
   Future<Map<String, dynamic>> patch(String path, [Map<String, dynamic>? body]) =>
       _send(() => _http.patch(_uri(path), headers: _headers(json: true), body: jsonEncode(body ?? const {})));
 
+  Future<Map<String, dynamic>> delete(String path, [Map<String, dynamic>? body]) =>
+      _send(() => _http.delete(_uri(path), headers: _headers(json: true), body: jsonEncode(body ?? const {})));
+
   Uri _uri(String path, [Map<String, String>? query]) {
     final uri = Uri.parse('$baseUrl/api/$path');
     return query == null || query.isEmpty ? uri : uri.replace(queryParameters: query);

@@ -52,7 +52,7 @@ class Collaboration extends Model
      */
     public function declarer(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'declared_by');
+        return $this->belongsTo(User::class, 'declared_by')->withTrashed();
     }
 
     /**
@@ -60,7 +60,7 @@ class Collaboration extends Model
      */
     public function partner(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'partner_id');
+        return $this->belongsTo(User::class, 'partner_id')->withTrashed();
     }
 
     /**

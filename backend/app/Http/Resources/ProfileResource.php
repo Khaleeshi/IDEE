@@ -26,6 +26,7 @@ class ProfileResource extends JsonResource
             'contact_preferences' => $this->contact_preferences ?? ['accepts_requests' => true],
             'weekly_contact_quota' => $this->weeklyContactQuota(),
             'contact_requests_sent_this_week' => $this->sentContactRequests()->where('created_at', '>=', now()->subWeek())->count(),
+            'terms_accepted' => $this->hasAcceptedTerms(),
         ];
     }
 }

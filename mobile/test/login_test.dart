@@ -52,6 +52,37 @@ void main() {
     expect(find.text('Aucun projet ne correspond à cette recherche.'), findsOneWidget);
   });
 
+  testWidgets('un nouveau membre accepte la charte avant d\'entrer', (tester) async {
+    FlutterSecureStorage.setMockInitialValues({'idee_token': 'jeton'});
+    final requests = <http.Request>[];
+    final session = Session(api: ApiClient(
+      baseUrl: 'https://idee.test',
+      client: MockClient((request) async {
+        requests.add(request);
+        return switch (request.url.path) {
+          '/api/me' => reply({'data': {'id': '01u', 'name': 'Awa Diop', 'terms_accepted': false}}),
+          '/api/me/terms' => reply({'data': {'id': '01u', 'name': 'Awa Diop', 'terms_accepted': true}}),
+          '/api/projects' => reply({'data': []}),
+          _ => http.Response('{}', 404),
+        };
+      }),
+    ));
+    await session.restore();
+
+    await tester.pumpWidget(IdeeApp(session: session));
+    expect(find.text('Bienvenue sur IDEE'), findsOneWidget);
+    expect(tester.widget<FilledButton>(find.widgetWithText(FilledButton, 'Continuer')).onPressed, isNull);
+
+    await tester.tap(find.byType(Checkbox));
+    await tester.pump();
+    await tester.tap(find.text('Continuer'));
+    await tester.pumpAndSettle();
+
+    expect(session.termsAccepted, isTrue);
+    expect(jsonDecode(requests.firstWhere((request) => request.url.path == '/api/me/terms').body), {'accept': true});
+    expect(find.text('Aucun projet ne correspond à cette recherche.'), findsOneWidget);
+  });
+
   testWidgets('un identifiant invalide est refusé sans appel au serveur', (tester) async {
     FlutterSecureStorage.setMockInitialValues({});
     var calls = 0;

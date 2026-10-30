@@ -25,6 +25,11 @@ final class AlertChannels
             return $channels;
         }
 
+        // Un compte supprimé ne reçoit plus rien.
+        if ($notifiable->trashed()) {
+            return [];
+        }
+
         if (app(PushService::class)->isEnabled() && $notifiable->pushSubscriptions()->exists()) {
             $channels[] = WebPushChannel::class;
         }

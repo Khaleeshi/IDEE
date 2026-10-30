@@ -28,6 +28,10 @@ class MessageService
             ]);
         }
 
+        if ($conversation->otherParty($sender)?->trashed()) {
+            throw ValidationException::withMessages(['body' => 'Ce membre a supprimé son compte : la conversation est close.']);
+        }
+
         $message = new Message;
         $message->contactRequest()->associate($conversation);
         $message->sender()->associate($sender);

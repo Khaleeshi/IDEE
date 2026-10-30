@@ -132,6 +132,13 @@
         <a href="{{ route('offers.index') }}" class="col-span-2 rounded-xl border border-stone-200 bg-white p-3 text-center font-medium text-stone-800">Offres et paiements</a>
     </nav>
 
+    <x-card class="text-sm">
+        <h2 class="font-semibold">Mes données</h2>
+        <p class="mt-1 text-stone-600">Téléchargez tout ce qu'IDEE garde sur vous, ou supprimez votre compte.</p>
+        <a href="{{ route('account.export') }}" class="mt-3 block py-1 font-medium text-brand-700 underline">Télécharger mes données</a>
+        <a href="{{ route('account.delete') }}" class="block py-1 font-medium text-red-700 underline">Supprimer mon compte</a>
+    </x-card>
+
     <form method="POST" action="{{ route('logout') }}" class="text-center">
         @csrf
         <button type="submit" class="py-3 text-sm font-medium text-red-700 underline">Se déconnecter</button>

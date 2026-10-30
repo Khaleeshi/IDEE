@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\EnsureAccountIsActive;
+use App\Http\Middleware\EnsureTermsAccepted;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -21,6 +22,10 @@ return Application::configure(basePath: dirname(__DIR__))
         // Un compte suspendu ou exclu est déconnecté à sa prochaine requête.
         $middleware->appendToGroup('web', EnsureAccountIsActive::class);
         $middleware->appendToGroup('api', EnsureAccountIsActive::class);
+
+        // Conditions d'utilisation et charte acceptées avant tout le reste (sections 8 et 9).
+        $middleware->appendToGroup('web', EnsureTermsAccepted::class);
+        $middleware->appendToGroup('api', EnsureTermsAccepted::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

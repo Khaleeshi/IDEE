@@ -49,6 +49,16 @@ class ProfileService
     }
 
     /**
+     * Le membre accepte les conditions d'utilisation et la charte communautaire en vigueur.
+     */
+    public function acceptTerms(User $user): User
+    {
+        $user->forceFill(['terms_version' => config('idee.legal.version'), 'terms_accepted_at' => now()])->save();
+
+        return $user;
+    }
+
+    /**
      * Recadre la photo en carré et la réduit avant de l'enregistrer (CP-02).
      */
     private function replacePhoto(User $user, UploadedFile $file): void

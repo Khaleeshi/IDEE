@@ -45,7 +45,16 @@ class User extends Authenticatable
             'is_admin' => 'boolean',
             'suspended_until' => 'datetime',
             'banned_at' => 'datetime',
+            'terms_accepted_at' => 'datetime',
         ];
+    }
+
+    /**
+     * Le membre a accepté la version en vigueur des conditions et de la charte.
+     */
+    public function hasAcceptedTerms(): bool
+    {
+        return $this->terms_version === config('idee.legal.version');
     }
 
     public function photoUrl(): ?string
