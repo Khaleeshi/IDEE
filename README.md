@@ -71,9 +71,17 @@ clients, matériel) et chaque demande de contact reçoit une réponse.
 - Notifications push du navigateur et SMS de secours pour les alertes critiques
 - 136 tests automatisés au total
 
+**Étape 6 — version 2** : en cours.
+
+- Collaboration : prochaines étapes convenues à deux (objectif, échéance,
+  responsable), tableau de tâches partagé du projet, rendez-vous en visio ou en
+  présentiel avec rappel la veille, collaborations et réussites publiées seulement
+  après confirmation des deux parties (CO-01 à CO-03, MR-07, FC-06)
+- 142 tests automatisés au total
+
 **Reste à faire** : saisie vocale par IA (la dictée du clavier est proposée en
-attendant), puis les fonctions prévues en V2 (collaborations confirmées, groupes,
-rendez-vous, paiements, fiches en wolof) et l'application Flutter.
+attendant), la suite de la V2 (groupes, alertes, pages d'organisation, experts,
+paiements, fiches en wolof…) et l'application Flutter.
 
 ## Structure du dépôt
 
@@ -117,6 +125,8 @@ de connexion ne sont pas envoyés par SMS : ils sont écrits dans
 | `/projets/nouveau` | Publier un projet |
 | `/mes-projets` | Mes projets et leur score de préparation |
 | `/demandes` | Demandes de contact reçues et envoyées |
+| `/demandes/{id}` | Conversation : messages, prochaines étapes, rendez-vous, collaboration |
+| `/projets/{id}/taches` | Tableau de tâches partagé avec les partenaires du projet |
 | `/profil` | Mon profil, mes rôles, mes préférences |
 | `/membres/{id}` | Profil public d'un membre et sa réactivité |
 | `/parcours` | Parcours guidés : choix de la situation, mes démarches, rappels |
@@ -172,6 +182,14 @@ l'en-tête `Authorization: Bearer <jeton>` reçu à la connexion.
 | GET, POST | `/api/projects/{id}/updates` | public, porteur | Journal de progression |
 | GET, POST | `/api/contact-requests/{id}/messages` | concerné | Messagerie (texte, vocal, document) |
 | GET | `/api/messages/{id}/attachment` | concerné | Pièce jointe d'un message |
+| GET | `/api/contact-requests/{id}/collaboration` | concerné | Étapes convenues, rendez-vous et collaborations de la conversation |
+| POST | `/api/contact-requests/{id}/agreements` · `meetings` · `collaborations` | concerné | Proposer une étape, un rendez-vous ; déclarer une collaboration |
+| POST | `/api/agreements/{id}/respond` · `complete` | l'autre personne, concerné | Accepter ou refuser une étape ; la marquer réalisée |
+| POST | `/api/meetings/{id}/respond` · `cancel` | l'autre personne, concerné | Confirmer, décliner ou annuler un rendez-vous |
+| POST | `/api/collaborations/{id}/respond` | partenaire | Confirmer ou non une collaboration |
+| GET | `/api/members/{id}/collaborations` | public | Collaborations confirmées d'un membre |
+| GET, POST | `/api/projects/{id}/tasks` | porteur, partenaires | Tableau de tâches du projet |
+| PATCH, DELETE | `/api/tasks/{id}` | porteur, partenaires | Changer la colonne d'une tâche, la retirer |
 | GET, POST | `/api/projects/{id}/documents` | autorisé, porteur | Documents privés |
 | GET | `/api/documents/{id}` | autorisé | Télécharger un document (consultation journalisée) |
 | GET, POST | `/api/projects/{id}/document-accesses` | porteur, connecté | Demandes d'accès aux documents |
@@ -208,8 +226,10 @@ Les valeurs se règlent dans `backend/config/idee.php` ou dans le fichier `.env`
 | RG-11 | Rôle d'investisseur ou d'expert affiché seulement après vérification d'identité | — |
 | Modération | Durée d'une suspension, délai pour contester une décision | 30 jours, 14 jours |
 | Assistant IA | Business plans par projet et par mois, questions par jour | 3, 3 |
+| Rendez-vous | Rappel envoyé aux deux personnes avant un rendez-vous confirmé | 24 heures |
+| Collaboration | Étapes, rendez-vous et collaborations ne comptent qu'avec l'accord des deux | — |
 
-Les relances et expirations tournent toutes les heures, la mise en sommeil
+Les relances, expirations et rappels de rendez-vous tournent toutes les heures, la mise en sommeil
 chaque nuit, les rappels d'étapes chaque matin et le signalement des fiches à
 revoir chaque lundi, via le planificateur Laravel (`php artisan schedule:work`
 en local, une tâche cron en production).

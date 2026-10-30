@@ -52,6 +52,24 @@
     @empty
         <p class="text-sm text-stone-600">Aucun projet actif.</p>
     @endforelse
+
+    {{-- CO-03 : collaborations confirmées par les deux parties. --}}
+    @if ($collaborations->isNotEmpty())
+        <h2 class="mb-3 mt-6 text-lg font-bold">Collaborations confirmées</h2>
+        <ul class="space-y-2">
+            @foreach ($collaborations as $collaboration)
+                @php($partner = $collaboration->otherThan($member))
+                <li class="rounded-xl border border-stone-200 bg-white p-3 text-sm">
+                    <p class="font-medium text-stone-900">{{ $collaboration->summary }}</p>
+                    <p class="mt-1 text-xs text-stone-500">
+                        Avec <a href="{{ route('members.show', $partner) }}" class="underline">{{ $partner->name }}</a>
+                        @if ($collaboration->project) · <a href="{{ route('projects.show', $collaboration->project) }}" class="underline">{{ $collaboration->project->title }}</a>@endif
+                        · {{ $collaboration->confirmed_at->translatedFormat('F Y') }}
+                    </p>
+                </li>
+            @endforeach
+        </ul>
+    @endif
     @auth
         @unless ($member->is(auth()->user()))
             <x-report-form type="membre" :id="$member->id" label="Signaler ce profil" class="mt-6 text-center" />

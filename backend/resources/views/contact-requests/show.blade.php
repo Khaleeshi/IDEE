@@ -57,6 +57,8 @@
             @endif
         </x-card>
 
+        @include('contact-requests.partials.collaboration')
+
         <section id="messages" aria-labelledby="titre-messages">
             <h2 id="titre-messages" class="mb-3 mt-6 text-lg font-bold">Messages</h2>
 

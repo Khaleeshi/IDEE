@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Web;
 
+use App\Enums\CollaborationStatus;
 use App\Enums\NeedType;
 use App\Enums\ProjectStage;
 use App\Http\Controllers\Controller;
@@ -16,6 +17,7 @@ use App\Models\Project;
 use App\Models\ProjectMember;
 use App\Models\Sector;
 use App\Services\Assistant\AssistantService;
+use App\Services\Collaboration\TaskService;
 use App\Services\ContactRequests\ReactivityIndicator;
 use App\Services\Documents\DocumentService;
 use App\Services\Journeys\JourneyService;
@@ -33,7 +35,7 @@ class ProjectController extends Controller
 {
     public function __construct(private readonly ProjectService $projects) {}
 
-    public function show(Request $request, Project $project, ReadinessScore $readiness, ReactivityIndicator $reactivity, JourneyService $journeys, FollowService $follows, DocumentService $documents, AssistantService $assistant): View
+    public function show(Request $request, Project $project, ReadinessScore $readiness, ReactivityIndicator $reactivity, JourneyService $journeys, FollowService $follows, DocumentService $documents, AssistantService $assistant, TaskService $tasks): View
     {
         abort_unless(Gate::allows('view', $project), Response::HTTP_NOT_FOUND);
 
@@ -52,6 +54,9 @@ class ProjectController extends Controller
             'reactivity' => $reactivity->for($project->owner),
             'updates' => $project->updates()->limit(10)->get(),
             'team' => $project->team,
+            // Réussites confirmées par les deux parties (FC-06) et tableau de tâches partagé (CO-02).
+            'collaborations' => $project->collaborations()->where('status', CollaborationStatus::Confirmee)->with(['declarer', 'partner'])->latest('confirmed_at')->limit(10)->get(),
+            'canManageTasks' => $tasks->canManage($project, $request->user()),
             'following' => $follows->isFollowing($request->user(), $project),
             // Documents privés : visibles seulement par le porteur et les membres autorisés (RG-05).
             'documents' => $documents->canRead($request->user(), $project) ? $project->documents : null,

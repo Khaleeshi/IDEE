@@ -4,6 +4,7 @@ namespace App\Services\Feed;
 
 use App\Enums\ActivityType;
 use App\Models\Activity;
+use App\Models\Collaboration;
 use App\Models\Need;
 use App\Models\Project;
 use App\Models\ProjectUpdate;
@@ -17,7 +18,7 @@ use Illuminate\Database\Eloquent\Builder;
  */
 class FeedService
 {
-    public function record(ActivityType $type, Project $project, User $actor, ?Need $need = null, ?ProjectUpdate $update = null): Activity
+    public function record(ActivityType $type, Project $project, User $actor, ?Need $need = null, ?ProjectUpdate $update = null, ?Collaboration $collaboration = null): Activity
     {
         $activity = new Activity;
         $activity->type = $type;
@@ -25,6 +26,7 @@ class FeedService
         $activity->project()->associate($project);
         $activity->need()->associate($need);
         $activity->projectUpdate()->associate($update);
+        $activity->collaboration()->associate($collaboration);
         $activity->save();
 
         return $activity;
@@ -48,7 +50,7 @@ class FeedService
                 ->whereIn('project_id', $followed['projects'])
                 ->orWhereIn('actor_id', $followed['users'])
                 ->orWhereHas('project', fn (Builder $query) => $query->whereIn('sector_id', $followed['sectors']))))
-            ->with(['actor.roleAssignments', 'project.sector', 'need', 'projectUpdate'])
+            ->with(['actor.roleAssignments', 'project.sector', 'need', 'projectUpdate', 'collaboration.declarer', 'collaboration.partner', 'collaboration.project'])
             ->latest()
             ->latest('id');
     }

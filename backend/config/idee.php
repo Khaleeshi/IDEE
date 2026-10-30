@@ -51,6 +51,11 @@ return [
         'max_voice_kb' => (int) env('IDEE_MESSAGE_VOICE_KB', 5120),
     ],
 
+    // MR-07 : rappel des rendez-vous confirmés, ce nombre d'heures avant (en heures).
+    'collaboration' => [
+        'meeting_reminder_hours' => (int) env('IDEE_MEETING_REMINDER_HOURS', 24),
+    ],
+
     // PR-05 : documents privés d'un projet (taille maximale en Ko).
     'documents' => [
         'max_kb' => (int) env('IDEE_DOCUMENT_KB', 10240),

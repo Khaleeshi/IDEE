@@ -10,6 +10,7 @@ use App\Models\ContactRequest;
 use App\Models\Need;
 use App\Models\Project;
 use App\Models\User;
+use App\Services\Collaboration\TaskService;
 use App\Services\ContactRequests\ContactRequestService;
 use App\Services\Messaging\MessageService;
 use Illuminate\Http\RedirectResponse;
@@ -72,7 +73,7 @@ class ContactRequestController extends Controller
             ->with('status', 'Demande envoyée. Le destinataire a '.config('idee.contact_expire_after_days').' jours pour vous répondre.');
     }
 
-    public function show(Request $request, ContactRequest $contactRequest, MessageService $messages): View
+    public function show(Request $request, ContactRequest $contactRequest, MessageService $messages, TaskService $tasks): View
     {
         Gate::authorize('view', $contactRequest);
 
@@ -80,7 +81,10 @@ class ContactRequestController extends Controller
         $messages->markRead($contactRequest, $request->user());
 
         return view('contact-requests.show', [
-            'contactRequest' => $contactRequest->load([...self::RELATIONS, 'messages']),
+            'contactRequest' => $contactRequest->load([
+                ...self::RELATIONS, 'messages', 'agreements.owner', 'meetings', 'collaborations.declarer', 'collaborations.partner',
+            ]),
+            'canSeeTasks' => $contactRequest->project !== null && $tasks->canManage($contactRequest->project, $request->user()),
             'canRespond' => $contactRequest->recipient_id === $request->user()->getKey() && $contactRequest->status->isPending(),
             'responses' => ContactRequestStatus::responses(),
         ]);

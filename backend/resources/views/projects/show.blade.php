@@ -112,6 +112,25 @@
         @endif
     </section>
 
+    @if ($canManageTasks)
+        <a href="{{ route('tasks.index', $project) }}" class="mt-4 block rounded-xl border border-brand-100 bg-brand-50 p-3 text-sm font-medium text-brand-800">Tableau de tâches partagé →</a>
+    @endif
+
+    {{-- FC-06 : réussites confirmées par les deux parties. --}}
+    @if ($collaborations->isNotEmpty())
+        <section id="reussites" class="mt-6" aria-labelledby="titre-reussites">
+            <h2 id="titre-reussites" class="mb-2 text-lg font-bold">Réussites confirmées</h2>
+            <ul class="space-y-2 text-sm">
+                @foreach ($collaborations as $collaboration)
+                    <li class="rounded-xl border border-brand-100 bg-white p-3">
+                        <p class="font-medium text-stone-900">{{ $collaboration->summary }}</p>
+                        <p class="mt-1 text-xs text-stone-500">{{ $collaboration->declarer->name }} et {{ $collaboration->partner->name }} · confirmée le {{ $collaboration->confirmed_at->translatedFormat('d F Y') }}</p>
+                    </li>
+                @endforeach
+            </ul>
+        </section>
+    @endif
+
     @if ($isOwner)
         @include('projects.partials.assistant')
     @endif

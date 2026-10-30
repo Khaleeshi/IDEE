@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\User;
+use App\Services\Collaboration\MeetingService;
 use App\Services\ContactRequests\ContactRequestService;
 use App\Services\Journeys\JourneyService;
 use App\Services\Opportunities\OpportunityService;
@@ -29,6 +30,12 @@ Artisan::command('idee:step-reminders', function (JourneyService $journeys, Oppo
 
     $this->info("{$count} rappel(s) d'étape envoyé(s), {$applications} rappel(s) de candidature envoyé(s).");
 })->purpose('Envoie les rappels fixés par les membres sur leurs étapes de parcours et leurs candidatures (PG-05)');
+
+Artisan::command('idee:meeting-reminders', function (MeetingService $meetings) {
+    $count = $meetings->sendReminders();
+
+    $this->info("{$count} rendez-vous rappelé(s).");
+})->purpose('Rappelle aux deux personnes les rendez-vous confirmés du lendemain (MR-07)');
 
 Artisan::command('idee:stale-guides', function (JourneyService $journeys) {
     $steps = $journeys->staleSteps();
@@ -68,6 +75,7 @@ Artisan::command('idee:cles-push', function () {
 // Tâches en arrière-plan (assistant IA) : traitées chaque minute par la tâche planifiée.
 Schedule::command('queue:work --stop-when-empty --max-time=55')->everyMinute()->withoutOverlapping();
 Schedule::command('idee:contact-requests')->hourly();
+Schedule::command('idee:meeting-reminders')->hourly();
 Schedule::command('idee:step-reminders')->dailyAt('08:00');
 Schedule::command('idee:stale-guides')->weeklyOn(1, '07:00');
 Schedule::command('idee:dormant-projects')->dailyAt('03:00');

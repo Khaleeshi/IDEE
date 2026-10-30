@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Web\Admin\AdminController;
 use App\Http\Controllers\Web\AssistantController;
+use App\Http\Controllers\Web\CollaborationController;
 use App\Http\Controllers\Web\ContactRequestController;
 use App\Http\Controllers\Web\DocumentController;
 use App\Http\Controllers\Web\FeedController;
@@ -16,6 +17,7 @@ use App\Http\Controllers\Web\OpportunityController;
 use App\Http\Controllers\Web\ProfileController;
 use App\Http\Controllers\Web\ProjectController;
 use App\Http\Controllers\Web\PushSubscriptionController;
+use App\Http\Controllers\Web\TaskController;
 use App\Http\Controllers\Web\TrustController;
 use Illuminate\Support\Facades\Route;
 
@@ -70,6 +72,18 @@ Route::middleware('auth')->group(function () {
     Route::post('/demandes/{contactRequest}/reponse', [ContactRequestController::class, 'respond'])->name('contact-requests.respond');
     Route::post('/demandes/{contactRequest}/messages', [MessageController::class, 'store'])->name('messages.store');
     Route::get('/messages/{message}/piece-jointe', [MessageController::class, 'attachment'])->name('messages.attachment');
+    Route::post('/demandes/{contactRequest}/etapes', [CollaborationController::class, 'proposeAgreement'])->name('agreements.store');
+    Route::post('/etapes-convenues/{agreement}/reponse', [CollaborationController::class, 'respondAgreement'])->name('agreements.respond');
+    Route::post('/etapes-convenues/{agreement}/realisee', [CollaborationController::class, 'completeAgreement'])->name('agreements.complete');
+    Route::post('/demandes/{contactRequest}/rendez-vous', [CollaborationController::class, 'proposeMeeting'])->name('meetings.store');
+    Route::post('/rendez-vous/{meeting}/reponse', [CollaborationController::class, 'respondMeeting'])->name('meetings.respond');
+    Route::post('/rendez-vous/{meeting}/annulation', [CollaborationController::class, 'cancelMeeting'])->name('meetings.cancel');
+    Route::post('/demandes/{contactRequest}/collaborations', [CollaborationController::class, 'declare'])->name('collaborations.store');
+    Route::post('/collaborations/{collaboration}/reponse', [CollaborationController::class, 'respondCollaboration'])->name('collaborations.respond');
+    Route::get('/projets/{project}/taches', [TaskController::class, 'index'])->name('tasks.index');
+    Route::post('/projets/{project}/taches', [TaskController::class, 'store'])->name('tasks.store');
+    Route::post('/taches/{projectTask}/colonne', [TaskController::class, 'move'])->name('tasks.move');
+    Route::delete('/taches/{projectTask}', [TaskController::class, 'destroy'])->name('tasks.destroy');
 
     Route::post('/parcours/{journey}/commencer', [JourneyController::class, 'start'])->name('journeys.start');
     Route::delete('/parcours/{journey}/suivi', [JourneyController::class, 'leave'])->name('journeys.leave');

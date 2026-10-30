@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AssistantController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\CollaborationController;
 use App\Http\Controllers\Api\ContactRequestController;
 use App\Http\Controllers\Api\DocumentController;
 use App\Http\Controllers\Api\FeedController;
@@ -17,6 +18,7 @@ use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\ProjectController;
 use App\Http\Controllers\Api\ProjectUpdateController;
 use App\Http\Controllers\Api\SectorController;
+use App\Http\Controllers\Api\TaskController;
 use App\Http\Controllers\Api\TrustController;
 use Illuminate\Support\Facades\Route;
 
@@ -35,6 +37,7 @@ Route::get('projects/{project}/needs', [NeedController::class, 'index']);
 Route::get('projects/{project}/updates', [ProjectUpdateController::class, 'index']);
 Route::get('feed', [FeedController::class, 'index']);
 Route::get('members/{user}', [MemberController::class, 'show']);
+Route::get('members/{user}/collaborations', [CollaborationController::class, 'forMember']);
 Route::get('journeys', [JourneyController::class, 'index']);
 Route::get('journeys/{journey}', [JourneyController::class, 'show']);
 Route::get('legal-form', [JourneyController::class, 'legalForm']);
@@ -104,4 +107,19 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('contact-requests/{contactRequest}/messages', [MessageController::class, 'index']);
     Route::post('contact-requests/{contactRequest}/messages', [MessageController::class, 'store']);
     Route::get('messages/{message}/attachment', [MessageController::class, 'attachment']);
+
+    Route::get('contact-requests/{contactRequest}/collaboration', [CollaborationController::class, 'show']);
+    Route::post('contact-requests/{contactRequest}/agreements', [CollaborationController::class, 'proposeAgreement']);
+    Route::post('agreements/{agreement}/respond', [CollaborationController::class, 'respondAgreement']);
+    Route::post('agreements/{agreement}/complete', [CollaborationController::class, 'completeAgreement']);
+    Route::post('contact-requests/{contactRequest}/meetings', [CollaborationController::class, 'proposeMeeting']);
+    Route::post('meetings/{meeting}/respond', [CollaborationController::class, 'respondMeeting']);
+    Route::post('meetings/{meeting}/cancel', [CollaborationController::class, 'cancelMeeting']);
+    Route::post('contact-requests/{contactRequest}/collaborations', [CollaborationController::class, 'declare']);
+    Route::post('collaborations/{collaboration}/respond', [CollaborationController::class, 'respondCollaboration']);
+
+    Route::get('projects/{project}/tasks', [TaskController::class, 'index']);
+    Route::post('projects/{project}/tasks', [TaskController::class, 'store']);
+    Route::patch('tasks/{projectTask}', [TaskController::class, 'move']);
+    Route::delete('tasks/{projectTask}', [TaskController::class, 'destroy']);
 });

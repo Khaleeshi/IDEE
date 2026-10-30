@@ -79,6 +79,38 @@ class ContactRequest extends Model
     }
 
     /**
+     * @return HasMany<Agreement, $this>
+     */
+    public function agreements(): HasMany
+    {
+        return $this->hasMany(Agreement::class)->latest();
+    }
+
+    /**
+     * @return HasMany<Meeting, $this>
+     */
+    public function meetings(): HasMany
+    {
+        return $this->hasMany(Meeting::class)->orderBy('starts_at');
+    }
+
+    /**
+     * @return HasMany<Collaboration, $this>
+     */
+    public function collaborations(): HasMany
+    {
+        return $this->hasMany(Collaboration::class)->latest();
+    }
+
+    /**
+     * L'autre personne de la conversation.
+     */
+    public function otherParty(User $user): ?User
+    {
+        return $this->sender_id === $user->getKey() ? $this->recipient : $this->sender;
+    }
+
+    /**
      * La messagerie s'ouvre quand le destinataire s'est dit intéressé (double consentement).
      */
     public function allowsMessages(): bool
