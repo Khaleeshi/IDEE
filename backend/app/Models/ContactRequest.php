@@ -70,6 +70,22 @@ class ContactRequest extends Model
         return $this->hasMany(ContactRequestEvent::class);
     }
 
+    /**
+     * @return HasMany<Message, $this>
+     */
+    public function messages(): HasMany
+    {
+        return $this->hasMany(Message::class)->oldest()->oldest('id');
+    }
+
+    /**
+     * La messagerie s'ouvre quand le destinataire s'est dit intéressé (double consentement).
+     */
+    public function allowsMessages(): bool
+    {
+        return $this->status === ContactRequestStatus::Interesse;
+    }
+
     public function involves(User $user): bool
     {
         return in_array($user->getKey(), [$this->sender_id, $this->recipient_id], true);

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Web;
 
+use App\Enums\HelpOfferKind;
 use App\Enums\NeedStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CloseNeedRequest;
@@ -39,9 +40,11 @@ class NeedController extends Controller
 
     public function offerHelp(StoreHelpOfferRequest $request, Need $need): RedirectResponse
     {
-        $this->needs->offerHelp($need, $request->user(), $request->validated('message'));
+        $this->needs->offerHelp($need, $request->user(), $request->validated('message'), $request->kind());
 
-        return back()->with('status', 'Votre proposition a été transmise au porteur du projet.');
+        return back()->with('status', $request->kind() === HelpOfferKind::Aide
+            ? 'Votre proposition a été transmise au porteur du projet.'
+            : 'Merci ! Le porteur du projet sait que vous connaissez quelqu\'un qui peut l\'aider.');
     }
 
     public function respondToOffer(RespondHelpOfferRequest $request, HelpOffer $helpOffer): RedirectResponse

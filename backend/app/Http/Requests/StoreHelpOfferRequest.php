@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\HelpOfferKind;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreHelpOfferRequest extends FormRequest
 {
@@ -13,6 +15,7 @@ class StoreHelpOfferRequest extends FormRequest
     {
         return [
             'message' => ['required', 'string', 'min:20', 'max:2000'],
+            'kind' => ['nullable', Rule::enum(HelpOfferKind::class)],
         ];
     }
 
@@ -25,5 +28,10 @@ class StoreHelpOfferRequest extends FormRequest
             'message.required' => 'Expliquez comment vous pouvez aider.',
             'message.min' => 'Expliquez comment vous pouvez aider en au moins 20 caractères.',
         ];
+    }
+
+    public function kind(): HelpOfferKind
+    {
+        return HelpOfferKind::tryFrom((string) $this->validated('kind')) ?? HelpOfferKind::Aide;
     }
 }

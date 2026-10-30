@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\HelpOfferKind;
 use App\Enums\HelpOfferStatus;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
@@ -22,6 +23,7 @@ class HelpOffer extends Model
     {
         return [
             'status' => HelpOfferStatus::class,
+            'kind' => HelpOfferKind::class,
             'responded_at' => 'datetime',
         ];
     }

@@ -17,7 +17,7 @@ class AuthController extends Controller
 
     public function requestCode(RequestCodeRequest $request): JsonResponse
     {
-        $this->codes->issue($request->validated('phone'));
+        $this->codes->issue($request->identifier());
 
         return response()->json([
             'message' => 'Un code de connexion vous a été envoyé. Il est valable '.config('idee.otp.ttl_minutes').' minutes.',
@@ -27,7 +27,7 @@ class AuthController extends Controller
     public function verifyCode(VerifyCodeRequest $request): JsonResponse
     {
         $user = $this->codes->verify(
-            $request->validated('phone'),
+            $request->identifier(),
             $request->validated('code'),
             $request->validated('name'),
         );

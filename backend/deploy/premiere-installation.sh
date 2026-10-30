@@ -33,6 +33,7 @@ if ! grep -q "^APP_KEY=base64:" .env; then
     "$PHP" artisan key:generate --force
 fi
 
+"$PHP" artisan storage:link || true
 "$PHP" artisan migrate --force
 "$PHP" artisan db:seed --force
 "$PHP" artisan optimize

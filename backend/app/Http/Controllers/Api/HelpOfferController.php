@@ -29,7 +29,7 @@ class HelpOfferController extends Controller
 
     public function store(StoreHelpOfferRequest $request, Need $need): JsonResponse
     {
-        $offer = $this->needs->offerHelp($need, $request->user(), $request->validated('message'));
+        $offer = $this->needs->offerHelp($need, $request->user(), $request->validated('message'), $request->kind());
 
         return (new HelpOfferResource($offer->load('user.roleAssignments')))
             ->response()

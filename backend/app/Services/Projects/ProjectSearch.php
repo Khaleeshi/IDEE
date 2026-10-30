@@ -6,13 +6,13 @@ use App\Models\Project;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
- * Recherche de projets actifs (RR-01) : mot-clé, secteur, région, stade
- * et type de besoin ouvert.
+ * Recherche de projets actifs (RR-01) : mot-clé, secteur, région, stade,
+ * type de besoin ouvert et montant recherché.
  */
 class ProjectSearch
 {
     /**
-     * @param  array{q?: string|null, sector?: string|null, region?: string|null, stage?: string|null, need_type?: string|null}  $filters
+     * @param  array{q?: string|null, sector?: string|null, region?: string|null, stage?: string|null, need_type?: string|null, amount_min?: string|int|null, amount_max?: string|int|null}  $filters
      * @return Builder<Project>
      */
     public function query(array $filters): Builder
@@ -33,6 +33,13 @@ class ProjectSearch
             ->when($filters['need_type'] ?? null, fn (Builder $query, $type) => $query->whereHas(
                 'openNeeds', fn (Builder $query) => $query->where('type', $type)
             ))
+            ->when(
+                is_numeric($filters['amount_min'] ?? null) || is_numeric($filters['amount_max'] ?? null),
+                fn (Builder $query) => $query->whereHas('openNeeds', fn (Builder $query) => $query
+                    ->whereNotNull('amount_fcfa')
+                    ->when(is_numeric($filters['amount_min'] ?? null), fn (Builder $query) => $query->where('amount_fcfa', '>=', (int) $filters['amount_min']))
+                    ->when(is_numeric($filters['amount_max'] ?? null), fn (Builder $query) => $query->where('amount_fcfa', '<=', (int) $filters['amount_max'])))
+            )
             ->latest('last_activity_at');
     }
 }

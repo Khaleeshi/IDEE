@@ -7,6 +7,7 @@ use App\Models\ContactRequest;
 use App\Models\Need;
 use App\Models\Project;
 use App\Models\User;
+use App\Notifications\ContactRequestReceived;
 use App\Notifications\ContactRequestReminder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -90,6 +91,8 @@ class ContactRequestService
                 'from_status' => null,
                 'to_status' => ContactRequestStatus::Envoyee,
             ]);
+
+            $recipient->notify(new ContactRequestReceived($request));
 
             return $request;
         });

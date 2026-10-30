@@ -8,10 +8,9 @@ use Illuminate\Notifications\Notification;
 
 /**
  * Relance du destinataire d'une demande restée sans réponse (RG-03).
- * Elle est enregistrée en base ; les canaux push et WhatsApp viendront
- * s'ajouter (NO-01, NO-02).
+ * Elle est affichée dans IDEE et envoyée sur WhatsApp quand le canal est activé (NO-02).
  */
-class ContactRequestReminder extends Notification
+class ContactRequestReminder extends Notification implements CriticalAlert
 {
     use Queueable;
 
@@ -22,7 +21,7 @@ class ContactRequestReminder extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['database'];
+        return AlertChannels::for($notifiable);
     }
 
     /**

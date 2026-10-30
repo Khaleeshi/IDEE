@@ -41,12 +41,27 @@ return [
 
     // WhatsApp Business Platform (Cloud API de Meta) : codes envoyés par un
     // modèle de message « authentification » validé par Meta.
+    // Notifications push (NO-01) : clés VAPID créées par « php artisan idee:cles-push ».
+    'webpush' => [
+        'public_key' => env('WEBPUSH_PUBLIC_KEY'),
+        'private_key' => env('WEBPUSH_PRIVATE_KEY'),
+        'subject' => env('WEBPUSH_SUBJECT', 'mailto:contact@idee.sn'),
+    ],
+
+    // Assistant IA (section 7) : clé d'API Anthropic et modèle utilisé.
+    'anthropic' => [
+        'key' => env('ANTHROPIC_API_KEY'),
+        'model' => env('IDEE_AI_MODEL', 'claude-opus-5-5'),
+    ],
+
     'whatsapp' => [
         'token' => env('WHATSAPP_TOKEN'),
         'phone_number_id' => env('WHATSAPP_PHONE_NUMBER_ID'),
         'template' => env('WHATSAPP_CODE_TEMPLATE', 'idee_code_connexion'),
         'language' => env('WHATSAPP_CODE_LANGUAGE', 'fr'),
         'graph_version' => env('WHATSAPP_GRAPH_VERSION', 'v23.0'),
+        // Modèle « utilitaire » des alertes, avec une variable : le texte de l'alerte.
+        'notification_template' => env('WHATSAPP_NOTIFICATION_TEMPLATE', 'idee_alerte'),
     ],
 
     'slack' => [

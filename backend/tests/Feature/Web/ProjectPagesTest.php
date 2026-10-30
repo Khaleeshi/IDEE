@@ -18,7 +18,7 @@ class ProjectPagesTest extends TestCase
         Need::factory()->for($project)->create();
         Project::factory()->create(['title' => 'Application de livraison', 'summary' => 'Livraison de repas en ville.']);
 
-        $this->get('/')->assertOk()
+        $this->get('/?vue=projets')->assertOk()
             ->assertSee('Farine de mil enrichie')
             ->assertSee('Application de livraison')
             ->assertSee('Cherche : associé');

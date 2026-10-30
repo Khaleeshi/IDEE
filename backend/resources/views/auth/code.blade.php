@@ -1,6 +1,6 @@
 <x-layout title="Code de connexion">
     <h1 class="mb-1 text-2xl font-bold">Saisissez votre code</h1>
-    <p class="mb-6 text-stone-600">Envoyé au {{ \App\Support\PhoneNumber::format($phone) }}. Il est valable {{ config('idee.otp.ttl_minutes') }} minutes.</p>
+    <p class="mb-6 text-stone-600">Envoyé {{ str_contains($phone, '@') ? 'à '.$phone : 'au '.\App\Support\PhoneNumber::format($phone) }}. Il est valable {{ config('idee.otp.ttl_minutes') }} minutes.</p>
 
     <x-card>
         <form method="POST" action="{{ route('login.verify') }}">

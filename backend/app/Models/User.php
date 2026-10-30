@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\Availability;
 use App\Enums\UserRole;
 use App\Enums\VerificationLevel;
 use Database\Factories\UserFactory;
@@ -13,9 +14,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Storage;
 use Laravel\Sanctum\HasApiTokens;
 
-#[Fillable(['name', 'phone', 'email', 'region', 'languages', 'bio', 'skills', 'sectors', 'contact_preferences'])]
+#[Fillable(['name', 'phone', 'email', 'region', 'languages', 'bio', 'skills', 'sectors', 'contact_preferences', 'availability'])]
 #[Hidden(['password', 'remember_token', 'phone', 'email'])]
 class User extends Authenticatable
 {
@@ -38,7 +40,36 @@ class User extends Authenticatable
             'sectors' => 'array',
             'contact_preferences' => 'array',
             'verification_level' => VerificationLevel::class,
+            'availability' => Availability::class,
+            'is_admin' => 'boolean',
+            'suspended_until' => 'datetime',
+            'banned_at' => 'datetime',
         ];
+    }
+
+    public function photoUrl(): ?string
+    {
+        return $this->photo_path ? Storage::disk('public')->url($this->photo_path) : null;
+    }
+
+    public function isAdmin(): bool
+    {
+        return (bool) $this->is_admin;
+    }
+
+    /**
+     * Compte exclu, ou suspendu à la suite d'une décision de modération.
+     */
+    public function isRestricted(): bool
+    {
+        return $this->banned_at !== null || $this->suspended_until?->isFuture();
+    }
+
+    public function restrictionMessage(): string
+    {
+        return $this->banned_at !== null
+            ? 'Ce compte a été exclu d\'IDEE à la suite d\'une décision de modération.'
+            : 'Ce compte est suspendu jusqu\'au '.$this->suspended_until->translatedFormat('d F Y').' à la suite d\'une décision de modération.';
     }
 
     /**
@@ -79,6 +110,30 @@ class User extends Authenticatable
     public function helpOffers(): HasMany
     {
         return $this->hasMany(HelpOffer::class);
+    }
+
+    /**
+     * @return HasMany<PushSubscription, $this>
+     */
+    public function pushSubscriptions(): HasMany
+    {
+        return $this->hasMany(PushSubscription::class);
+    }
+
+    /**
+     * @return HasMany<Verification, $this>
+     */
+    public function verifications(): HasMany
+    {
+        return $this->hasMany(Verification::class);
+    }
+
+    /**
+     * @return HasMany<StepProgress, $this>
+     */
+    public function stepProgress(): HasMany
+    {
+        return $this->hasMany(StepProgress::class);
     }
 
     /**

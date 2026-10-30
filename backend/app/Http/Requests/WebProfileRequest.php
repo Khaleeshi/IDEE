@@ -19,7 +19,10 @@ class WebProfileRequest extends UpdateProfileRequest
         $this->merge([
             'roles' => $this->input('roles', []),
             'sectors' => $this->input('sectors', []),
-            'contact_preferences' => ['accepts_requests' => $this->boolean('accepts_requests')],
+            'contact_preferences' => [
+                'accepts_requests' => $this->boolean('accepts_requests'),
+                'whatsapp_alerts' => $this->boolean('whatsapp_alerts'),
+            ],
         ]);
     }
 }

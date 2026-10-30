@@ -2,18 +2,24 @@
 
 namespace App\Services\Needs;
 
+use App\Enums\ActivityType;
+use App\Enums\HelpOfferKind;
 use App\Enums\HelpOfferStatus;
 use App\Enums\NeedStatus;
 use App\Models\HelpOffer;
 use App\Models\Need;
 use App\Models\Project;
 use App\Models\User;
+use App\Services\Feed\FeedService;
 use App\Services\Projects\ReadinessScore;
 use Illuminate\Validation\ValidationException;
 
 class NeedService
 {
-    public function __construct(private readonly ReadinessScore $readiness) {}
+    public function __construct(
+        private readonly ReadinessScore $readiness,
+        private readonly FeedService $feed,
+    ) {}
 
     /**
      * Publie un appel à action, dans la limite de besoins ouverts (RG-01).
@@ -39,6 +45,7 @@ class NeedService
         $project->unsetRelation('openNeeds');
         $project->recordActivity();
         $this->readiness->refresh($project);
+        $this->feed->record(ActivityType::BesoinPublie, $project, $project->owner, $need);
 
         return $need;
     }
@@ -63,15 +70,20 @@ class NeedService
         $need->project->recordActivity();
         $this->readiness->refresh($need->project);
 
+        // Un besoin comblé est une réussite partagée avec le réseau.
+        if ($status === NeedStatus::Comble) {
+            $this->feed->record(ActivityType::Reussite, $need->project, $need->project->owner, $need);
+        }
+
         return $need;
     }
 
     /**
-     * Répond « Je peux aider » à un besoin (AA-03).
+     * Répond « Je peux aider » (AA-03) ou « Je connais quelqu'un » (FC-03) à un besoin.
      *
      * @throws ValidationException
      */
-    public function offerHelp(Need $need, User $helper, string $message): HelpOffer
+    public function offerHelp(Need $need, User $helper, string $message, HelpOfferKind $kind = HelpOfferKind::Aide): HelpOffer
     {
         if (! $need->isOpen()) {
             throw ValidationException::withMessages(['need' => 'Ce besoin est clôturé.']);
@@ -81,11 +93,14 @@ class NeedService
             throw ValidationException::withMessages(['need' => 'Vous ne pouvez pas répondre à votre propre besoin.']);
         }
 
-        if ($need->helpOffers()->where('user_id', $helper->getKey())->exists()) {
-            throw ValidationException::withMessages(['need' => 'Vous avez déjà proposé votre aide pour ce besoin.']);
+        if ($need->helpOffers()->where('user_id', $helper->getKey())->where('kind', $kind)->exists()) {
+            throw ValidationException::withMessages(['need' => $kind === HelpOfferKind::Aide
+                ? 'Vous avez déjà proposé votre aide pour ce besoin.'
+                : 'Vous avez déjà signalé une personne pour ce besoin.']);
         }
 
         $offer = new HelpOffer(['message' => $message]);
+        $offer->kind = $kind;
         $offer->need()->associate($need);
         $offer->user()->associate($helper);
         $offer->status = HelpOfferStatus::Proposee;

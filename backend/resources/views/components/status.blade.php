@@ -2,8 +2,8 @@
 
 @php
     $tone = match ($status->value) {
-        'ouvert', 'actif', 'interesse', 'acceptee', 'comble' => 'bg-brand-50 text-brand-800 border-brand-100',
-        'envoyee', 'lue', 'proposee', 'pas_maintenant' => 'bg-amber-50 text-amber-800 border-amber-200',
+        'ouvert', 'actif', 'interesse', 'acceptee', 'comble', 'terminee' => 'bg-brand-50 text-brand-800 border-brand-100',
+        'envoyee', 'lue', 'proposee', 'pas_maintenant', 'en_cours', 'en_attente' => 'bg-amber-50 text-amber-800 border-amber-200',
         'refusee', 'expiree', 'declinee', 'abandonne' => 'bg-stone-100 text-stone-600 border-stone-200',
         default => 'bg-stone-100 text-stone-700 border-stone-200',
     };

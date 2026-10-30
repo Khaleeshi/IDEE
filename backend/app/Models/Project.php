@@ -77,6 +77,42 @@ class Project extends Model
     }
 
     /**
+     * Équipe du projet, hors porteur (PR-02).
+     *
+     * @return HasMany<ProjectMember, $this>
+     */
+    public function team(): HasMany
+    {
+        return $this->hasMany(ProjectMember::class)->orderBy('position')->orderBy('created_at');
+    }
+
+    /**
+     * @return HasMany<ProjectDocument, $this>
+     */
+    public function documents(): HasMany
+    {
+        return $this->hasMany(ProjectDocument::class)->latest();
+    }
+
+    /**
+     * @return HasMany<DocumentAccess, $this>
+     */
+    public function documentAccesses(): HasMany
+    {
+        return $this->hasMany(DocumentAccess::class);
+    }
+
+    /**
+     * Journal de progression, du plus récent au plus ancien (PR-04).
+     *
+     * @return HasMany<ProjectUpdate, $this>
+     */
+    public function updates(): HasMany
+    {
+        return $this->hasMany(ProjectUpdate::class)->latest()->latest('id');
+    }
+
+    /**
      * Projets visibles dans le fil et les recommandations (RG-07).
      */
     #[Scope]

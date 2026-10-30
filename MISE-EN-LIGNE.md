@@ -85,7 +85,9 @@ puis choisissez le dossier `php83` (ou plus récent).
 
    Le script crée le fichier `.env` et s'arrête.
 3. Ouvrez `.env` (Webuzo → File Manager, ou `nano .env`) et remplacez chaque
-   `CHANGEZ_MOI` : adresse du site et informations de la base MySQL.
+   `CHANGEZ_MOI` : adresse du site, informations de la base MySQL et serveur
+   d'e-mails (une boîte créée chez l'hébergeur suffit, par exemple
+   `contact@votre-domaine.com` : son serveur SMTP, son identifiant et son mot de passe).
 4. Relancez la même commande. Elle crée la clé de chiffrement, les tables et la
    liste des secteurs, puis affiche une ligne de tâche planifiée.
 5. Ajoutez cette ligne dans **Webuzo → Cron Jobs**, à exécuter chaque minute.
@@ -93,6 +95,16 @@ puis choisissez le dossier `php83` (ou plus récent).
    sommeil les projets inactifs.
 6. Ouvrez l'adresse du site : le fil des projets doit s'afficher, et
    `ADRESSE_DU_SITE/up` doit répondre.
+7. Connectez-vous une première fois sur le site avec votre numéro, puis donnez-vous
+   l'accès à l'administration (signalements, vérifications, fiches, indicateurs) :
+
+   ```bash
+   /usr/local/apps/php83/bin/php artisan idee:admin 771234567
+   ```
+
+   Le lien « Administration de l'équipe IDEE » apparaît alors dans votre profil.
+   Ajoutez au moins une deuxième personne : un recours doit être examiné par un
+   autre modérateur que celui qui a pris la décision.
 
 Les mises en ligne suivantes sont automatiques : à chaque fusion dans `main`,
 le site passe quelques secondes en maintenance, la base est mise à jour, puis
@@ -125,10 +137,52 @@ le modèle approuvé, reportez dans `.env` un jeton d'accès permanent (utilisat
 système) dans `WHATSAPP_TOKEN` et l'identifiant du numéro dans
 `WHATSAPP_PHONE_NUMBER_ID`.
 
-Ces deux branchements ont été vérifiés avec des réponses simulées, pas encore
+**Alertes WhatsApp** (demandes de contact, rappels, décisions de modération) —
+créez un second modèle, de catégorie **Utilitaire**, nommé `idee_alerte`, en
+français, dont le texte contient une seule variable, par exemple :
+« IDEE : {{1}} ». Une fois approuvé, mettez `IDEE_WHATSAPP_ALERTS=true` dans
+`.env`. Chaque membre peut refuser ces alertes dans son profil.
+
+**SMS de secours** — si l'API SMS d'Orange est configurée, mettez aussi
+`IDEE_SMS_FALLBACK=true` : une demande de contact ou une relance qui n'a pas pu
+partir sur WhatsApp est alors envoyée par SMS (numéros du Sénégal).
+
+Ces branchements ont été vérifiés avec des réponses simulées, pas encore
 avec les vrais services : faites un essai avec votre propre numéro avant
 d'ouvrir le site au public. En cas d'échec, le motif est écrit dans
 `storage/logs`.
+
+## 7. Activer les notifications push (gratuites)
+
+Les membres peuvent recevoir les alertes sur leur téléphone, même IDEE fermé.
+Sur le serveur, lancez une seule fois :
+
+```bash
+/usr/local/apps/php83/bin/php artisan idee:cles-push
+```
+
+Copiez les deux lignes affichées dans `.env`, indiquez votre adresse de contact
+dans `WEBPUSH_SUBJECT` (forme `mailto:contact@votre-domaine.com`), puis lancez
+`php artisan optimize`. Chaque membre active ensuite les notifications depuis
+la page « Notifications » de son téléphone. Ne changez plus ces clés : les
+abonnements existants cesseraient de fonctionner.
+
+## 8. Activer l'assistant IA (business plan)
+
+L'assistant utilise Claude Opus 5.5 d'Anthropic, payé à l'usage : 4 $ par million
+de jetons (morceaux de mots) lus et 20 $ par million écrits, soit de l'ordre de 100 à
+200 FCFA par business plan. Des plafonds par projet limitent la dépense
+(`IDEE_AI_PLANS_PER_MONTH`, 3 par défaut).
+
+1. Créez un compte sur platform.claude.com, ajoutez un moyen de paiement et
+   fixez une limite de dépense mensuelle.
+2. Créez une clé d'API et collez-la dans `.env` : `ANTHROPIC_API_KEY=…`
+3. Mettez `IDEE_AI_ENABLED=true`, puis lancez `php artisan optimize`.
+
+Les business plans sont rédigés en arrière-plan : la tâche planifiée de
+l'étape 5 les traite chaque minute (`QUEUE_CONNECTION=database`). En cas de
+refus pour raison de sécurité, la demande est rejouée automatiquement sur le
+modèle de secours d'Anthropic.
 
 ## En cas de problème
 

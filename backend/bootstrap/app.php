@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\EnsureAccountIsActive;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -16,6 +17,10 @@ return Application::configure(basePath: dirname(__DIR__))
         // En production, Nginx (Webuzo) reçoit le HTTPS et transmet à Apache :
         // on fait confiance à ses en-têtes pour reconnaître les pages sécurisées.
         $middleware->trustProxies(at: env('TRUSTED_PROXIES', '127.0.0.1'));
+
+        // Un compte suspendu ou exclu est déconnecté à sa prochaine requête.
+        $middleware->appendToGroup('web', EnsureAccountIsActive::class);
+        $middleware->appendToGroup('api', EnsureAccountIsActive::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
