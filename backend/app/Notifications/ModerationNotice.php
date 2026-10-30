@@ -14,7 +14,7 @@ class ModerationNotice extends Notification
 {
     use Queueable;
 
-    public function __construct(public readonly Report $report) {}
+    public function __construct(public readonly Report $report, public readonly ?string $text = null) {}
 
     /**
      * @return list<string>
@@ -29,9 +29,9 @@ class ModerationNotice extends Notification
      */
     public function toArray(object $notifiable): array
     {
-        $message = $this->report->appeal_decided_at
+        $message = $this->text ?? ($this->report->appeal_decided_at
             ? ($this->report->appeal_upheld ? 'Votre recours a été examiné : la décision est maintenue.' : 'Votre recours a été accepté : la décision est annulée.')
-            : 'Décision de modération : '.$this->report->decision->label().'. Motif : '.$this->report->reason->label().'.';
+            : 'Décision de modération : '.$this->report->decision->label().'. Motif : '.$this->report->reason->label().'.');
 
         return ['report_id' => $this->report->id, 'message' => $message];
     }

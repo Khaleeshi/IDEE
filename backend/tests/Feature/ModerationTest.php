@@ -44,6 +44,31 @@ class ModerationTest extends TestCase
         $this->assertSame($scam->id, app(ModerationService::class)->queue()->first()->id);
     }
 
+    public function test_three_independent_reports_suspend_the_account_until_a_moderator_decides(): void
+    {
+        Notification::fake();
+        $project = Project::factory()->create();
+        $owner = $project->owner;
+
+        $first = $this->reportProject($project);
+        $this->reportProject($project, 'spam');
+        $this->assertFalse($owner->fresh()->isRestricted(), 'Deux signalements ne suffisent pas.');
+
+        $this->reportProject($project, 'faux_profil');
+        $owner->refresh();
+        $this->assertNotNull($owner->precautionary_suspension_at);
+        $this->assertStringContainsString('par précaution', $owner->restrictionMessage());
+        Notification::assertSentTo($owner, ModerationNotice::class, fn (ModerationNotice $notice) => str_contains($notice->text, 'par précaution'));
+
+        Sanctum::actingAs($owner);
+        $this->getJson('/api/me/projects')->assertForbidden();
+
+        $this->actingAs($this->admin())->get(route('admin.reports'))->assertSee('Compte suspendu par précaution');
+
+        app(ModerationService::class)->decide($first, $this->admin(), ModerationDecision::AucuneAction);
+        $this->assertFalse($owner->fresh()->isRestricted());
+    }
+
     public function test_a_member_cannot_report_their_own_project_twice_or_at_all(): void
     {
         $project = Project::factory()->create();

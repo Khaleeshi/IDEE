@@ -65,7 +65,34 @@ class ModerationService
             'status' => ReportStatus::Ouvert,
         ])->save();
 
+        $this->suspendIfReportedByMany($report);
+
         return $report;
+    }
+
+    /**
+     * Suspension préventive quand plusieurs personnes différentes signalent le même
+     * membre, en attendant qu'un modérateur examine (section 8).
+     */
+    private function suspendIfReportedByMany(Report $report): void
+    {
+        $user = $report->targetUser;
+
+        if ($user === null || $user->isAdmin() || $user->isRestricted()) {
+            return;
+        }
+
+        $reporters = Report::where('target_user_id', $user->id)
+            ->where('status', ReportStatus::Ouvert)
+            ->distinct()
+            ->count('reporter_id');
+
+        if ($reporters < config('idee.moderation.reports_before_suspension')) {
+            return;
+        }
+
+        $user->forceFill(['precautionary_suspension_at' => now()])->save();
+        $user->notify(new ModerationNotice($report, 'Votre compte est suspendu par précaution après plusieurs signalements. Un modérateur examine la situation et vous informera de sa décision.'));
     }
 
     /**
@@ -92,6 +119,11 @@ class ModerationService
         }
 
         DB::transaction(function () use ($report, $moderator, $decision, $note) {
+            // Un modérateur a examiné : la suspension préventive n'a plus lieu d'être.
+            if ($report->targetUser?->precautionary_suspension_at !== null) {
+                $report->targetUser->forceFill(['precautionary_suspension_at' => null])->save();
+            }
+
             $report->moderator()->associate($moderator);
             $report->forceFill([
                 'decision' => $decision,

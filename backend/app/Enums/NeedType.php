@@ -29,4 +29,9 @@ enum NeedType: string
             self::Mentor => 'Mentor',
         };
     }
+
+    /**
+     * Mention portée par chaque recherche de financement (section 9, deuxième ligne rouge).
+     */
+    public const FUNDRAISING_NOTICE = 'Ceci n\'est pas une offre au public. Le montant est indicatif : aucun argent ne transite par IDEE, qui ne propose ni parts ni actions.';
 }

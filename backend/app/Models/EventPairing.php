@@ -28,7 +28,7 @@ class EventPairing extends Model
      */
     public function first(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'first_user_id');
+        return $this->belongsTo(User::class, 'first_user_id')->withTrashed();
     }
 
     /**
@@ -36,7 +36,7 @@ class EventPairing extends Model
      */
     public function second(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'second_user_id');
+        return $this->belongsTo(User::class, 'second_user_id')->withTrashed();
     }
 
     public function partnerOf(User $user): ?User

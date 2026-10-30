@@ -88,3 +88,22 @@ String formatDate(DateTime date) {
   const months = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'];
   return '${date.day} ${months[date.month - 1]} ${date.year}';
 }
+
+/// Avertissement sous un message qui parle d'argent, d'un code ou de coordonnées bancaires.
+class ScamAlert extends StatelessWidget {
+  const ScamAlert({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(top: 8),
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(color: Colors.amber.shade50, borderRadius: BorderRadius.circular(10), border: Border.all(color: Colors.amber.shade300)),
+      child: Text(
+        'Prudence : un investisseur ou une institution ne demande jamais d\'argent pour étudier un dossier. '
+        'Ne transmettez jamais un code reçu par SMS. En cas de doute, signalez ce message sur le site.',
+        style: TextStyle(fontSize: 12, color: Colors.brown.shade900),
+      ),
+    );
+  }
+}

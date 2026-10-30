@@ -6,11 +6,14 @@ sauf le jeton de connexion, gardé dans le stockage sécurisé du téléphone.
 
 ## Ce que fait l'application
 
-- Connexion par code à usage unique (SMS, WhatsApp ou e-mail)
-- Projets qui cherchent du soutien, recherche, fiche projet et demande de contact
-- Demandes reçues et envoyées, réponse, messagerie après accord des deux
+- Connexion par code à usage unique (SMS, WhatsApp ou e-mail), puis acceptation
+  des conditions d'utilisation et de la charte communautaire
+- Projets qui cherchent du soutien, recherche, fiche projet et demande de contact ;
+  mention « Ceci n'est pas une offre au public » sur les recherches de financement
+- Demandes reçues et envoyées, réponse, messagerie après accord des deux, avec une
+  alerte sous les messages qui parlent d'argent, de code ou de banque
 - Parcours guidés : étapes, avancement
-- Notifications et profil
+- Notifications, profil et suppression du compte
 
 Les fonctions plus rares (administration, organisations, paiements…) restent sur
 le site, ouvert dans le navigateur du téléphone.
@@ -42,5 +45,6 @@ flutter test
   puis envoi sur la Google Play Console (25 USD une fois).
 - iOS : `flutter build ipa --dart-define=API_URL=https://votre-domaine` sur un Mac,
   puis App Store Connect (99 USD par an).
-- Les deux boutiques demandent une politique de confidentialité et la
-  suppression du compte depuis l'application : à prévoir avant la publication.
+- Les deux boutiques demandent une politique de confidentialité, publiée sur le
+  site (`/confidentialite`), et la suppression du compte depuis l'application,
+  disponible dans l'onglet Profil.

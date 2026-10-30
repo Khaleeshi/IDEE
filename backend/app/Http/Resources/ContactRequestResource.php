@@ -30,6 +30,7 @@ class ContactRequestResource extends JsonResource
                 'type' => EnumResource::make($this->need->type),
             ] : null),
             'message' => $this->message,
+            'scam_alert' => $this->raisesScamAlert(),
             'status' => EnumResource::make($this->status),
             'refusal_reason' => $this->refusal_reason,
             'read_at' => $this->read_at?->toIso8601String(),

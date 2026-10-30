@@ -10,8 +10,10 @@ use App\Models\IdeaClarification;
 use App\Models\Meeting;
 use App\Models\Project;
 use App\Services\Assistant\AssistantService;
+use App\Services\Assistant\BusinessPlanDocument;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 
@@ -80,13 +82,26 @@ class AssistantController extends Controller
     /**
      * Version à imprimer ou à enregistrer en PDF depuis le navigateur.
      */
-    public function print(Project $project): View
+    public function print(Project $project, BusinessPlanDocument $documents): View
     {
         Gate::authorize('update', $project);
 
         return view('business-plans.print', [
             'project' => $project,
-            'plan' => BusinessPlan::where('project_id', $project->id)->where('status', 'pret')->orderByDesc('version')->firstOrFail(),
+            'plan' => $documents->latestReady($project),
+        ]);
+    }
+
+    /**
+     * Section 7 : le business plan s'exporte aussi en Word, pour être retouché.
+     */
+    public function word(Project $project, BusinessPlanDocument $documents): Response
+    {
+        Gate::authorize('update', $project);
+
+        return response($documents->docx($project, $documents->latestReady($project)), 200, [
+            'Content-Type' => BusinessPlanDocument::MIME,
+            'Content-Disposition' => 'attachment; filename="'.$documents->fileName($project).'"',
         ]);
     }
 
@@ -169,5 +184,14 @@ class AssistantController extends Controller
                 ->orderByDesc('version')
                 ->firstOrFail(),
         ]);
+    }
+
+    public function forget(Request $request): RedirectResponse
+    {
+        $count = $this->assistant->forgetConversations($request->user());
+
+        return redirect()->route('profile.edit')->with('status', $count > 0
+            ? 'Vos échanges avec l\'assistant ont été effacés.'
+            : 'Aucun échange avec l\'assistant à effacer.');
     }
 }

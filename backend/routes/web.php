@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Web\AccountController;
 use App\Http\Controllers\Web\Admin\AdminController;
 use App\Http\Controllers\Web\AlertController;
 use App\Http\Controllers\Web\AssistantController;
@@ -27,6 +28,7 @@ use App\Http\Controllers\Web\ProjectController;
 use App\Http\Controllers\Web\PushSubscriptionController;
 use App\Http\Controllers\Web\QuoteController;
 use App\Http\Controllers\Web\TaskController;
+use App\Http\Controllers\Web\TermsController;
 use App\Http\Controllers\Web\TrustController;
 use Illuminate\Support\Facades\Route;
 
@@ -60,6 +62,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/projets/{project}/business-plan', [AssistantController::class, 'show'])->name('business-plans.show');
     Route::post('/projets/{project}/business-plan', [AssistantController::class, 'generate'])->name('business-plans.generate');
     Route::get('/projets/{project}/business-plan/impression', [AssistantController::class, 'print'])->name('business-plans.print');
+    Route::get('/projets/{project}/business-plan/word', [AssistantController::class, 'word'])->name('business-plans.word');
     Route::put('/business-plans/{businessPlan}', [AssistantController::class, 'update'])->name('business-plans.update');
     Route::get('/projets/{project}/presentation', [AssistantController::class, 'pitchDeck'])->name('pitch-decks.show');
     Route::post('/projets/{project}/presentation', [AssistantController::class, 'generatePitchDeck'])->name('pitch-decks.generate');
@@ -175,6 +178,12 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/profil', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profil', [ProfileController::class, 'update'])->name('profile.update');
+    Route::get('/charte/accepter', [TermsController::class, 'show'])->name('terms.show');
+    Route::post('/charte/accepter', [TermsController::class, 'accept'])->name('terms.accept');
+    Route::get('/profil/mes-donnees', [AccountController::class, 'export'])->middleware('throttle:5,1')->name('account.export');
+    Route::get('/profil/supprimer', [AccountController::class, 'confirm'])->name('account.delete');
+    Route::delete('/profil/echanges-assistant', [AssistantController::class, 'forget'])->name('assistant.forget');
+    Route::delete('/profil', [AccountController::class, 'destroy'])->name('account.destroy');
 });
 
 // Administration de l'équipe IDEE (AD-01 à AD-04).
@@ -207,7 +216,13 @@ Route::middleware(['auth', 'can:administrer'])->prefix('administration')->name('
 
 // Pages publiques : à déclarer après « /projets/nouveau » pour ne pas l'intercepter.
 Route::get('/projets/{project}', [ProjectController::class, 'show'])->name('projects.show');
-Route::get('/membres/{user}', [MemberController::class, 'show'])->name('members.show');
+Route::get('/membres/{user}', [MemberController::class, 'show'])->withTrashed()->name('members.show');
+
+// Textes légaux, accessibles depuis toutes les pages (section 9).
+Route::view('/mentions-legales', 'legal.notice')->name('legal.notice');
+Route::view('/conditions-d-utilisation', 'legal.terms')->name('legal.terms');
+Route::view('/confidentialite', 'legal.privacy')->name('legal.privacy');
+Route::view('/charte', 'legal.charter')->name('legal.charter');
 
 // Confirmation d'une adresse e-mail ajoutée au profil (CF-01).
 Route::get('/email/confirmation/{user}/{hash}', [ProfileController::class, 'confirmEmail'])->middleware('signed')->name('email.verify');

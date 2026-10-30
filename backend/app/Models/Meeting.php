@@ -46,7 +46,7 @@ class Meeting extends Model
      */
     public function proposer(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'proposer_id');
+        return $this->belongsTo(User::class, 'proposer_id')->withTrashed();
     }
 
     /**

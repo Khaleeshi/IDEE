@@ -8,6 +8,9 @@
             <a href="{{ route('admin.reports.show', $report) }}" class="mb-2 block rounded-2xl border bg-white p-3 text-sm {{ $report->priority >= 3 ? 'border-red-300' : 'border-stone-200' }}">
                 <span class="font-semibold {{ $report->priority >= 3 ? 'text-red-700' : '' }}">{{ $report->reason->label() }}</span>
                 <span class="block text-stone-600">{{ class_basename($report->reportable_type) === 'User' ? 'Profil' : (class_basename($report->reportable_type) === 'Project' ? 'Projet' : 'Message') }} de {{ $report->targetUser?->name ?? 'membre supprimé' }} · {{ $report->created_at->diffForHumans() }}</span>
+                @if ($report->targetUser?->precautionary_suspension_at)
+                    <span class="mt-1 block font-medium text-red-700">Compte suspendu par précaution : à examiner en priorité</span>
+                @endif
             </a>
         @empty
             <p class="text-sm text-stone-500">Rien en attente.</p>

@@ -42,7 +42,14 @@ class LoginTest extends TestCase
             ->assertRedirect(route('home'));
 
         $this->assertAuthenticatedAs(User::firstWhere('phone', '+221771234567'));
-        $this->get('/')->assertSee('Bienvenue sur IDEE, Aminata Diop');
+
+        // Un nouveau membre accepte d'abord les conditions et la charte (section 8).
+        $this->get('/')->assertRedirect(route('terms.show'));
+        $this->get(route('terms.show'))->assertOk()->assertSee('Bienvenue sur IDEE, Aminata Diop')->assertSee('ne demande jamais d');
+        $this->post(route('terms.accept'))->assertSessionHasErrors('accept');
+        $this->post(route('terms.accept'), ['accept' => '1'])->assertRedirect('/');
+        $this->assertSame(config('idee.legal.version'), User::firstWhere('phone', '+221771234567')->terms_version);
+        $this->get('/')->assertOk()->assertSee('Activité');
     }
 
     public function test_a_wrong_code_shows_an_error_in_french(): void

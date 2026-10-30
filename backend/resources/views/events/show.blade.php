@@ -1,4 +1,4 @@
-<x-layout :title="$event->title" :description="\Illuminate\Support\Str::limit($event->description, 180)">
+<x-layout :title="$event->title" :description="\Illuminate\Support\Str::limit($event->description, 180)" :noindex="! $event->isSpeedMeeting()">
     <a href="{{ route('events.index') }}" class="mb-3 inline-block py-1 text-sm text-stone-500">← Sessions de pitch</a>
 
     <p class="text-sm font-medium text-brand-700">{{ $event->starts_at->translatedFormat('l d F Y · H\hi') }} · {{ $event->mode === \App\Enums\MeetingMode::Visio ? 'En ligne' : 'En présentiel' }}</p>

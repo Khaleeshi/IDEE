@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\ContactRequestStatus;
+use App\Services\Moderation\ScamDetector;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
@@ -35,7 +36,7 @@ class ContactRequest extends Model
      */
     public function sender(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'sender_id');
+        return $this->belongsTo(User::class, 'sender_id')->withTrashed();
     }
 
     /**
@@ -43,7 +44,7 @@ class ContactRequest extends Model
      */
     public function recipient(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'recipient_id');
+        return $this->belongsTo(User::class, 'recipient_id')->withTrashed();
     }
 
     /**
@@ -116,6 +117,14 @@ class ContactRequest extends Model
     public function allowsMessages(): bool
     {
         return $this->status === ContactRequestStatus::Interesse;
+    }
+
+    /**
+     * Le message de la demande parle d'argent, d'un code ou de coordonnées bancaires (section 8).
+     */
+    public function raisesScamAlert(): bool
+    {
+        return app(ScamDetector::class)->isSuspicious($this->message);
     }
 
     public function involves(User $user): bool

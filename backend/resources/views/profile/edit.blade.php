@@ -68,9 +68,14 @@
                 <span>Recevoir les alertes importantes sur WhatsApp</span>
             </label>
 
-            <label class="mb-6 flex min-h-12 items-center gap-3 rounded-xl border border-stone-200 px-3">
+            <label class="mb-3 flex min-h-12 items-center gap-3 rounded-xl border border-stone-200 px-3">
                 <input type="checkbox" name="weekly_digest" value="1" @checked($user->contact_preferences['weekly_digest'] ?? true) class="h-5 w-5 accent-brand-700">
                 <span>Recevoir le résumé de la semaine par e-mail{{ $user->email_verified_at ? '' : ' (une fois votre adresse confirmée)' }}</span>
+            </label>
+
+            <label class="mb-6 flex min-h-12 items-center gap-3 rounded-xl border border-stone-200 px-3">
+                <input type="checkbox" name="personalized_recommendations" value="1" @checked($user->wantsPersonalizedRecommendations()) class="h-5 w-5 accent-brand-700">
+                <span class="py-2">Recevoir des recommandations selon mon profil (secteurs, compétences, rôles)</span>
             </label>
 
             <x-button class="w-full">Enregistrer</x-button>
@@ -131,6 +136,23 @@
         <a href="{{ route('quotes.index') }}" class="col-span-2 rounded-xl border border-stone-200 bg-white p-3 text-center font-medium text-stone-800">Devis et prestations</a>
         <a href="{{ route('offers.index') }}" class="col-span-2 rounded-xl border border-stone-200 bg-white p-3 text-center font-medium text-stone-800">Offres et paiements</a>
     </nav>
+
+    <x-card class="text-sm">
+        <h2 class="font-semibold">Assistant IA</h2>
+        <p class="mt-1 text-stone-600">Effacez vos échanges avec l'assistant : ses questions sur vos idées et vos préparations de rendez-vous. Vos business plans et présentations restent.</p>
+        <form method="POST" action="{{ route('assistant.forget') }}">
+            @csrf
+            @method('DELETE')
+            <button type="submit" class="mt-2 py-1 font-medium text-red-700 underline">Effacer mes échanges avec l'assistant</button>
+        </form>
+    </x-card>
+
+    <x-card class="text-sm">
+        <h2 class="font-semibold">Mes données</h2>
+        <p class="mt-1 text-stone-600">Téléchargez tout ce qu'IDEE garde sur vous, ou supprimez votre compte.</p>
+        <a href="{{ route('account.export') }}" class="mt-3 block py-1 font-medium text-brand-700 underline">Télécharger mes données</a>
+        <a href="{{ route('account.delete') }}" class="block py-1 font-medium text-red-700 underline">Supprimer mon compte</a>
+    </x-card>
 
     <form method="POST" action="{{ route('logout') }}" class="text-center">
         @csrf

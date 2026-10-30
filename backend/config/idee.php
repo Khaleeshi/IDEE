@@ -101,9 +101,26 @@ return [
     ],
 
     // Modération (section 8) : durée d'une suspension et délai pour contester une décision (en jours).
+    // Section 8 : expressions qui déclenchent l'alerte anti-arnaque dans la messagerie.
+    // Écrites en minuscules et sans accents ; le message est comparé sous la même forme.
+    'scam_alert' => [
+        // Demande d'argent ou de transfert.
+        'frais de dossier', 'frais d\'etude', 'frais de traitement', 'frais d\'enregistrement', 'frais de deblocage',
+        'western union', 'moneygram', 'ria money', 'envoie moi de l\'argent', 'envoyez moi de l\'argent', 'envoyer de l\'argent', 'envoyez de l\'argent',
+        'faire un transfert', 'faites un transfert', 'transferez', 'faire un depot', 'faites un depot', 'virement',
+        'numero wave', 'mon wave', 'par wave', 'numero orange money', 'mon orange money', 'par orange money', 'yonnee ma xaalis',
+        // Demande d'un code reçu par SMS ou d'un mot de passe.
+        'code recu', 'code de confirmation', 'code de verification', 'code secret', 'code pin', 'mot de passe',
+        'donne moi le code', 'donnez moi le code', 'envoie moi le code', 'envoyez moi le code',
+        // Coordonnées bancaires.
+        'rib', 'iban', 'numero de compte', 'numero de carte', 'carte bancaire', 'coordonnees bancaires', 'cvv', 'date d\'expiration',
+    ],
+
     'moderation' => [
         'suspension_days' => (int) env('IDEE_SUSPENSION_DAYS', 30),
         'appeal_days' => (int) env('IDEE_APPEAL_DAYS', 14),
+        // Section 8 : suspension préventive après ce nombre de signalements de personnes différentes.
+        'reports_before_suspension' => (int) env('IDEE_REPORTS_BEFORE_SUSPENSION', 3),
     ],
 
     // CF-02 : durée de validité d'une vérification d'identité (en mois).
@@ -187,6 +204,17 @@ return [
         'address' => env('IDEE_COMPANY_ADDRESS'),
         'ninea' => env('IDEE_COMPANY_NINEA'),
         'rccm' => env('IDEE_COMPANY_RCCM'),
+        'email' => env('IDEE_CONTACT_EMAIL'),
+        'publisher' => env('IDEE_PUBLISHER'),
+        'host' => env('IDEE_HOST'),
+    ],
+
+    // Section 9 : conditions d'utilisation, confidentialité et charte communautaire.
+    // Changer la version demande à chaque membre d'accepter de nouveau les textes.
+    'legal' => [
+        'version' => '2026-10',
+        // Passe à true quand un avocat a validé les textes : le bandeau « provisoire » disparaît.
+        'validated' => (bool) env('IDEE_LEGAL_VALIDATED', false),
     ],
 
     // Code de connexion à usage unique (section 10).

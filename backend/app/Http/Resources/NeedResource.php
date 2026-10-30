@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Enums\NeedType;
 use App\Models\Need;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -26,6 +27,7 @@ class NeedResource extends JsonResource
             'profile_sought' => $this->profile_sought,
             'deadline' => $this->deadline?->toDateString(),
             'counterpart' => $this->counterpart,
+            'notice' => $this->isFundraising() ? NeedType::FUNDRAISING_NOTICE : null,
             'status' => EnumResource::make($this->status),
             'outcome' => $this->outcome,
             'closed_at' => $this->closed_at?->toIso8601String(),

@@ -33,6 +33,7 @@ class UpdateProfileRequest extends FormRequest
             'contact_preferences.accepts_requests' => ['boolean'],
             'contact_preferences.whatsapp_alerts' => ['boolean'],
             'contact_preferences.weekly_digest' => ['boolean'],
+            'contact_preferences.personalized_recommendations' => ['boolean'],
             'availability' => ['nullable', Rule::enum(Availability::class)],
             'photo' => ['nullable', 'image', 'max:5120'],
         ];

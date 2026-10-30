@@ -3,6 +3,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'src/screens/home_shell.dart';
 import 'src/screens/login_screen.dart';
+import 'src/screens/terms_screen.dart';
 import 'src/session.dart';
 import 'src/widgets.dart';
 
@@ -36,7 +37,10 @@ class IdeeApp extends StatelessWidget {
           if (!session.ready) {
             return const Scaffold(body: Center(child: CircularProgressIndicator()));
           }
-          return session.isSignedIn ? HomeShell(session: session) : LoginScreen(session: session);
+          if (!session.isSignedIn) {
+            return LoginScreen(session: session);
+          }
+          return session.termsAccepted ? HomeShell(session: session) : TermsScreen(session: session);
         },
       ),
     );

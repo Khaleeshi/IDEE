@@ -54,4 +54,12 @@ class Need extends Model
     {
         return $this->status === NeedStatus::Ouvert;
     }
+
+    /**
+     * Besoin de financement : la page porte la mention exigée et n'est pas indexée (section 9).
+     */
+    public function isFundraising(): bool
+    {
+        return $this->type === NeedType::Financement;
+    }
 }

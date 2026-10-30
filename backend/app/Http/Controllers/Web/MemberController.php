@@ -10,12 +10,18 @@ use App\Services\ContactRequests\ReactivityIndicator;
 use App\Services\Network\FollowService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\View\View;
 
 class MemberController extends Controller
 {
-    public function show(Request $request, User $user, ReactivityIndicator $reactivity, FollowService $follows, CollaborationService $collaborations): View
+    public function show(Request $request, User $user, ReactivityIndicator $reactivity, FollowService $follows, CollaborationService $collaborations): View|Response
     {
+        // Les liens vers un compte supprimé restent dans les conversations des autres membres.
+        if ($user->trashed()) {
+            return response()->view('members.deleted', status: 410);
+        }
+
         return view('members.show', [
             'member' => $user->load('roleAssignments'),
             'following' => $follows->isFollowing($request->user(), $user),

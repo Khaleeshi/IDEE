@@ -26,6 +26,10 @@ class RecommendationService
      */
     public function forUser(User $user): Collection
     {
+        if (! $user->wantsPersonalizedRecommendations()) {
+            return collect();
+        }
+
         // Calculées une fois par jour, puis relues tant qu'elles restent ouvertes.
         $picks = Cache::remember(
             "recommandations:{$user->id}:".today()->toDateString(),

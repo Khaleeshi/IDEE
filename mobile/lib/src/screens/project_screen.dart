@@ -36,7 +36,11 @@ class ProjectScreen extends StatelessWidget {
           ...project.needs.map((need) => Card(
                 child: ListTile(
                   title: Text(need.title),
-                  subtitle: Text([need.type.label, if (need.amountFcfa != null) '${need.amountFcfa} FCFA'].join(' · ')),
+                  subtitle: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Text([need.type.label, if (need.amountFcfa != null) '${need.amountFcfa} FCFA (indicatif)'].join(' · ')),
+                    if (need.notice != null)
+                      Padding(padding: const EdgeInsets.only(top: 4), child: Text(need.notice!, style: const TextStyle(fontSize: 12, color: Colors.black54))),
+                  ]),
                 ),
               )),
           if (!project.isOwner && project.owner != null) ...[

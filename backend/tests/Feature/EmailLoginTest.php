@@ -44,6 +44,7 @@ class EmailLoginTest extends TestCase
         $this->assertAuthenticatedAs($user);
         $this->assertNull($user->phone);
         $this->assertNotNull($user->email_verified_at);
+        $this->post(route('terms.accept'), ['accept' => '1']);
         $this->get(route('profile.edit'))->assertOk()->assertSee('confirmée');
     }
 

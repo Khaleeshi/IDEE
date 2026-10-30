@@ -26,6 +26,8 @@ class UserFactory extends Factory
             'region' => fake()->randomElement(['Dakar', 'Thiès', 'Saint-Louis', 'Kaolack', 'Ziguinchor']),
             'languages' => ['français', 'wolof'],
             'verification_level' => VerificationLevel::Phone,
+            'terms_version' => config('idee.legal.version'),
+            'terms_accepted_at' => now(),
             'remember_token' => Str::random(10),
         ];
     }
