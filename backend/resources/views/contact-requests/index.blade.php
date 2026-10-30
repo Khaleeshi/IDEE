@@ -17,7 +17,12 @@
         <a href="{{ route('contact-requests.show', $request) }}" class="mb-3 block rounded-2xl border bg-white p-4 shadow-sm {{ ! $sent && $request->status->isPending() ? 'border-amber-300' : 'border-stone-200' }}">
             <div class="flex items-center justify-between gap-2">
                 <span class="font-semibold">{{ $sent ? 'À' : 'De' }} {{ $other->name }}</span>
-                <x-status :status="$request->status" />
+                <span class="flex items-center gap-1">
+                    @if ($request->unread_messages_count)
+                        <span class="rounded-full bg-amber-500 px-2 py-0.5 text-xs font-bold text-white">{{ $request->unread_messages_count }} message{{ $request->unread_messages_count > 1 ? 's' : '' }}</span>
+                    @endif
+                    <x-status :status="$request->status" />
+                </span>
             </div>
             @if ($request->project)
                 <p class="mt-1 text-sm text-stone-500">Projet : {{ $request->project->title }}@if ($request->need) · {{ $request->need->title }}@endif</p>

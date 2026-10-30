@@ -12,6 +12,11 @@ class ContactRequestPolicy
         return $request->involves($user);
     }
 
+    public function message(User $user, ContactRequest $request): bool
+    {
+        return $request->involves($user) && $request->allowsMessages();
+    }
+
     public function respond(User $user, ContactRequest $request): bool
     {
         return $request->recipient_id === $user->getKey();

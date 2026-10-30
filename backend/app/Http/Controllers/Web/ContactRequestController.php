@@ -11,6 +11,7 @@ use App\Models\Need;
 use App\Models\Project;
 use App\Models\User;
 use App\Services\ContactRequests\ContactRequestService;
+use App\Services\Messaging\MessageService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -29,6 +30,9 @@ class ContactRequestController extends Controller
         $requests = $request->user()
             ->{$sent ? 'sentContactRequests' : 'receivedContactRequests'}()
             ->with(self::RELATIONS)
+            ->withCount(['messages as unread_messages_count' => fn ($query) => $query
+                ->where('sender_id', '!=', $request->user()->id)
+                ->whereNull('read_at')])
             ->latest()
             ->paginate(20)
             ->withQueryString();
@@ -68,14 +72,15 @@ class ContactRequestController extends Controller
             ->with('status', 'Demande envoyée. Le destinataire a '.config('idee.contact_expire_after_days').' jours pour vous répondre.');
     }
 
-    public function show(Request $request, ContactRequest $contactRequest): View
+    public function show(Request $request, ContactRequest $contactRequest, MessageService $messages): View
     {
         Gate::authorize('view', $contactRequest);
 
         $this->requests->markAsRead($contactRequest, $request->user());
+        $messages->markRead($contactRequest, $request->user());
 
         return view('contact-requests.show', [
-            'contactRequest' => $contactRequest->load(self::RELATIONS),
+            'contactRequest' => $contactRequest->load([...self::RELATIONS, 'messages']),
             'canRespond' => $contactRequest->recipient_id === $request->user()->getKey() && $contactRequest->status->isPending(),
             'responses' => ContactRequestStatus::responses(),
         ]);

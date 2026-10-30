@@ -42,6 +42,12 @@ return [
         'weights' => ['role' => 3, 'skill' => 3, 'sector' => 2, 'followed' => 2, 'region' => 1],
     ],
 
+    // MR-04 : pièces jointes de la messagerie (taille maximale en Ko).
+    'messages' => [
+        'max_document_kb' => (int) env('IDEE_MESSAGE_DOCUMENT_KB', 10240),
+        'max_voice_kb' => (int) env('IDEE_MESSAGE_VOICE_KB', 5120),
+    ],
+
     // RG-10 : une fiche pratique non revue depuis ce délai (en mois) est signalée à l'équipe.
     'guide_review_after_months' => (int) env('IDEE_GUIDE_REVIEW_MONTHS', 6),
 

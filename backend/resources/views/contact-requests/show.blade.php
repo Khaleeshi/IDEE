@@ -52,5 +52,47 @@
             <p class="mt-2 text-lg font-semibold">{{ \App\Support\PhoneNumber::format($other->phone) }}</p>
             <x-button :href="'https://wa.me/'.ltrim($other->phone, '+')" class="mt-3 w-full" target="_blank" rel="noopener">Écrire sur WhatsApp</x-button>
         </x-card>
+
+        <section id="messages" aria-labelledby="titre-messages">
+            <h2 id="titre-messages" class="mb-3 mt-6 text-lg font-bold">Messages</h2>
+
+            @forelse ($contactRequest->messages as $message)
+                @php($mine = $message->sender_id === auth()->id())
+                <div class="mb-2 flex {{ $mine ? 'justify-end' : 'justify-start' }}">
+                    <div class="max-w-[85%] rounded-2xl px-3 py-2 text-sm {{ $mine ? 'bg-brand-700 text-white' : 'border border-stone-200 bg-white text-stone-800' }}">
+                        @if ($message->body)
+                            <p class="whitespace-pre-line">{{ $message->body }}</p>
+                        @endif
+                        @if ($message->kind->value === 'vocal')
+                            <audio controls preload="none" src="{{ route('messages.attachment', $message) }}" class="mt-1 max-w-full"></audio>
+                        @elseif ($message->hasAttachment())
+                            <a href="{{ route('messages.attachment', $message) }}" class="mt-1 block font-medium underline">📎 {{ $message->attachment_name }}</a>
+                        @endif
+                        <p class="mt-1 text-[11px] {{ $mine ? 'text-brand-50' : 'text-stone-400' }}">
+                            {{ $message->created_at->translatedFormat('d F, H:i') }}@if ($mine && $message->read_at) · lu @endif
+                        </p>
+                    </div>
+                </div>
+            @empty
+                <p class="mb-3 text-sm text-stone-500">Écrivez le premier message pour convenir d'un échange.</p>
+            @endforelse
+
+            <form method="POST" action="{{ route('messages.store', $contactRequest) }}" enctype="multipart/form-data" class="mt-3 rounded-2xl border border-stone-200 bg-white p-3">
+                @csrf
+                <label for="message-texte" class="sr-only">Votre message</label>
+                <textarea id="message-texte" name="body" rows="2" maxlength="4000" placeholder="Votre message…"
+                          class="block w-full rounded-xl border border-stone-300 px-3 py-3 text-base focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-100">{{ old('body') }}</textarea>
+                <label for="message-fichier" class="mt-2 block text-sm text-stone-600">Joindre un document ou une photo (facultatif)</label>
+                <input id="message-fichier" name="attachment" type="file" accept=".pdf,image/*,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt" class="mt-1 block w-full text-sm">
+                <x-button class="mt-3 w-full">Envoyer</x-button>
+            </form>
+
+            <form method="POST" action="{{ route('messages.store', $contactRequest) }}" enctype="multipart/form-data" class="mt-2 rounded-2xl border border-stone-200 bg-white p-3">
+                @csrf
+                <label for="message-vocal" class="block text-sm font-medium text-stone-800">Message vocal</label>
+                <input id="message-vocal" name="attachment" type="file" accept="audio/*" capture required class="mt-1 block w-full text-sm">
+                <x-button variant="secondary" class="mt-2 w-full">Envoyer le vocal</x-button>
+            </form>
+        </section>
     @endif
 </x-layout>

@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\FeedController;
 use App\Http\Controllers\Api\HelpOfferController;
 use App\Http\Controllers\Api\JourneyController;
 use App\Http\Controllers\Api\MemberController;
+use App\Http\Controllers\Api\MessageController;
 use App\Http\Controllers\Api\NeedController;
 use App\Http\Controllers\Api\NetworkController;
 use App\Http\Controllers\Api\ProfileController;
@@ -64,4 +65,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('contact-requests', [ContactRequestController::class, 'store']);
     Route::get('contact-requests/{contactRequest}', [ContactRequestController::class, 'show']);
     Route::post('contact-requests/{contactRequest}/respond', [ContactRequestController::class, 'respond']);
+    Route::get('contact-requests/{contactRequest}/messages', [MessageController::class, 'index']);
+    Route::post('contact-requests/{contactRequest}/messages', [MessageController::class, 'store']);
+    Route::get('messages/{message}/attachment', [MessageController::class, 'attachment']);
 });

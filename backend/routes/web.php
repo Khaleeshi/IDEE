@@ -6,6 +6,7 @@ use App\Http\Controllers\Web\FollowController;
 use App\Http\Controllers\Web\JourneyController;
 use App\Http\Controllers\Web\LoginController;
 use App\Http\Controllers\Web\MemberController;
+use App\Http\Controllers\Web\MessageController;
 use App\Http\Controllers\Web\NeedController;
 use App\Http\Controllers\Web\ProfileController;
 use App\Http\Controllers\Web\ProjectController;
@@ -46,6 +47,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/demandes', [ContactRequestController::class, 'store'])->name('contact-requests.store');
     Route::get('/demandes/{contactRequest}', [ContactRequestController::class, 'show'])->name('contact-requests.show');
     Route::post('/demandes/{contactRequest}/reponse', [ContactRequestController::class, 'respond'])->name('contact-requests.respond');
+    Route::post('/demandes/{contactRequest}/messages', [MessageController::class, 'store'])->name('messages.store');
+    Route::get('/messages/{message}/piece-jointe', [MessageController::class, 'attachment'])->name('messages.attachment');
 
     Route::post('/parcours/{journey}/commencer', [JourneyController::class, 'start'])->name('journeys.start');
     Route::delete('/parcours/{journey}/suivi', [JourneyController::class, 'leave'])->name('journeys.leave');

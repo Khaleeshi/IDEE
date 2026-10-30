@@ -7,6 +7,7 @@ use App\Enums\ContactRequestStatus;
 use App\Services\Journeys\JourneyService;
 use App\Services\Messaging\FallbackCodeSender;
 use App\Services\Messaging\LogCodeSender;
+use App\Services\Messaging\MessageService;
 use App\Services\Messaging\OrangeSmsCodeSender;
 use App\Services\Messaging\WhatsAppCodeSender;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -51,6 +52,7 @@ class AppServiceProvider extends ServiceProvider
 
             $view->with('pendingRequestsCount', $user
                 ? $user->receivedContactRequests()->whereIn('status', [ContactRequestStatus::Envoyee, ContactRequestStatus::Lue])->count()
+                    + app(MessageService::class)->unreadCount($user)
                 : 0);
             $view->with('dueRemindersCount', $user ? app(JourneyService::class)->dueRemindersCount($user) : 0);
         });
