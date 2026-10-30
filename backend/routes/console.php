@@ -56,6 +56,8 @@ Artisan::command('idee:admin {phone} {--retirer}', function (string $phone) {
     $this->info($user->is_admin ? "{$user->name} fait maintenant partie de l'équipe d'administration." : "{$user->name} n'a plus accès à l'administration.");
 })->purpose('Donne (ou retire avec --retirer) l\'accès à l\'administration à un membre');
 
+// Tâches en arrière-plan (assistant IA) : traitées chaque minute par la tâche planifiée.
+Schedule::command('queue:work --stop-when-empty --max-time=55')->everyMinute()->withoutOverlapping();
 Schedule::command('idee:contact-requests')->hourly();
 Schedule::command('idee:step-reminders')->dailyAt('08:00');
 Schedule::command('idee:stale-guides')->weeklyOn(1, '07:00');

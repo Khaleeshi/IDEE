@@ -41,6 +41,12 @@ return [
 
     // WhatsApp Business Platform (Cloud API de Meta) : codes envoyés par un
     // modèle de message « authentification » validé par Meta.
+    // Assistant IA (section 7) : clé d'API Anthropic et modèle utilisé.
+    'anthropic' => [
+        'key' => env('ANTHROPIC_API_KEY'),
+        'model' => env('IDEE_AI_MODEL', 'claude-opus-5-5'),
+    ],
+
     'whatsapp' => [
         'token' => env('WHATSAPP_TOKEN'),
         'phone_number_id' => env('WHATSAPP_PHONE_NUMBER_ID'),

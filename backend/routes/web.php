@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Web\Admin\AdminController;
+use App\Http\Controllers\Web\AssistantController;
 use App\Http\Controllers\Web\ContactRequestController;
 use App\Http\Controllers\Web\DocumentController;
 use App\Http\Controllers\Web\FeedController;
@@ -39,6 +40,12 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/projets/{project}/mises-a-jour', [ProjectController::class, 'publishUpdate'])->name('projects.updates.store');
     Route::post('/projets/{project}/besoins', [NeedController::class, 'store'])->name('needs.store');
+    Route::post('/projets/{project}/assistant/questions', [AssistantController::class, 'clarify'])->name('assistant.clarify');
+    Route::put('/clarifications/{ideaClarification}', [AssistantController::class, 'answer'])->name('assistant.answer');
+    Route::get('/projets/{project}/business-plan', [AssistantController::class, 'show'])->name('business-plans.show');
+    Route::post('/projets/{project}/business-plan', [AssistantController::class, 'generate'])->name('business-plans.generate');
+    Route::get('/projets/{project}/business-plan/impression', [AssistantController::class, 'print'])->name('business-plans.print');
+    Route::put('/business-plans/{businessPlan}', [AssistantController::class, 'update'])->name('business-plans.update');
     Route::post('/projets/{project}/documents', [DocumentController::class, 'store'])->name('documents.store');
     Route::get('/documents/{projectDocument}', [DocumentController::class, 'show'])->name('documents.show');
     Route::delete('/documents/{projectDocument}', [DocumentController::class, 'destroy'])->name('documents.destroy');

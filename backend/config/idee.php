@@ -80,6 +80,14 @@ return [
         'whatsapp' => (bool) env('IDEE_WHATSAPP_ALERTS', false),
     ],
 
+    // Assistant IA (section 7) : désactivé tant qu'aucune clé n'est fournie.
+    // Les plafonds par projet maîtrisent la dépense (environ 100 à 200 FCFA par business plan).
+    'ai' => [
+        'enabled' => (bool) env('IDEE_AI_ENABLED', false),
+        'business_plans_per_month' => (int) env('IDEE_AI_PLANS_PER_MONTH', 3),
+        'clarifications_per_day' => (int) env('IDEE_AI_CLARIFICATIONS_PER_DAY', 3),
+    ],
+
     // RG-10 : une fiche pratique non revue depuis ce délai (en mois) est signalée à l'équipe.
     'guide_review_after_months' => (int) env('IDEE_GUIDE_REVIEW_MONTHS', 6),
 

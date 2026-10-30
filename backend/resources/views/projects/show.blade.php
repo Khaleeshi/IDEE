@@ -77,6 +77,10 @@
         @endauth
     </x-card>
 
+    @if ($isOwner)
+        @include('projects.partials.assistant')
+    @endif
+
     @include('projects.partials.documents')
 
     <section id="journal" class="mt-6">

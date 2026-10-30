@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\AssistantController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ContactRequestController;
 use App\Http\Controllers\Api\DocumentController;
@@ -71,6 +72,13 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('projects/{project}/updates', [ProjectUpdateController::class, 'store']);
     Route::post('projects/{project}/needs', [NeedController::class, 'store']);
+
+    Route::get('projects/{project}/clarification', [AssistantController::class, 'clarification']);
+    Route::post('projects/{project}/clarification', [AssistantController::class, 'clarify']);
+    Route::put('clarifications/{ideaClarification}', [AssistantController::class, 'answer']);
+    Route::get('projects/{project}/business-plan', [AssistantController::class, 'businessPlan']);
+    Route::post('projects/{project}/business-plan', [AssistantController::class, 'generate']);
+    Route::put('business-plans/{businessPlan}', [AssistantController::class, 'update']);
 
     Route::get('projects/{project}/documents', [DocumentController::class, 'index']);
     Route::post('projects/{project}/documents', [DocumentController::class, 'store']);

@@ -2,9 +2,11 @@
 
 namespace App\Providers;
 
+use App\Contracts\Assistant;
 use App\Contracts\CodeSender;
 use App\Enums\ContactRequestStatus;
 use App\Models\User;
+use App\Services\Assistant\ClaudeAssistant;
 use App\Services\Journeys\JourneyService;
 use App\Services\Messaging\FallbackCodeSender;
 use App\Services\Messaging\LogCodeSender;
@@ -26,6 +28,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        $this->app->bind(Assistant::class, ClaudeAssistant::class);
+
         // Canal d'envoi des codes de connexion, choisi par IDEE_OTP_DRIVER.
         $this->app->bind(CodeSender::class, fn () => match (config('idee.otp.driver')) {
             'sms' => new OrangeSmsCodeSender,

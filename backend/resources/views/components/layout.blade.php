@@ -1,4 +1,4 @@
-@props(['title' => null, 'description' => null])
+@props(['title' => null, 'description' => null, 'refresh' => null])
 
 <!DOCTYPE html>
 <html lang="fr">
@@ -16,6 +16,9 @@
     <meta property="og:description" content="{{ $description }}">
     <meta property="og:url" content="{{ url()->current() }}">
     <meta property="og:image" content="{{ url('/icons/icon-512.png') }}">
+    @if ($refresh)
+        <meta http-equiv="refresh" content="{{ (int) $refresh }}">
+    @endif
     <link rel="manifest" href="/manifest.webmanifest">
     <link rel="icon" href="/favicon.ico" sizes="any">
     <link rel="apple-touch-icon" href="/icons/icon-192.png">

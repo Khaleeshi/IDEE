@@ -8,9 +8,12 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreProjectRequest;
 use App\Http\Requests\StoreProjectUpdateRequest;
 use App\Http\Requests\UpdateProjectRequest;
+use App\Models\BusinessPlan;
+use App\Models\IdeaClarification;
 use App\Models\JourneyStep;
 use App\Models\Project;
 use App\Models\Sector;
+use App\Services\Assistant\AssistantService;
 use App\Services\ContactRequests\ReactivityIndicator;
 use App\Services\Documents\DocumentService;
 use App\Services\Journeys\JourneyService;
@@ -28,7 +31,7 @@ class ProjectController extends Controller
 {
     public function __construct(private readonly ProjectService $projects) {}
 
-    public function show(Request $request, Project $project, ReadinessScore $readiness, ReactivityIndicator $reactivity, JourneyService $journeys, FollowService $follows, DocumentService $documents): View
+    public function show(Request $request, Project $project, ReadinessScore $readiness, ReactivityIndicator $reactivity, JourneyService $journeys, FollowService $follows, DocumentService $documents, AssistantService $assistant): View
     {
         abort_unless(Gate::allows('view', $project), Response::HTTP_NOT_FOUND);
 
@@ -53,6 +56,10 @@ class ProjectController extends Controller
             'documentAccess' => $documents->accessOf($request->user(), $project),
             'accesses' => $isOwner ? $project->documentAccesses()->with('user')->latest()->get() : collect(),
             'documentLogs' => $isOwner ? $documents->logFor($project) : collect(),
+            // Assistant IA, réservé au porteur (section 7).
+            'assistantEnabled' => $assistant->isEnabled(),
+            'clarification' => $isOwner ? IdeaClarification::where('project_id', $project->id)->latest()->first() : null,
+            'latestPlan' => $isOwner ? BusinessPlan::where('project_id', $project->id)->orderByDesc('version')->first() : null,
             'needTypes' => $this->needTypes(),
             // Demande d'aide lancée depuis une étape de parcours guidé.
             'needDraft' => $isOwner && ($step = JourneyStep::find($request->string('etape')->toString()))

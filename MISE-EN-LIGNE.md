@@ -146,6 +146,23 @@ avec les vrais services : faites un essai avec votre propre numéro avant
 d'ouvrir le site au public. En cas d'échec, le motif est écrit dans
 `storage/logs`.
 
+## 7. Activer l'assistant IA (business plan)
+
+L'assistant utilise Claude Opus 5.5 d'Anthropic, payé à l'usage : environ 4 $ par
+million de mots-jetons lus et 20 $ par million écrits, soit de l'ordre de 100 à
+200 FCFA par business plan. Des plafonds par projet limitent la dépense
+(`IDEE_AI_PLANS_PER_MONTH`, 3 par défaut).
+
+1. Créez un compte sur platform.claude.com, ajoutez un moyen de paiement et
+   fixez une limite de dépense mensuelle.
+2. Créez une clé d'API et collez-la dans `.env` : `ANTHROPIC_API_KEY=…`
+3. Mettez `IDEE_AI_ENABLED=true`, puis lancez `php artisan optimize`.
+
+Les business plans sont rédigés en arrière-plan : la tâche planifiée de
+l'étape 5 les traite chaque minute (`QUEUE_CONNECTION=database`). En cas de
+refus pour raison de sécurité, la demande est rejouée automatiquement sur le
+modèle de secours d'Anthropic.
+
 ## En cas de problème
 
 | Symptôme | Où regarder |
