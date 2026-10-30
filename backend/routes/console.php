@@ -4,6 +4,7 @@ use App\Models\User;
 use App\Services\Alerts\SavedSearchService;
 use App\Services\Collaboration\MeetingService;
 use App\Services\ContactRequests\ContactRequestService;
+use App\Services\Events\EventService;
 use App\Services\Journeys\JourneyService;
 use App\Services\Notifications\WeeklyDigestService;
 use App\Services\Opportunities\OpportunityService;
@@ -46,11 +47,12 @@ Artisan::command('idee:weekly-digest', function (WeeklyDigestService $digests) {
     $this->info("{$count} résumé(s) hebdomadaire(s) envoyé(s).");
 })->purpose('Envoie le résumé de la semaine par e-mail aux membres à l\'adresse confirmée (NO-04)');
 
-Artisan::command('idee:meeting-reminders', function (MeetingService $meetings) {
+Artisan::command('idee:meeting-reminders', function (MeetingService $meetings, EventService $events) {
     $count = $meetings->sendReminders();
+    $sessions = $events->sendReminders();
 
-    $this->info("{$count} rendez-vous rappelé(s).");
-})->purpose('Rappelle aux deux personnes les rendez-vous confirmés du lendemain (MR-07)');
+    $this->info("{$count} rendez-vous rappelé(s), {$sessions} rappel(s) de session de pitch.");
+})->purpose('Rappelle les rendez-vous confirmés (MR-07) et les sessions de pitch (EV-01) du lendemain');
 
 Artisan::command('idee:stale-guides', function (JourneyService $journeys) {
     $steps = $journeys->staleSteps();

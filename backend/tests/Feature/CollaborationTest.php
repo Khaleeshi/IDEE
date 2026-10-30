@@ -157,12 +157,12 @@ class CollaborationTest extends TestCase
             ->assertOk()
             ->assertJsonPath('data.status.value', 'confirmee');
 
-        $this->artisan('idee:meeting-reminders')->expectsOutputToContain('1 rendez-vous rappelé(s).')->assertSuccessful();
+        $this->artisan('idee:meeting-reminders')->expectsOutputToContain('1 rendez-vous rappelé(s)')->assertSuccessful();
         Notification::assertSentToTimes($conversation->recipient, CollaborationNotice::class, 2);
         Notification::assertSentToTimes($conversation->sender, CollaborationNotice::class, 2);
 
         // Le rappel ne part qu'une fois.
-        $this->artisan('idee:meeting-reminders')->expectsOutputToContain('0 rendez-vous rappelé(s).');
+        $this->artisan('idee:meeting-reminders')->expectsOutputToContain('0 rendez-vous rappelé(s)');
 
         $this->postJson("/api/meetings/{$meetingId}/cancel")->assertOk()->assertJsonPath('data.status.value', 'annulee');
     }

@@ -6,6 +6,7 @@ use App\Http\Controllers\Web\AssistantController;
 use App\Http\Controllers\Web\CollaborationController;
 use App\Http\Controllers\Web\ContactRequestController;
 use App\Http\Controllers\Web\DocumentController;
+use App\Http\Controllers\Web\EventController;
 use App\Http\Controllers\Web\ExpertController;
 use App\Http\Controllers\Web\FeedController;
 use App\Http\Controllers\Web\FollowController;
@@ -123,6 +124,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/membres/{user}/contacter', [MemberController::class, 'contact'])->name('members.contact');
     Route::post('/groupes/{type}/{key}', [GroupController::class, 'store'])->name('groups.posts.store');
     Route::delete('/messages-groupe/{groupPost}', [GroupController::class, 'destroy'])->name('groups.posts.destroy');
+    Route::get('/evenements/nouveau', [EventController::class, 'create'])->name('events.create');
+    Route::post('/evenements', [EventController::class, 'store'])->name('events.store');
+    Route::post('/evenements/{event}/inscription', [EventController::class, 'register'])->name('events.register');
+    Route::delete('/evenements/{event}/inscription', [EventController::class, 'unregister'])->name('events.unregister');
+    Route::post('/evenements/{event}/annulation', [EventController::class, 'cancel'])->name('events.cancel');
+    Route::post('/inscriptions/{eventRegistration}/decision', [EventController::class, 'decide'])->name('events.decide');
     Route::get('/alertes', [AlertController::class, 'index'])->name('alerts.index');
     Route::post('/alertes', [AlertController::class, 'store'])->name('alerts.store');
     Route::get('/alertes/{savedSearch}', [AlertController::class, 'show'])->name('alerts.show');
@@ -172,6 +179,8 @@ Route::get('/parcours/{journey}', [JourneyController::class, 'show'])->name('jou
 
 // Répertoire des programmes, concours et financements (OP-01).
 Route::get('/experts', [ExpertController::class, 'index'])->name('experts.index');
+Route::get('/evenements', [EventController::class, 'index'])->name('events.index');
+Route::get('/evenements/{event}', [EventController::class, 'show'])->name('events.show');
 Route::get('/groupes', [GroupController::class, 'index'])->name('groups.index');
 Route::get('/groupes/{type}/{key}', [GroupController::class, 'show'])->name('groups.show');
 Route::get('/organisations', [OrganisationController::class, 'index'])->name('organisations.index');

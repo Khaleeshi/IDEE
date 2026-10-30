@@ -34,6 +34,7 @@
     @php($tabs = ['activite' => ['Activité', route('home')], 'projets' => ['Projets', route('home', ['vue' => 'projets'])]] + (auth()->check() ? ['suivis' => ['Suivis', route('home', ['vue' => 'suivis'])]] : []))
     <nav aria-label="Explorer le réseau" class="mb-3 flex gap-2 overflow-x-auto pb-1 text-sm">
         <a href="{{ route('groups.index') }}" class="shrink-0 rounded-full border border-stone-300 bg-white px-3 py-1.5">Groupes</a>
+        <a href="{{ route('events.index') }}" class="shrink-0 rounded-full border border-stone-300 bg-white px-3 py-1.5">Pitchs</a>
         <a href="{{ route('opportunities.index') }}" class="shrink-0 rounded-full border border-stone-300 bg-white px-3 py-1.5">Financements</a>
         <a href="{{ route('experts.index') }}" class="shrink-0 rounded-full border border-stone-300 bg-white px-3 py-1.5">Experts</a>
         <a href="{{ route('organisations.index') }}" class="shrink-0 rounded-full border border-stone-300 bg-white px-3 py-1.5">Organisations</a>

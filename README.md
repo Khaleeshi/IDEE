@@ -91,7 +91,10 @@ clients, matériel) et chaque demande de contact reçoit une réponse.
   demande de contact à propos de son projet (SE-01)
 - Groupes par secteur et par région : projets du groupe et discussion signalable,
   avec une limite de messages par jour (FC-05)
-- 164 tests automatisés au total
+- Sessions de pitch en ligne ou en présentiel, organisées par l'équipe ou une
+  organisation vérifiée : inscription, candidature avec un projet, sélection dans
+  la limite des places, lien de visio réservé aux inscrits, rappel la veille (EV-01)
+- 168 tests automatisés au total
 
 **Reste à faire** : saisie vocale par IA (la dictée du clavier est proposée en
 attendant), la suite de la V2 (groupes, alertes, pages d'organisation, experts,
@@ -146,6 +149,7 @@ de connexion ne sont pas envoyés par SMS : ils sont écrits dans
 | `/organisations` | Annuaire des organisations ; `/organisations/{id}` leur page, `/gestion` pour la gérer |
 | `/experts` | Experts vérifiés et leurs tarifs ; `/membres/{id}/contacter` pour écrire à propos de son projet |
 | `/groupes` | Groupes par secteur et par région ; `/groupes/{secteur ou region}/{id}` |
+| `/evenements` | Sessions de pitch ; `/evenements/{id}` pour s'inscrire ou candidater |
 | `/opportunites?projet={id}` | Programmes compatibles avec l'un de mes projets |
 | `/profil` | Mon profil, mes rôles, mes préférences |
 | `/membres/{id}` | Profil public d'un membre et sa réactivité |
@@ -223,6 +227,10 @@ l'en-tête `Authorization: Bearer <jeton>` reçu à la connexion.
 | GET | `/api/experts` | public | Experts vérifiés (`q`, `sector`, `region`) |
 | GET | `/api/groups` · `/api/groups/{secteur ou region}/{id}` | public | Groupes, leurs projets et leurs messages |
 | POST, DELETE | `/api/groups/{type}/{id}/posts` · `/api/group-posts/{id}` | connecté, auteur | Écrire au groupe, supprimer son message |
+| GET | `/api/events` · `/api/events/{id}` | public | Sessions de pitch à venir (le lien de visio seulement pour les inscrits) |
+| POST | `/api/events` | équipe, organisation vérifiée | Organiser une session |
+| POST, DELETE | `/api/events/{id}/registration` | connecté | S'inscrire, ou candidater avec `project_id` ; se désinscrire |
+| GET, POST | `/api/events/{id}/registrations` · `/api/event-registrations/{id}/decide` | organisateur | Candidatures et sélection |
 | PATCH, DELETE | `/api/tasks/{id}` | porteur, partenaires | Changer la colonne d'une tâche, la retirer |
 | GET, POST | `/api/projects/{id}/documents` | autorisé, porteur | Documents privés |
 | GET | `/api/documents/{id}` | autorisé | Télécharger un document (consultation journalisée) |
