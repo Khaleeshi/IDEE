@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Web\ContactRequestController;
+use App\Http\Controllers\Web\DocumentController;
 use App\Http\Controllers\Web\FeedController;
 use App\Http\Controllers\Web\FollowController;
 use App\Http\Controllers\Web\JourneyController;
@@ -34,6 +35,12 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/projets/{project}/mises-a-jour', [ProjectController::class, 'publishUpdate'])->name('projects.updates.store');
     Route::post('/projets/{project}/besoins', [NeedController::class, 'store'])->name('needs.store');
+    Route::post('/projets/{project}/documents', [DocumentController::class, 'store'])->name('documents.store');
+    Route::get('/documents/{projectDocument}', [DocumentController::class, 'show'])->name('documents.show');
+    Route::delete('/documents/{projectDocument}', [DocumentController::class, 'destroy'])->name('documents.destroy');
+    Route::post('/projets/{project}/acces-documents', [DocumentController::class, 'requestAccess'])->name('document-access.request');
+    Route::post('/acces-documents/{documentAccess}/decision', [DocumentController::class, 'decide'])->name('document-access.decide');
+    Route::post('/acces-documents/{documentAccess}/revocation', [DocumentController::class, 'revoke'])->name('document-access.revoke');
     Route::post('/besoins/{need}/cloture', [NeedController::class, 'close'])->name('needs.close');
     Route::post('/besoins/{need}/aide', [NeedController::class, 'offerHelp'])->name('help-offers.store');
     Route::post('/aides/{helpOffer}/reponse', [NeedController::class, 'respondToOffer'])->name('help-offers.respond');

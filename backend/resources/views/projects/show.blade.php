@@ -74,6 +74,8 @@
         @endauth
     </x-card>
 
+    @include('projects.partials.documents')
+
     <section id="journal" class="mt-6">
         <h2 class="mb-3 text-lg font-bold">Journal de progression</h2>
         @if ($isOwner)

@@ -77,6 +77,22 @@ class Project extends Model
     }
 
     /**
+     * @return HasMany<ProjectDocument, $this>
+     */
+    public function documents(): HasMany
+    {
+        return $this->hasMany(ProjectDocument::class)->latest();
+    }
+
+    /**
+     * @return HasMany<DocumentAccess, $this>
+     */
+    public function documentAccesses(): HasMany
+    {
+        return $this->hasMany(DocumentAccess::class);
+    }
+
+    /**
      * Journal de progression, du plus récent au plus ancien (PR-04).
      *
      * @return HasMany<ProjectUpdate, $this>

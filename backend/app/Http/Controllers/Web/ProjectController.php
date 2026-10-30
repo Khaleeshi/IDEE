@@ -12,6 +12,7 @@ use App\Models\JourneyStep;
 use App\Models\Project;
 use App\Models\Sector;
 use App\Services\ContactRequests\ReactivityIndicator;
+use App\Services\Documents\DocumentService;
 use App\Services\Journeys\JourneyService;
 use App\Services\Network\FollowService;
 use App\Services\Projects\ProjectService;
@@ -27,7 +28,7 @@ class ProjectController extends Controller
 {
     public function __construct(private readonly ProjectService $projects) {}
 
-    public function show(Request $request, Project $project, ReadinessScore $readiness, ReactivityIndicator $reactivity, JourneyService $journeys, FollowService $follows): View
+    public function show(Request $request, Project $project, ReadinessScore $readiness, ReactivityIndicator $reactivity, JourneyService $journeys, FollowService $follows, DocumentService $documents): View
     {
         abort_unless(Gate::allows('view', $project), Response::HTTP_NOT_FOUND);
 
@@ -46,6 +47,12 @@ class ProjectController extends Controller
             'reactivity' => $reactivity->for($project->owner),
             'updates' => $project->updates()->limit(10)->get(),
             'following' => $follows->isFollowing($request->user(), $project),
+            // Documents privés : visibles seulement par le porteur et les membres autorisés (RG-05).
+            'documents' => $documents->canRead($request->user(), $project) ? $project->documents : null,
+            'documentsCount' => $project->documents()->count(),
+            'documentAccess' => $documents->accessOf($request->user(), $project),
+            'accesses' => $isOwner ? $project->documentAccesses()->with('user')->latest()->get() : collect(),
+            'documentLogs' => $isOwner ? $documents->logFor($project) : collect(),
             'needTypes' => $this->needTypes(),
             // Demande d'aide lancée depuis une étape de parcours guidé.
             'needDraft' => $isOwner && ($step = JourneyStep::find($request->string('etape')->toString()))

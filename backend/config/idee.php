@@ -48,6 +48,11 @@ return [
         'max_voice_kb' => (int) env('IDEE_MESSAGE_VOICE_KB', 5120),
     ],
 
+    // PR-05 : documents privés d'un projet (taille maximale en Ko).
+    'documents' => [
+        'max_kb' => (int) env('IDEE_DOCUMENT_KB', 10240),
+    ],
+
     // RG-10 : une fiche pratique non revue depuis ce délai (en mois) est signalée à l'équipe.
     'guide_review_after_months' => (int) env('IDEE_GUIDE_REVIEW_MONTHS', 6),
 

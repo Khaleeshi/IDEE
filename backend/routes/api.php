@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ContactRequestController;
+use App\Http\Controllers\Api\DocumentController;
 use App\Http\Controllers\Api\FeedController;
 use App\Http\Controllers\Api\HelpOfferController;
 use App\Http\Controllers\Api\JourneyController;
@@ -55,6 +56,16 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('projects/{project}/updates', [ProjectUpdateController::class, 'store']);
     Route::post('projects/{project}/needs', [NeedController::class, 'store']);
+
+    Route::get('projects/{project}/documents', [DocumentController::class, 'index']);
+    Route::post('projects/{project}/documents', [DocumentController::class, 'store']);
+    Route::get('documents/{projectDocument}', [DocumentController::class, 'show']);
+    Route::delete('documents/{projectDocument}', [DocumentController::class, 'destroy']);
+    Route::get('projects/{project}/document-accesses', [DocumentController::class, 'accesses']);
+    Route::post('projects/{project}/document-accesses', [DocumentController::class, 'requestAccess']);
+    Route::post('document-accesses/{documentAccess}/decide', [DocumentController::class, 'decide']);
+    Route::post('document-accesses/{documentAccess}/revoke', [DocumentController::class, 'revoke']);
+
     Route::post('needs/{need}/close', [NeedController::class, 'close']);
 
     Route::get('needs/{need}/help-offers', [HelpOfferController::class, 'index']);
