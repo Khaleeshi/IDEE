@@ -98,11 +98,17 @@ clients, matériel) et chaque demande de contact reçoit une réponse.
   prochaines étapes), sans livrer les détails privés d'un projet à qui n'en est pas
   le porteur (IA-05) ; présentation du projet en neuf diapositives, modifiable et
   imprimable (IA-06)
-- 172 tests automatisés au total
+- Fiches pratiques en wolof : texte et enregistrement audio saisis par l'équipe dans
+  l'administration, bouton Français / Wolof sur les parcours (PG-07, contenu à
+  produire avec des locuteurs natifs)
+- 173 tests automatisés au total
 
 **Reste à faire** : saisie vocale par IA (la dictée du clavier est proposée en
-attendant), la suite de la V2 (groupes, alertes, pages d'organisation, experts,
-paiements, fiches en wolof…) et l'application Flutter.
+attendant) ; traduction et enregistrement des fiches en wolof ; paiements
+(abonnements Wave, Orange Money ou carte, mise en avant « Sponsorisé », factures),
+qui demandent des comptes marchands et une grille de prix ; fonctions prévues en
+V3 (rencontres ciblées, devis d'experts, candidatures structurées, suivi de
+cohortes) ; application Flutter.
 
 ## Structure du dépôt
 

@@ -10,9 +10,10 @@ use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Storage;
 
 #[Fillable([
-    'slug', 'position', 'title', 'body', 'documents', 'organisation', 'cost', 'delay',
+    'slug', 'position', 'title', 'body', 'title_wo', 'body_wo', 'documents', 'organisation', 'cost', 'delay',
     'source_label', 'source_url', 'checked_on', 'needs_expert', 'action', 'related_journey_id',
 ])]
 class JourneyStep extends Model
@@ -80,5 +81,21 @@ class JourneyStep extends Model
     private static function reviewThreshold(): CarbonInterface
     {
         return now()->subMonths(config('idee.guide_review_after_months'))->startOfDay();
+    }
+
+    /**
+     * La fiche existe en wolof écrit (PG-07).
+     */
+    public function hasWolof(): bool
+    {
+        return filled($this->body_wo);
+    }
+
+    /**
+     * Enregistrement audio en wolof, s'il existe.
+     */
+    public function audioUrl(): ?string
+    {
+        return $this->audio_path ? Storage::disk('public')->url($this->audio_path) : null;
     }
 }

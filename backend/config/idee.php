@@ -131,6 +131,9 @@ return [
     // RG-10 : une fiche pratique non revue depuis ce délai (en mois) est signalée à l'équipe.
     'guide_review_after_months' => (int) env('IDEE_GUIDE_REVIEW_MONTHS', 6),
 
+    // PG-07 : taille maximale de l'enregistrement audio en wolof d'une fiche (en Ko).
+    'guide_audio_max_kb' => (int) env('IDEE_GUIDE_AUDIO_KB', 10240),
+
     // Code de connexion à usage unique (section 10).
     'otp' => [
         'length' => 6,

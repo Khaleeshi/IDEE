@@ -42,6 +42,9 @@ class JourneyController extends Controller
             'doneCount' => $progress->filter(fn ($item) => $item->status->isDone())->count(),
             'helpProject' => $user ? $this->journeys->helpTarget($user) : null,
             'statuses' => StepStatus::cases(),
+            // PG-07 : fiches en wolof quand l'équipe les a traduites.
+            'wolof' => $request->query('langue') === 'wo',
+            'hasWolof' => $journey->steps->contains(fn ($step) => $step->hasWolof() || $step->audio_path),
         ]);
     }
 

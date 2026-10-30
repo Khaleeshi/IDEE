@@ -12,7 +12,9 @@ use App\Models\User;
 use App\Notifications\StepReminder;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class JourneyService
@@ -206,6 +208,25 @@ class JourneyService
      * @param  Builder<StepProgress>  $query
      * @return Builder<StepProgress>
      */
+    /**
+     * Remplace ou retire l'enregistrement audio en wolof d'une fiche (PG-07).
+     */
+    public function setWolofAudio(JourneyStep $step, ?UploadedFile $audio, bool $remove = false): JourneyStep
+    {
+        if (($audio !== null || $remove) && $step->audio_path) {
+            Storage::disk('public')->delete($step->audio_path);
+            $step->audio_path = null;
+        }
+
+        if ($audio !== null) {
+            $step->audio_path = $audio->store('fiches/audio', 'public');
+        }
+
+        $step->save();
+
+        return $step;
+    }
+
     private function due(Builder $query): Builder
     {
         return $query

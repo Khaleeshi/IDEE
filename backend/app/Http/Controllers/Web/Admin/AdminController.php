@@ -208,11 +208,15 @@ class AdminController extends Controller
         return view('admin.guide', ['step' => $journeyStep->load('journey')]);
     }
 
-    public function updateGuide(Request $request, JourneyStep $journeyStep): RedirectResponse
+    public function updateGuide(Request $request, JourneyStep $journeyStep, JourneyService $journeys): RedirectResponse
     {
         $data = $request->validate([
             'title' => ['required', 'string', 'max:255'],
             'body' => ['required', 'string', 'max:3000'],
+            'title_wo' => ['nullable', 'string', 'max:255'],
+            'body_wo' => ['nullable', 'string', 'max:3000'],
+            'audio' => ['nullable', 'file', 'mimes:mp3,m4a,aac,ogg,oga,opus,wav', 'max:'.config('idee.guide_audio_max_kb')],
+            'remove_audio' => ['boolean'],
             'documents' => ['nullable', 'string', 'max:3000'],
             'organisation' => ['nullable', 'string', 'max:255'],
             'cost' => ['nullable', 'string', 'max:255'],
@@ -224,7 +228,7 @@ class AdminController extends Controller
         ]);
 
         $journeyStep->fill([
-            ...collect($data)->except(['documents', 'checked'])->all(),
+            ...collect($data)->except(['documents', 'checked', 'audio', 'remove_audio'])->all(),
             'documents' => array_values(array_filter(array_map('trim', explode("\n", $data['documents'] ?? '')))) ?: null,
             'needs_expert' => $request->boolean('needs_expert'),
         ]);
@@ -235,7 +239,7 @@ class AdminController extends Controller
         }
 
         $journeyStep->edited_at = now();
-        $journeyStep->save();
+        $journeys->setWolofAudio($journeyStep, $request->file('audio'), $request->boolean('remove_audio'));
 
         return redirect()->route('admin.guides')->with('status', 'Fiche mise à jour.');
     }
