@@ -111,7 +111,9 @@ clients, matériel) et chaque demande de contact reçoit une réponse.
 - Candidatures structurées aux programmes des organisations vérifiées, envoyées
   depuis le dossier IDEE avec, si le porteur le veut, son business plan (OR-02) ;
   suivi des cohortes : score, besoins, activité et points de suivi (OR-03)
-- 184 tests automatisés au total
+- Devis et prestations : demande de devis à un expert vérifié, devis, acceptation,
+  livraison puis confirmation par le client ; règlement direct entre eux (SE-02)
+- 187 tests automatisés au total
 
 **Reste à faire** : saisie vocale en wolof (IA-04, après des tests de qualité) ; traduction et enregistrement des fiches en wolof ; paiement par carte
 (avec un agrégateur comme PayDunya ou PayTech) ; fonctions prévues en
@@ -171,6 +173,7 @@ de connexion ne sont pas envoyés par SMS : ils sont écrits dans
 | `/projets/{id}/presentation` | Présentation du projet rédigée par l'assistant, à corriger et projeter |
 | `/candidatures/{id}` | Candidature à un programme : réponses, business plan joint, décision |
 | `/organisations/{id}/cohortes` | Cohortes suivies par une organisation ; `/cohortes/{id}` leur tableau de suivi |
+| `/devis` | Mes demandes de devis et prestations ; `/membres/{id}/devis` pour en demander un |
 | `/offres` | Offres payantes, mes offres en cours et mes paiements ; `/paiements/{id}/recu` pour le reçu |
 | `/opportunites?projet={id}` | Programmes compatibles avec l'un de mes projets |
 | `/profil` | Mon profil, mes rôles, mes préférences |
@@ -255,6 +258,8 @@ l'en-tête `Authorization: Bearer <jeton>` reçu à la connexion.
 | GET | `/api/me/programme-applications` | connecté | Mes candidatures et leurs décisions |
 | GET, POST | `/api/programmes/{id}/applications` · `/api/programme-applications/{id}/decide` | gestionnaire | Candidatures reçues, décision |
 | GET | `/api/organisations/{id}/cohorts` · `/api/cohorts/{id}` | gestionnaire | Cohortes et tableau de suivi |
+| GET, POST | `/api/me/quotes` · `/api/members/{id}/quotes` | connecté | Mes devis ; demander un devis à un expert vérifié |
+| POST | `/api/quotes/{id}/quote` · `answer` · `deliver` · `complete` · `cancel` | expert ou client | Devis, réponse, livraison, fin, annulation |
 | GET | `/api/offers` | public | Offres, prix et moyens de paiement disponibles |
 | POST, GET | `/api/payments` · `/api/me/payments` · `/api/payments/{id}` | connecté | Acheter une offre (lien Wave en retour), suivre ses paiements |
 | POST | `/api/payments/{id}/reference` | acheteur | Identifiant du transfert Orange Money |

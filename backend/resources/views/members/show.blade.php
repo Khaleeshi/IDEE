@@ -43,6 +43,11 @@
             <div class="mt-3 rounded-xl bg-stone-50 p-3 text-sm">
                 <p><span class="text-stone-500">Services :</span> {{ $member->expertise }}</p>
                 <p class="mt-1"><span class="text-stone-500">Tarif indicatif :</span> {{ $member->rate ?? 'sur demande' }}</p>
+                @auth
+                    @unless ($member->is(auth()->user()))
+                        <x-button :href="route('quotes.create', $member)" variant="secondary" class="mt-2 w-full min-h-10 py-2 text-sm">Demander un devis</x-button>
+                    @endunless
+                @endauth
             </div>
         @endif
 
