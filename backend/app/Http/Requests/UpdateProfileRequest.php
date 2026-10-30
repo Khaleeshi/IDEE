@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\Availability;
 use App\Enums\UserRole;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -29,6 +30,8 @@ class UpdateProfileRequest extends FormRequest
             'contact_preferences' => ['sometimes', 'array'],
             'contact_preferences.accepts_requests' => ['boolean'],
             'contact_preferences.whatsapp_alerts' => ['boolean'],
+            'availability' => ['nullable', Rule::enum(Availability::class)],
+            'photo' => ['nullable', 'image', 'max:5120'],
         ];
     }
 }

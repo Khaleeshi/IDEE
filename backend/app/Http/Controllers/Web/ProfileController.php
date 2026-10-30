@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Web;
 
+use App\Enums\Availability;
 use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\WebProfileRequest;
@@ -23,6 +24,7 @@ class ProfileController extends Controller
             'decisions' => $moderation->decisionsAbout($request->user()),
             'sectors' => Sector::options('slug'),
             'roles' => UserRole::cases(),
+            'availabilities' => collect(Availability::cases())->mapWithKeys(fn (Availability $availability) => [$availability->value => $availability->label()]),
         ]);
     }
 

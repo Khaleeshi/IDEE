@@ -1,6 +1,9 @@
 <x-layout :title="$member->name">
     <x-card>
-        <h1 class="text-2xl font-bold">{{ $member->name }}</h1>
+        <div class="flex items-center gap-3">
+            <x-avatar :user="$member" size="h-16 w-16 text-xl" />
+            <h1 class="text-2xl font-bold">{{ $member->name }}</h1>
+        </div>
         <p class="text-sm text-stone-500">
             {{ $member->region ?? 'Région non précisée' }} · {{ $member->verification_level->label() }} · membre depuis {{ $member->created_at->translatedFormat('F Y') }}
         </p>
@@ -21,6 +24,10 @@
                 </form>
             @endunless
         @endauth
+
+        @if ($member->availability)
+            <p class="mt-3 text-sm font-medium {{ $member->availability->value === 'indisponible' ? 'text-stone-500' : 'text-brand-800' }}">{{ $member->availability->label() }}</p>
+        @endif
 
         @if ($member->bio)
             <p class="mt-3 whitespace-pre-line text-stone-700">{{ $member->bio }}</p>

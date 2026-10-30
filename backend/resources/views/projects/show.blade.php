@@ -61,7 +61,10 @@
 
     <x-card class="mt-4">
         <p class="text-sm text-stone-500">Porté par</p>
-        <a href="{{ route('members.show', $project->owner) }}" class="text-lg font-semibold text-brand-800 underline">{{ $project->owner->name }}</a>
+        <div class="mt-1 flex items-center gap-2">
+            <x-avatar :user="$project->owner" size="h-10 w-10 text-sm" />
+            <a href="{{ route('members.show', $project->owner) }}" class="text-lg font-semibold text-brand-800 underline">{{ $project->owner->name }}</a>
+        </div>
         @if ($project->owner->region)<span class="text-sm text-stone-500"> · {{ $project->owner->region }}</span>@endif
         @include('members.partials.reactivity', ['reactivity' => $reactivity])
 

@@ -2,9 +2,18 @@
     <h1 class="mb-4 text-2xl font-bold">Mon profil</h1>
 
     <x-card>
-        <form method="POST" action="{{ route('profile.update') }}">
+        <form method="POST" action="{{ route('profile.update') }}" enctype="multipart/form-data">
             @csrf
             @method('PUT')
+
+            <div class="mb-4 flex items-center gap-3">
+                <x-avatar :user="$user" size="h-16 w-16 text-xl" />
+                <div class="flex-1">
+                    <label for="photo-profil" class="block text-sm font-medium text-stone-800">Photo (facultatif)</label>
+                    <input id="photo-profil" name="photo" type="file" accept="image/*" class="mt-1 block w-full text-sm">
+                </div>
+            </div>
+            <x-select name="availability" label="Disponibilité" :options="$availabilities" :value="$user->availability?->value" placeholder="Ne pas préciser" />
 
             <x-field name="name" label="Nom" :value="$user->name" required autocomplete="name" />
             <x-field name="region" label="Région" :value="$user->region" placeholder="Ex. : Dakar, ou Paris pour la diaspora" />

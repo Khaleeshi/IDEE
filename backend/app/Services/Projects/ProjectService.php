@@ -9,6 +9,7 @@ use App\Models\Project;
 use App\Models\ProjectUpdate;
 use App\Models\User;
 use App\Services\Feed\FeedService;
+use App\Services\Needs\NeedService;
 use Illuminate\Support\Facades\DB;
 
 class ProjectService
@@ -21,14 +22,16 @@ class ProjectService
     public function __construct(
         private readonly ReadinessScore $readiness,
         private readonly FeedService $feed,
+        private readonly NeedService $needs,
     ) {}
 
     /**
      * @param  array<string, mixed>  $attributes
+     * @param  array{type: string, title: string, description: string}|null  $firstNeed  premier appel à action (PR-01)
      */
-    public function create(User $owner, array $attributes): Project
+    public function create(User $owner, array $attributes, ?array $firstNeed = null): Project
     {
-        return DB::transaction(function () use ($owner, $attributes) {
+        return DB::transaction(function () use ($owner, $attributes, $firstNeed) {
             $project = new Project($attributes);
             $project->owner()->associate($owner);
             $project->status = ProjectStatus::Actif;
@@ -42,6 +45,10 @@ class ProjectService
             $this->recordVersion($project);
             $this->readiness->refresh($project);
             $this->feed->record(ActivityType::ProjetPublie, $project, $owner);
+
+            if ($firstNeed !== null) {
+                $this->needs->create($project, $firstNeed);
+            }
 
             return $project;
         });

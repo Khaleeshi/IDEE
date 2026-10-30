@@ -31,7 +31,7 @@ class ProjectController extends Controller
 
     public function store(StoreProjectRequest $request): JsonResponse
     {
-        $project = $this->projects->create($request->user(), $request->validated());
+        $project = $this->projects->create($request->user(), $request->projectAttributes(), $request->firstNeed());
 
         return (new ProjectResource($project->load(['owner.roleAssignments', 'sector', 'openNeeds'])))
             ->response()

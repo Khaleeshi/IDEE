@@ -84,7 +84,7 @@ class ProjectController extends Controller
 
     public function store(StoreProjectRequest $request): RedirectResponse
     {
-        $project = $this->projects->create($request->user(), $request->validated());
+        $project = $this->projects->create($request->user(), $request->projectAttributes(), $request->firstNeed());
 
         return redirect()->route('projects.show', $project)
             ->with('status', 'Votre projet est publié. Ajoutez maintenant ce qui lui manque : ses appels à action.');
@@ -121,6 +121,7 @@ class ProjectController extends Controller
     private function formOptions(): array
     {
         return [
+            'needTypes' => $this->needTypes(),
             'sectors' => Sector::options(),
             'stages' => collect(ProjectStage::cases())->mapWithKeys(fn (ProjectStage $stage) => [$stage->value => $stage->label()]),
         ];
