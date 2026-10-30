@@ -45,4 +45,9 @@
     @empty
         <p class="text-sm text-stone-600">Aucun projet actif.</p>
     @endforelse
+    @auth
+        @unless ($member->is(auth()->user()))
+            <x-report-form type="membre" :id="$member->id" label="Signaler ce profil" class="mt-6 text-center" />
+        @endunless
+    @endauth
 </x-layout>

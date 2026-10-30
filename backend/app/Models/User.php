@@ -38,7 +38,30 @@ class User extends Authenticatable
             'sectors' => 'array',
             'contact_preferences' => 'array',
             'verification_level' => VerificationLevel::class,
+            'is_admin' => 'boolean',
+            'suspended_until' => 'datetime',
+            'banned_at' => 'datetime',
         ];
+    }
+
+    public function isAdmin(): bool
+    {
+        return (bool) $this->is_admin;
+    }
+
+    /**
+     * Compte exclu, ou suspendu à la suite d'une décision de modération.
+     */
+    public function isRestricted(): bool
+    {
+        return $this->banned_at !== null || $this->suspended_until?->isFuture();
+    }
+
+    public function restrictionMessage(): string
+    {
+        return $this->banned_at !== null
+            ? 'Ce compte a été exclu d\'IDEE à la suite d\'une décision de modération.'
+            : 'Ce compte est suspendu jusqu\'au '.$this->suspended_until->translatedFormat('d F Y').' à la suite d\'une décision de modération.';
     }
 
     /**
@@ -79,6 +102,14 @@ class User extends Authenticatable
     public function helpOffers(): HasMany
     {
         return $this->hasMany(HelpOffer::class);
+    }
+
+    /**
+     * @return HasMany<Verification, $this>
+     */
+    public function verifications(): HasMany
+    {
+        return $this->hasMany(Verification::class);
     }
 
     /**

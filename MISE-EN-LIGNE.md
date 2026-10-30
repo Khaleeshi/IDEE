@@ -93,6 +93,16 @@ puis choisissez le dossier `php83` (ou plus récent).
    sommeil les projets inactifs.
 6. Ouvrez l'adresse du site : le fil des projets doit s'afficher, et
    `ADRESSE_DU_SITE/up` doit répondre.
+7. Connectez-vous une première fois sur le site avec votre numéro, puis donnez-vous
+   l'accès à l'administration (signalements, vérifications, fiches, indicateurs) :
+
+   ```bash
+   /usr/local/apps/php83/bin/php artisan idee:admin 771234567
+   ```
+
+   Le lien « Administration de l'équipe IDEE » apparaît alors dans votre profil.
+   Ajoutez au moins une deuxième personne : un recours doit être examiné par un
+   autre modérateur que celui qui a pris la décision.
 
 Les mises en ligne suivantes sont automatiques : à chaque fusion dans `main`,
 le site passe quelques secondes en maintenance, la base est mise à jour, puis

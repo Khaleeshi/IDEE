@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\ProjectController;
 use App\Http\Controllers\Api\ProjectUpdateController;
 use App\Http\Controllers\Api\SectorController;
+use App\Http\Controllers\Api\TrustController;
 use Illuminate\Support\Facades\Route;
 
 // Connexion par code à usage unique.
@@ -40,6 +41,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('me', [ProfileController::class, 'update']);
     Route::get('me/projects', [ProfileController::class, 'projects']);
     Route::get('me/journeys', [JourneyController::class, 'mine']);
+    Route::post('reports', [TrustController::class, 'report']);
+    Route::get('me/moderation', [TrustController::class, 'decisions']);
+    Route::post('reports/{report}/appeal', [TrustController::class, 'appeal']);
+    Route::get('me/verification', [TrustController::class, 'verification']);
+    Route::post('me/verification', [TrustController::class, 'verify']);
     Route::get('me/feed', [NetworkController::class, 'followedFeed']);
     Route::get('me/recommendations', [NetworkController::class, 'recommendations']);
     Route::post('follows/projects/{project}', [NetworkController::class, 'followProject']);

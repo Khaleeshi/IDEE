@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Contracts\CodeSender;
 use App\Enums\ContactRequestStatus;
+use App\Models\User;
 use App\Services\Journeys\JourneyService;
 use App\Services\Messaging\FallbackCodeSender;
 use App\Services\Messaging\LogCodeSender;
@@ -12,6 +13,7 @@ use App\Services\Messaging\OrangeSmsCodeSender;
 use App\Services\Messaging\WhatsAppCodeSender;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -38,6 +40,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Équipe IDEE : modération, vérifications, fiches et indicateurs (AD-01 à AD-04).
+        Gate::define('administrer', fn (User $user) => $user->isAdmin());
+
         // Limite les envois de codes pour éviter les abus et les coûts de SMS.
         RateLimiter::for('otp', fn (Request $request) => [
             Limit::perMinute(1)->by('phone:'.$request->input('phone')),

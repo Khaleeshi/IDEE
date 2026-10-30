@@ -60,10 +60,13 @@
                 @php($mine = $message->sender_id === auth()->id())
                 <div class="mb-2 flex {{ $mine ? 'justify-end' : 'justify-start' }}">
                     <div class="max-w-[85%] rounded-2xl px-3 py-2 text-sm {{ $mine ? 'bg-brand-700 text-white' : 'border border-stone-200 bg-white text-stone-800' }}">
-                        @if ($message->body)
+                        @if ($message->isRemoved())
+                            <p class="italic">Message retiré par la modération.</p>
+                        @elseif ($message->body)
                             <p class="whitespace-pre-line">{{ $message->body }}</p>
                         @endif
-                        @if ($message->kind->value === 'vocal')
+                        @if ($message->isRemoved())
+                        @elseif ($message->kind->value === 'vocal')
                             <audio controls preload="none" src="{{ route('messages.attachment', $message) }}" class="mt-1 max-w-full"></audio>
                         @elseif ($message->hasAttachment())
                             <a href="{{ route('messages.attachment', $message) }}" class="mt-1 block font-medium underline">📎 {{ $message->attachment_name }}</a>
@@ -93,6 +96,11 @@
                 <input id="message-vocal" name="attachment" type="file" accept="audio/*" capture required class="mt-1 block w-full text-sm">
                 <x-button variant="secondary" class="mt-2 w-full">Envoyer le vocal</x-button>
             </form>
+
+            @php($lastReceived = $contactRequest->messages->where('sender_id', '!=', auth()->id())->whereNull('removed_at')->last())
+            @if ($lastReceived)
+                <x-report-form type="message" :id="$lastReceived->id" label="Signaler le dernier message reçu" class="mt-4 text-center" />
+            @endif
         </section>
     @endif
 </x-layout>

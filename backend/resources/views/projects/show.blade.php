@@ -216,4 +216,9 @@
             <button type="submit" class="py-3 text-sm text-red-700 underline">Supprimer le projet</button>
         </form>
     @endif
+    @auth
+        @unless ($isOwner)
+            <x-report-form type="projet" :id="$project->id" label="Signaler ce projet" class="mt-8 text-center" />
+        @endunless
+    @endauth
 </x-layout>

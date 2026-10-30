@@ -14,7 +14,8 @@ class JourneySeeder extends Seeder
      *
      * Relancé à chaque mise en ligne : les parcours et étapes gardent leur
      * identifiant (et donc l'avancement des membres) tant que leur « slug »
-     * ne change pas. Une étape retirée du fichier est supprimée.
+     * ne change pas. Une étape retirée du fichier est supprimée ; une étape
+     * corrigée dans l'administration garde sa version corrigée.
      */
     public function run(): void
     {
@@ -30,6 +31,16 @@ class JourneySeeder extends Seeder
             $kept = [];
 
             foreach ($data['steps'] as $stepPosition => $stepData) {
+                $edited = $journey->steps()->where('slug', $stepData['slug'])->whereNotNull('edited_at')->first();
+
+                if ($edited !== null) {
+                    $edited->update(['position' => $stepPosition + 1]);
+                    $kept[] = $edited->id;
+                    $related[$edited->id] = $stepData['related'] ?? null;
+
+                    continue;
+                }
+
                 $step = $journey->steps()->updateOrCreate(
                     ['slug' => $stepData['slug']],
                     [

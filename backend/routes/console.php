@@ -1,8 +1,10 @@
 <?php
 
+use App\Models\User;
 use App\Services\ContactRequests\ContactRequestService;
 use App\Services\Journeys\JourneyService;
 use App\Services\Projects\ProjectService;
+use App\Support\PhoneNumber;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schedule;
@@ -38,6 +40,19 @@ Artisan::command('idee:stale-guides', function (JourneyService $journeys) {
 
     $this->info("{$steps->count()} fiche(s) à revoir.");
 })->purpose('Signale les fiches pratiques non revues depuis 6 mois (RG-10)');
+
+Artisan::command('idee:admin {phone} {--retirer}', function (string $phone) {
+    $user = User::where('phone', PhoneNumber::normalize($phone))->first();
+
+    if ($user === null) {
+        $this->error('Aucun membre avec ce numéro. Il doit d\'abord se connecter une fois à IDEE.');
+
+        return 1;
+    }
+
+    $user->forceFill(['is_admin' => ! $this->option('retirer')])->save();
+    $this->info($user->is_admin ? "{$user->name} fait maintenant partie de l'équipe d'administration." : "{$user->name} n'a plus accès à l'administration.");
+})->purpose('Donne (ou retire avec --retirer) l\'accès à l\'administration à un membre');
 
 Schedule::command('idee:contact-requests')->hourly();
 Schedule::command('idee:step-reminders')->dailyAt('08:00');

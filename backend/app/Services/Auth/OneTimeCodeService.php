@@ -90,6 +90,10 @@ class OneTimeCodeService
                 $user->name = $name ?: 'Membre IDEE';
             }
 
+            if ($user->exists && $user->isRestricted()) {
+                throw ValidationException::withMessages(['code' => $user->restrictionMessage()]);
+            }
+
             if ($user->trashed()) {
                 $user->restore();
             }

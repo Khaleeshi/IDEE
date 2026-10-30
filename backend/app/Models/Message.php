@@ -21,6 +21,7 @@ class Message extends Model
         return [
             'kind' => MessageKind::class,
             'read_at' => 'datetime',
+            'removed_at' => 'datetime',
             'attachment_size' => 'integer',
         ];
     }
@@ -43,6 +44,11 @@ class Message extends Model
 
     public function hasAttachment(): bool
     {
-        return $this->attachment_path !== null;
+        return $this->attachment_path !== null && ! $this->isRemoved();
+    }
+
+    public function isRemoved(): bool
+    {
+        return $this->removed_at !== null;
     }
 }

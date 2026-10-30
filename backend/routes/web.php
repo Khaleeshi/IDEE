@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Web\Admin\AdminController;
 use App\Http\Controllers\Web\ContactRequestController;
 use App\Http\Controllers\Web\DocumentController;
 use App\Http\Controllers\Web\FeedController;
@@ -11,6 +12,7 @@ use App\Http\Controllers\Web\MessageController;
 use App\Http\Controllers\Web\NeedController;
 use App\Http\Controllers\Web\ProfileController;
 use App\Http\Controllers\Web\ProjectController;
+use App\Http\Controllers\Web\TrustController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [FeedController::class, 'index'])->name('home');
@@ -61,8 +63,28 @@ Route::middleware('auth')->group(function () {
     Route::delete('/parcours/{journey}/suivi', [JourneyController::class, 'leave'])->name('journeys.leave');
     Route::put('/etapes/{journeyStep}', [JourneyController::class, 'updateStep'])->name('journey-steps.update');
 
+    Route::post('/signalements', [TrustController::class, 'report'])->name('reports.store');
+    Route::get('/moderation/{report}', [TrustController::class, 'decision'])->name('moderation.decision');
+    Route::post('/moderation/{report}/recours', [TrustController::class, 'appeal'])->name('moderation.appeal');
+    Route::post('/profil/verification', [TrustController::class, 'verify'])->name('verification.store');
+
     Route::get('/profil', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profil', [ProfileController::class, 'update'])->name('profile.update');
+});
+
+// Administration de l'équipe IDEE (AD-01 à AD-04).
+Route::middleware(['auth', 'can:administrer'])->prefix('administration')->name('admin.')->group(function () {
+    Route::get('/', [AdminController::class, 'dashboard'])->name('dashboard');
+    Route::get('/signalements', [AdminController::class, 'reports'])->name('reports');
+    Route::get('/signalements/{report}', [AdminController::class, 'report'])->name('reports.show');
+    Route::post('/signalements/{report}/decision', [AdminController::class, 'decide'])->name('reports.decide');
+    Route::post('/signalements/{report}/recours', [AdminController::class, 'reviewAppeal'])->name('reports.appeal');
+    Route::get('/verifications', [AdminController::class, 'verifications'])->name('verifications');
+    Route::get('/verifications/{verification}/piece', [AdminController::class, 'verificationDocument'])->name('verifications.document');
+    Route::post('/verifications/{verification}/decision', [AdminController::class, 'decideVerification'])->name('verifications.decide');
+    Route::get('/fiches', [AdminController::class, 'guides'])->name('guides');
+    Route::get('/fiches/{journeyStep}', [AdminController::class, 'editGuide'])->name('guides.edit');
+    Route::put('/fiches/{journeyStep}', [AdminController::class, 'updateGuide'])->name('guides.update');
 });
 
 // Pages publiques : à déclarer après « /projets/nouveau » pour ne pas l'intercepter.

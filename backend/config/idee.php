@@ -53,6 +53,27 @@ return [
         'max_kb' => (int) env('IDEE_DOCUMENT_KB', 10240),
     ],
 
+    // Modération (section 8) : durée d'une suspension et délai pour contester une décision (en jours).
+    'moderation' => [
+        'suspension_days' => (int) env('IDEE_SUSPENSION_DAYS', 30),
+        'appeal_days' => (int) env('IDEE_APPEAL_DAYS', 14),
+    ],
+
+    // CF-02 : durée de validité d'une vérification d'identité (en mois).
+    'identity_valid_months' => (int) env('IDEE_IDENTITY_VALID_MONTHS', 24),
+
+    // AD-03 : cibles des indicateurs au mois 12 (section 18).
+    'indicator_targets' => [
+        'useful_response_rate' => 50,
+        'reply_rate' => 80,
+        'days_to_first_match' => 14,
+        'active_projects' => 300,
+        'active_members' => 1000,
+        'active_investors' => 30,
+        'finished_steps' => 100,
+        'retention_rate' => 30,
+    ],
+
     // RG-10 : une fiche pratique non revue depuis ce délai (en mois) est signalée à l'équipe.
     'guide_review_after_months' => (int) env('IDEE_GUIDE_REVIEW_MONTHS', 6),
 

@@ -21,7 +21,8 @@ class MessageResource extends JsonResource
             'contact_request_id' => $this->contact_request_id,
             'sender_id' => $this->sender_id,
             'kind' => EnumResource::make($this->kind),
-            'body' => $this->body,
+            'body' => $this->isRemoved() ? null : $this->body,
+            'removed' => $this->isRemoved(),
             'attachment' => $this->hasAttachment() ? [
                 'name' => $this->attachment_name,
                 'mime' => $this->attachment_mime,
