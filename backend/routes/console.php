@@ -8,6 +8,7 @@ use App\Services\Events\EventService;
 use App\Services\Journeys\JourneyService;
 use App\Services\Notifications\WeeklyDigestService;
 use App\Services\Opportunities\OpportunityService;
+use App\Services\Payments\PaymentService;
 use App\Services\Projects\ProjectService;
 use App\Support\PhoneNumber;
 use Illuminate\Support\Facades\Artisan;
@@ -54,6 +55,12 @@ Artisan::command('idee:meeting-reminders', function (MeetingService $meetings, E
     $this->info("{$count} rendez-vous rappelé(s), {$sessions} rappel(s) de session de pitch.");
 })->purpose('Rappelle les rendez-vous confirmés (MR-07) et les sessions de pitch (EV-01) du lendemain');
 
+Artisan::command('idee:payments', function (PaymentService $payments) {
+    $expired = $payments->sweep();
+
+    $this->info("Paiements en attente relus, {$expired} paiement(s) expiré(s).");
+})->purpose('Relit les paiements Wave en attente et fait expirer les achats abandonnés (PA-01)');
+
 Artisan::command('idee:stale-guides', function (JourneyService $journeys) {
     $steps = $journeys->staleSteps();
 
@@ -93,6 +100,7 @@ Artisan::command('idee:cles-push', function () {
 Schedule::command('queue:work --stop-when-empty --max-time=55')->everyMinute()->withoutOverlapping();
 Schedule::command('idee:contact-requests')->hourly();
 Schedule::command('idee:meeting-reminders')->hourly();
+Schedule::command('idee:payments')->everyTenMinutes()->withoutOverlapping();
 Schedule::command('idee:step-reminders')->dailyAt('08:00');
 Schedule::command('idee:alerts')->dailyAt('09:00');
 Schedule::command('idee:weekly-digest')->weeklyOn(1, '08:30');

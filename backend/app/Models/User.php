@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\Availability;
+use App\Enums\Offer;
 use App\Enums\UserRole;
 use App\Enums\VerificationLevel;
 use Database\Factories\UserFactory;
@@ -207,8 +208,47 @@ class User extends Authenticatable
      */
     public function weeklyContactQuota(): int
     {
-        return $this->hasVerifiedIdentity()
+        $quota = $this->hasVerifiedIdentity()
             ? config('idee.weekly_contact_quota.verified')
             : config('idee.weekly_contact_quota.unverified');
+
+        // Les offres Pro et investisseur relèvent le quota (section 13).
+        foreach ($this->activeOffers() as $offer) {
+            $quota = max($quota, (int) config('idee.offers.'.$offer->value.'.weekly_contacts'));
+        }
+
+        return $quota;
+    }
+
+    /**
+     * Nombre d'alertes enregistrées autorisées (RR-04), relevé par les offres payantes.
+     */
+    public function savedSearchLimit(): int
+    {
+        $limit = (int) config('idee.alerts.max_saved_searches');
+
+        foreach ($this->activeOffers() as $offer) {
+            $limit = max($limit, (int) config('idee.offers.'.$offer->value.'.saved_searches'));
+        }
+
+        return $limit;
+    }
+
+    /**
+     * Offres du membre en cours de validité (hors mise en avant de projet).
+     *
+     * @return list<Offer>
+     */
+    public function activeOffers(): array
+    {
+        return $this->entitlements()->active()->whereNull('project_id')->pluck('offer')->unique()->values()->all();
+    }
+
+    /**
+     * @return HasMany<Entitlement, $this>
+     */
+    public function entitlements(): HasMany
+    {
+        return $this->hasMany(Entitlement::class);
     }
 }

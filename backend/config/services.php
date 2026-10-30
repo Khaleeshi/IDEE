@@ -49,6 +49,12 @@ return [
     ],
 
     // Assistant IA (section 7) : clé d'API Anthropic et modèle utilisé.
+    // PA-01 : paiements Wave Business (API Checkout).
+    'wave' => [
+        'key' => env('WAVE_API_KEY'),
+        'base_url' => env('WAVE_API_URL', 'https://api.wave.com'),
+    ],
+
     'anthropic' => [
         'key' => env('ANTHROPIC_API_KEY'),
         'model' => env('IDEE_AI_MODEL', 'claude-opus-5-5'),

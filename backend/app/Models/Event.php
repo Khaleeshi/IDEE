@@ -15,7 +15,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 /**
  * Session de pitch en ligne ou en présentiel (EV-01).
  */
-#[Fillable(['title', 'description', 'mode', 'starts_at', 'place', 'pitch_slots', 'apply_until'])]
+#[Fillable(['title', 'format', 'description', 'mode', 'starts_at', 'place', 'pitch_slots', 'apply_until'])]
 class Event extends Model
 {
     use HasUlids;
@@ -70,6 +70,22 @@ class Event extends Model
         $query->where('status', 'publie')->where('starts_at', '>=', now())->orderBy('starts_at');
     }
 
+    /**
+     * @return HasMany<EventPairing, $this>
+     */
+    public function pairings(): HasMany
+    {
+        return $this->hasMany(EventPairing::class)->orderBy('round');
+    }
+
+    /**
+     * Rencontres ciblées par binômes (EV-02), plutôt qu'une session de pitch.
+     */
+    public function isSpeedMeeting(): bool
+    {
+        return $this->format === 'rencontres';
+    }
+
     public function isCancelled(): bool
     {
         return $this->status === 'annule';
@@ -81,6 +97,7 @@ class Event extends Model
     public function acceptsPitches(): bool
     {
         return $this->pitch_slots > 0
+            && ! $this->isSpeedMeeting()
             && ! $this->isCancelled()
             && $this->starts_at->isFuture()
             && ($this->apply_until === null || ! $this->apply_until->isPast() || $this->apply_until->isToday());

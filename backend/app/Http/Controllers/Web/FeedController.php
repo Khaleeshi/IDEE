@@ -32,6 +32,10 @@ class FeedController extends Controller
         return view('feed.index', [
             'tab' => $tab,
             'projects' => $tab === 'projets' ? $search->query($filters)->paginate(15)->withQueryString() : null,
+            // PA-02 : au plus quelques projets sponsorisés, en tête et signalés, parmi ceux qui correspondent à la recherche.
+            'sponsored' => $tab === 'projets' && ! $request->has('page')
+                ? $search->query($filters)->sponsored()->inRandomOrder()->limit(config('idee.offers.sponsorise.slots'))->get()
+                : collect(),
             'activities' => $tab !== 'projets' ? $feed->query($tab === 'suivis' ? $user : null)->paginate(20)->withQueryString() : null,
             'recommendations' => $user && $tab === 'activite' ? $recommendations->forUser($user) : collect(),
             'sector' => $sector,

@@ -187,6 +187,36 @@ l'étape 5 les traite chaque minute (`QUEUE_CONNECTION=database`). En cas de
 refus pour raison de sécurité, la demande est rejouée automatiquement sur le
 modèle de secours d'Anthropic.
 
+## 9. Activer les paiements des offres
+
+Les offres Pro, investisseur et « Sponsorisé » se paient à l'avance, sans
+prélèvement automatique. Les prix de départ se règlent dans `.env`
+(`IDEE_PRICE_PRO`, `IDEE_PRICE_INVESTOR`, `IDEE_PRICE_SPONSORED_WEEK`). IDEE
+n'encaisse que le prix de ses propres offres : jamais d'argent entre membres.
+
+**Orange Money (sans développement)**
+
+1. Ouvrez un compte marchand Orange Money au nom de la société.
+2. Indiquez son numéro dans `.env` : `IDEE_ORANGE_MONEY_NUMBER=77 000 00 00`.
+3. Les membres envoient le montant et notent l'identifiant du transfert. Vous
+   vérifiez chaque transfert dans **Administration › Paiements**, puis vous le
+   confirmez : le reçu et l'offre partent tout seuls.
+
+**Wave (paiement en ligne)**
+
+1. Ouvrez un compte Wave Business et créez une clé d'API « Checkout ».
+2. Collez-la dans `.env` : `WAVE_API_KEY=…`, puis `IDEE_PAY_WAVE=true`.
+3. Dans l'espace Wave Business, déclarez l'adresse d'avis de paiement :
+   `https://votre-domaine/api/webhooks/wave`.
+4. Faites un paiement de test de 100 FCFA avant d'ouvrir l'offre à tous. Le
+   statut est toujours relu auprès de Wave : vérifiez dans sa documentation que
+   les champs `payment_status` et `wave_launch_url` portent toujours ces noms.
+
+Renseignez aussi le nom, l'adresse, le RCCM et le NINEA de la société
+(`IDEE_COMPANY_…`) : ils figurent sur les reçus et les factures. Les factures
+des organisations (espace organisations, sur devis) s'émettent dans
+**Administration › Paiements**.
+
 ## En cas de problème
 
 | Symptôme | Où regarder |

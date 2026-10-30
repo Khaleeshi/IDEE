@@ -101,6 +101,10 @@
             @endif
         @endauth
 
+        @foreach ($sponsored as $project)
+            <x-project-card :project="$project" :sponsored="true" />
+        @endforeach
+
         @forelse ($projects as $project)
             <x-project-card :project="$project" />
         @empty

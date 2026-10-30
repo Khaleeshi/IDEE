@@ -8,6 +8,13 @@
             <x-select name="organisation_id" label="Organisée par" :options="$organisations->pluck('name', 'id')->all()"
                       :value="$organisations->first()->id" :placeholder="auth()->user()->isAdmin() ? 'L\'équipe IDEE' : null" />
         @endif
+        <fieldset class="mb-4">
+            <legend class="block text-sm font-medium text-stone-800">Format</legend>
+            <div class="mt-1 space-y-2">
+                <label class="flex min-h-12 items-center gap-2 rounded-xl border border-stone-200 px-3"><input type="radio" name="format" value="pitch" @checked(old('format', 'pitch') === 'pitch') class="h-5 w-5 accent-brand-700"> <span>Session de pitch : des projets présentent devant un jury</span></label>
+                <label class="flex min-h-12 items-center gap-2 rounded-xl border border-stone-200 px-3"><input type="radio" name="format" value="rencontres" @checked(old('format') === 'rencontres') class="h-5 w-5 accent-brand-700"> <span>Rencontres ciblées : porteurs et partenaires en tête-à-tête de {{ config('idee.speed_meeting.minutes') }} minutes</span></label>
+            </div>
+        </fieldset>
         <x-field name="title" label="Titre" placeholder="Ex. : Pitch agro-transformation de Thiès" maxlength="200" required />
         <x-field name="description" type="textarea" rows="4" label="Présentation" maxlength="3000" required
                  placeholder="Public visé, déroulé, composition du jury, temps de présentation…" />

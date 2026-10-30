@@ -9,10 +9,11 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable([
     'slug', 'title', 'organisation', 'kind', 'summary', 'criteria', 'stages', 'sectors', 'max_amount_fcfa', 'amount', 'deadline',
-    'deadline_note', 'url', 'source_label', 'checked_on', 'is_published',
+    'deadline_note', 'url', 'source_label', 'checked_on', 'is_published', 'accepts_applications', 'application_questions',
 ])]
 class Opportunity extends Model
 {
@@ -33,6 +34,8 @@ class Opportunity extends Model
             'deadline' => 'date',
             'checked_on' => 'date',
             'is_published' => 'boolean',
+            'accepts_applications' => 'boolean',
+            'application_questions' => 'array',
             'edited_at' => 'datetime',
         ];
     }
@@ -57,6 +60,24 @@ class Opportunity extends Model
     public function organisationPage(): BelongsTo
     {
         return $this->belongsTo(Organisation::class, 'organisation_id');
+    }
+
+    /**
+     * Candidatures reçues depuis IDEE (OR-02).
+     *
+     * @return HasMany<ProgrammeApplication, $this>
+     */
+    public function programmeApplications(): HasMany
+    {
+        return $this->hasMany(ProgrammeApplication::class)->latest();
+    }
+
+    /**
+     * Le programme reçoit des candidatures depuis IDEE et n'est pas clos.
+     */
+    public function takesApplications(): bool
+    {
+        return $this->accepts_applications && $this->organisation_id !== null && $this->is_published && ! $this->isClosed();
     }
 
     public function isClosed(): bool

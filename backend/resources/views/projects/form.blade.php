@@ -4,7 +4,7 @@
 
     @unless ($project->exists)
         {{-- Création guidée en cinq questions (PR-01). --}}
-        <p class="mb-4 rounded-xl bg-brand-50 px-4 py-3 text-sm text-brand-800">Astuce : touchez le micro de votre clavier pour dicter vos réponses au lieu de les écrire.</p>
+        <p class="mb-4 rounded-xl bg-brand-50 px-4 py-3 text-sm text-brand-800">Astuce : touchez « 🎤 Dicter » sous une question, ou le micro de votre clavier, pour répondre à la voix.</p>
         <form method="POST" action="{{ route('projects.store') }}">
             @csrf
             <x-card>

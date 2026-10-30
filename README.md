@@ -101,14 +101,24 @@ clients, matériel) et chaque demande de contact reçoit une réponse.
 - Fiches pratiques en wolof : texte et enregistrement audio saisis par l'équipe dans
   l'administration, bouton Français / Wolof sur les parcours (PG-07, contenu à
   produire avec des locuteurs natifs)
-- 173 tests automatisés au total
+- Paiements : offres Pro et investisseur, mise en avant « Sponsorisé » signalée et
+  sans effet sur le score ni les recommandations (RG-08), packs prépayés payés par
+  Wave (API Checkout, statut toujours relu auprès de Wave) ou par Orange Money
+  (transfert vérifié par l'équipe), reçus numérotés, factures des organisations,
+  statistiques de visibilité pour l'offre Pro (PA-01 à PA-03)
+- Saisie vocale en français : bouton « Dicter » sur les champs de texte, avec la
+  reconnaissance vocale du navigateur, sans frais (IA-03)
+- Candidatures structurées aux programmes des organisations vérifiées, envoyées
+  depuis le dossier IDEE avec, si le porteur le veut, son business plan (OR-02) ;
+  suivi des cohortes : score, besoins, activité et points de suivi (OR-03)
+- Devis et prestations : demande de devis à un expert vérifié, devis, acceptation,
+  livraison puis confirmation par le client ; règlement direct entre eux (SE-02)
+- Rencontres ciblées en ligne : porteurs et partenaires en binômes, tour par tour,
+  sans se revoir, avec un lien de visio gratuit (Jitsi) et un rappel la veille (EV-02)
+- 188 tests automatisés au total
 
-**Reste à faire** : saisie vocale par IA (la dictée du clavier est proposée en
-attendant) ; traduction et enregistrement des fiches en wolof ; paiements
-(abonnements Wave, Orange Money ou carte, mise en avant « Sponsorisé », factures),
-qui demandent des comptes marchands et une grille de prix ; fonctions prévues en
-V3 (rencontres ciblées, devis d'experts, candidatures structurées, suivi de
-cohortes) ; application Flutter.
+**Reste à faire** : saisie vocale en wolof (IA-04, après des tests de qualité) ; traduction et enregistrement des fiches en wolof ; paiement par carte
+(avec un agrégateur comme PayDunya ou PayTech) ; application Flutter.
 
 ## Structure du dépôt
 
@@ -159,8 +169,12 @@ de connexion ne sont pas envoyés par SMS : ils sont écrits dans
 | `/organisations` | Annuaire des organisations ; `/organisations/{id}` leur page, `/gestion` pour la gérer |
 | `/experts` | Experts vérifiés et leurs tarifs ; `/membres/{id}/contacter` pour écrire à propos de son projet |
 | `/groupes` | Groupes par secteur et par région ; `/groupes/{secteur ou region}/{id}` |
-| `/evenements` | Sessions de pitch ; `/evenements/{id}` pour s'inscrire ou candidater |
+| `/evenements` | Sessions de pitch et rencontres ciblées ; `/evenements/{id}` pour s'inscrire, candidater ou voir ses rencontres |
 | `/projets/{id}/presentation` | Présentation du projet rédigée par l'assistant, à corriger et projeter |
+| `/candidatures/{id}` | Candidature à un programme : réponses, business plan joint, décision |
+| `/organisations/{id}/cohortes` | Cohortes suivies par une organisation ; `/cohortes/{id}` leur tableau de suivi |
+| `/devis` | Mes demandes de devis et prestations ; `/membres/{id}/devis` pour en demander un |
+| `/offres` | Offres payantes, mes offres en cours et mes paiements ; `/paiements/{id}/recu` pour le reçu |
 | `/opportunites?projet={id}` | Programmes compatibles avec l'un de mes projets |
 | `/profil` | Mon profil, mes rôles, mes préférences |
 | `/membres/{id}` | Profil public d'un membre et sa réactivité |
@@ -240,10 +254,22 @@ l'en-tête `Authorization: Bearer <jeton>` reçu à la connexion.
 | POST, DELETE | `/api/groups/{type}/{id}/posts` · `/api/group-posts/{id}` | connecté, auteur | Écrire au groupe, supprimer son message |
 | GET, POST | `/api/projects/{id}/pitch-deck` | porteur | Présentation du projet (IA-06) ; `PUT /api/pitch-decks/{id}` pour la corriger |
 | POST | `/api/meetings/{id}/preparation` | concerné | Préparer un rendez-vous (IA-05) ; `GET /api/assistant-documents/{id}` pour la lire |
+| GET, POST | `/api/opportunities/{id}/questions` · `/api/opportunities/{id}/applications` | public, porteur | Questions d'un programme ; candidater depuis IDEE |
+| GET | `/api/me/programme-applications` | connecté | Mes candidatures et leurs décisions |
+| GET, POST | `/api/programmes/{id}/applications` · `/api/programme-applications/{id}/decide` | gestionnaire | Candidatures reçues, décision |
+| GET | `/api/organisations/{id}/cohorts` · `/api/cohorts/{id}` | gestionnaire | Cohortes et tableau de suivi |
+| GET, POST | `/api/me/quotes` · `/api/members/{id}/quotes` | connecté | Mes devis ; demander un devis à un expert vérifié |
+| POST | `/api/quotes/{id}/quote` · `answer` · `deliver` · `complete` · `cancel` | expert ou client | Devis, réponse, livraison, fin, annulation |
+| GET | `/api/offers` | public | Offres, prix et moyens de paiement disponibles |
+| POST, GET | `/api/payments` · `/api/me/payments` · `/api/payments/{id}` | connecté | Acheter une offre (lien Wave en retour), suivre ses paiements |
+| POST | `/api/payments/{id}/reference` | acheteur | Identifiant du transfert Orange Money |
+| POST | `/api/webhooks/wave` | Wave | Avis de paiement, qui déclenche une relecture auprès de Wave |
+| GET | `/api/projects/{id}/stats` | porteur avec l'offre Pro | Statistiques de visibilité du projet |
 | GET | `/api/events` · `/api/events/{id}` | public | Sessions de pitch à venir (le lien de visio seulement pour les inscrits) |
 | POST | `/api/events` | équipe, organisation vérifiée | Organiser une session |
 | POST, DELETE | `/api/events/{id}/registration` | connecté | S'inscrire, ou candidater avec `project_id` ; se désinscrire |
 | GET, POST | `/api/events/{id}/registrations` · `/api/event-registrations/{id}/decide` | organisateur | Candidatures et sélection |
+| POST, GET | `/api/events/{id}/pairings` · `/api/events/{id}/my-meetings` | organisateur, inscrit | Former les binômes ; mes rencontres |
 | PATCH, DELETE | `/api/tasks/{id}` | porteur, partenaires | Changer la colonne d'une tâche, la retirer |
 | GET, POST | `/api/projects/{id}/documents` | autorisé, porteur | Documents privés |
 | GET | `/api/documents/{id}` | autorisé | Télécharger un document (consultation journalisée) |
@@ -286,6 +312,9 @@ Les valeurs se règlent dans `backend/config/idee.php` ou dans le fichier `.env`
 | CF-03 | Badge « Vérifiée » après contrôle du RCCM et du NINEA ; justificatif effacé après la décision | — |
 | CF-05 | Accord de confidentialité accepté avant toute demande d'accès aux documents | version 2026-10 |
 | Groupes | Messages par membre et par jour dans les groupes | 10 |
+| Rencontres ciblées | Durée d'une rencontre ; nombre de tours au plus | 10 minutes ; 6 |
+| RG-08 | Mise en avant payante signalée « Sponsorisé », sans effet sur le score ni sur l'ordre des recommandations | 2 projets au plus en tête |
+| Offres | Pro : 5 000 FCFA / 30 jours ; investisseur : 20 000 FCFA / 30 jours ; « Sponsorisé » : 5 000 FCFA / semaine | prix à tester pendant le pilote |
 | Alertes | Alertes enregistrées par membre ; rappels avant une date limite | 10 ; 7 jours puis 1 jour |
 | Résumé hebdomadaire | Envoyé le lundi aux adresses e-mail confirmées, s'il y a du nouveau | activé |
 | Collaboration | Étapes, rendez-vous et collaborations ne comptent qu'avec l'accord des deux | — |

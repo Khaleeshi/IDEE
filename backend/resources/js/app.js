@@ -13,6 +13,47 @@ document.querySelectorAll('[data-min-length]').forEach((field) => {
     update();
 });
 
+// Saisie vocale en français (IA-03) : la reconnaissance vocale du navigateur, sans frais pour IDEE.
+const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+if (Recognition) {
+    document.querySelectorAll('textarea[data-dictation]').forEach((field) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'mt-1 inline-flex min-h-10 items-center gap-1 rounded-lg px-2 text-sm font-medium text-brand-700';
+        button.textContent = '🎤 Dicter';
+        button.title = 'La dictée passe par le service vocal de votre navigateur.';
+        field.insertAdjacentElement('afterend', button);
+
+        let recognition = null;
+        button.addEventListener('click', () => {
+            if (recognition) {
+                recognition.stop();
+                return;
+            }
+
+            recognition = new Recognition();
+            recognition.lang = 'fr-FR';
+            recognition.continuous = true;
+            recognition.interimResults = false;
+            recognition.onresult = (event) => {
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    if (event.results[i].isFinal) {
+                        const text = event.results[i][0].transcript.trim();
+                        field.value = (field.value.trim() ? field.value.trim() + ' ' : '') + text;
+                        field.dispatchEvent(new Event('input'));
+                    }
+                }
+            };
+            recognition.onend = () => {
+                recognition = null;
+                button.textContent = '🎤 Dicter';
+            };
+            recognition.start();
+            button.textContent = '⏹ Arrêter la dictée';
+        });
+    });
+}
+
 // Demande une confirmation avant une action irréversible.
 document.querySelectorAll('form[data-confirm]').forEach((form) => {
     form.addEventListener('submit', (event) => {

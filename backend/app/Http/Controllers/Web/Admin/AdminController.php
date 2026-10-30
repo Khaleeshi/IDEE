@@ -5,13 +5,17 @@ namespace App\Http\Controllers\Web\Admin;
 use App\Enums\ModerationDecision;
 use App\Enums\OpportunityKind;
 use App\Enums\OrganisationVerification;
+use App\Enums\PaymentMethod;
+use App\Enums\PaymentStatus;
 use App\Enums\ProjectStage;
 use App\Enums\ReportStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\OpportunityRequest;
+use App\Models\Invoice;
 use App\Models\JourneyStep;
 use App\Models\Opportunity;
 use App\Models\Organisation;
+use App\Models\Payment;
 use App\Models\Report;
 use App\Models\Sector;
 use App\Models\Verification;
@@ -19,9 +23,12 @@ use App\Services\Admin\IndicatorService;
 use App\Services\Journeys\JourneyService;
 use App\Services\Moderation\ModerationService;
 use App\Services\Organisations\OrganisationService;
+use App\Services\Payments\InvoiceService;
+use App\Services\Payments\PaymentService;
 use App\Services\Trust\VerificationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -138,6 +145,53 @@ class AdminController extends Controller
         $organisations->decideVerification($organisation, $request->boolean('approved'), $request->input('note'));
 
         return redirect()->route('admin.organisations')->with('status', 'Vérification traitée.');
+    }
+
+    /**
+     * PA-01 et PA-03 : transferts Orange Money à vérifier, derniers paiements, factures des organisations.
+     */
+    public function payments(): View
+    {
+        return view('admin.payments', [
+            'pending' => Payment::where('status', PaymentStatus::EnAttente)->where('method', PaymentMethod::OrangeMoney)->whereNotNull('payer_reference')->with('user')->oldest()->get(),
+            'recent' => Payment::where('status', PaymentStatus::Payee)->with('user')->latest('paid_at')->limit(30)->get(),
+            'monthTotal' => (int) Payment::where('status', PaymentStatus::Payee)->where('paid_at', '>=', now()->startOfMonth())->sum('amount_fcfa'),
+            'invoices' => Invoice::with('organisation')->latest()->limit(30)->get(),
+            'organisations' => Organisation::orderBy('name')->pluck('name', 'id'),
+            'orangeMoneyNumber' => config('idee.payments.orange_money_number'),
+        ]);
+    }
+
+    public function decidePayment(Request $request, Payment $payment, PaymentService $payments): RedirectResponse
+    {
+        $request->validate(['approved' => ['required', 'boolean']]);
+
+        $request->boolean('approved') ? $payments->markPaid($payment, $request->user()) : $payments->refuse($payment, $request->user());
+
+        return redirect()->route('admin.payments')->with('status', 'Paiement traité.');
+    }
+
+    public function storeInvoice(Request $request, InvoiceService $invoices): RedirectResponse
+    {
+        $data = $request->validate([
+            'organisation_id' => ['required', 'string', 'exists:organisations,id'],
+            'label' => ['required', 'string', 'max:300'],
+            'amount_fcfa' => ['required', 'integer', 'min:1'],
+            'due_on' => ['nullable', 'date'],
+        ]);
+
+        $invoice = $invoices->issue(Organisation::findOrFail($data['organisation_id']), $data['label'], (int) $data['amount_fcfa'], isset($data['due_on']) ? Carbon::parse($data['due_on']) : null);
+
+        return redirect()->route('admin.payments')->with('status', 'Facture '.$invoice->number.' émise.');
+    }
+
+    public function settleInvoice(Request $request, Invoice $invoice, InvoiceService $invoices): RedirectResponse
+    {
+        $request->validate(['paid' => ['required', 'boolean']]);
+
+        $invoices->settle($invoice, $request->boolean('paid'));
+
+        return redirect()->route('admin.payments')->with('status', 'Facture mise à jour.');
     }
 
     public function opportunities(): View

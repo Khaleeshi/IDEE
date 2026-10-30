@@ -21,7 +21,7 @@ class AlertController extends Controller
     {
         return view('alerts.index', [
             'alerts' => $request->user()->savedSearches,
-            'max' => config('idee.alerts.max_saved_searches'),
+            'max' => $request->user()->savedSearchLimit(),
         ]);
     }
 

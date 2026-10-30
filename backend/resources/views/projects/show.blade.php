@@ -143,6 +143,28 @@
         <a href="{{ route('tasks.index', $project) }}" class="mt-4 block rounded-xl border border-brand-100 bg-brand-50 p-3 text-sm font-medium text-brand-800">Tableau de tâches partagé →</a>
     @endif
     @if ($isOwner)
+        {{-- Offre Pro : statistiques de visibilité ; PA-02 : mise en avant « Sponsorisé ». --}}
+        <x-card class="mt-4 text-sm">
+            <h2 class="font-semibold">Visibilité</h2>
+            @if ($stats)
+                <dl class="mt-2 grid grid-cols-2 gap-2">
+                    <div class="rounded-xl bg-stone-50 p-2"><dt class="text-xs text-stone-500">Vues, 7 jours</dt><dd class="text-lg font-bold">{{ $stats['views_7'] }}</dd></div>
+                    <div class="rounded-xl bg-stone-50 p-2"><dt class="text-xs text-stone-500">Vues, 30 jours</dt><dd class="text-lg font-bold">{{ $stats['views_30'] }}</dd></div>
+                    <div class="rounded-xl bg-stone-50 p-2"><dt class="text-xs text-stone-500">Demandes, 30 jours</dt><dd class="text-lg font-bold">{{ $stats['requests_30'] }}</dd></div>
+                    <div class="rounded-xl bg-stone-50 p-2"><dt class="text-xs text-stone-500">Offres d'aide, 30 jours</dt><dd class="text-lg font-bold">{{ $stats['help_offers_30'] }}</dd></div>
+                </dl>
+            @else
+                <p class="mt-1 text-stone-600">Le nombre de vues de votre fiche, de demandes et d'offres d'aide est inclus dans l'<a href="{{ route('offers.index') }}" class="font-medium text-brand-700 underline">offre Pro</a>.</p>
+            @endif
+            @if ($sponsoredUntil)
+                <p class="mt-3 font-medium text-brand-800">Sponsorisé jusqu'au {{ \Illuminate\Support\Carbon::parse($sponsoredUntil)->translatedFormat('d F') }}</p>
+            @else
+                <a href="{{ route('offers.checkout', ['offer' => 'sponsorise', 'projet' => $project->id]) }}" class="mt-3 inline-block font-medium text-brand-700 underline">Mettre ce projet en avant</a>
+            @endif
+        </x-card>
+    @endif
+
+    @if ($isOwner)
         <a href="{{ route('matches.index', $project) }}" class="mt-2 block rounded-xl border border-stone-200 bg-white p-3 text-sm font-medium text-stone-800">Projets proches du vôtre →</a>
     @endif
 

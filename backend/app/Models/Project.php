@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\NeedStatus;
+use App\Enums\Offer;
 use App\Enums\ProjectStage;
 use App\Enums\ProjectStatus;
 use Database\Factories\ProjectFactory;
@@ -136,6 +137,25 @@ class Project extends Model
     protected function active(Builder $query): void
     {
         $query->where('status', ProjectStatus::Actif);
+    }
+
+    /**
+     * Projets dont la mise en avant payée est en cours (PA-02).
+     *
+     * @param  Builder<Project>  $query
+     */
+    #[Scope]
+    protected function sponsored(Builder $query): void
+    {
+        $query->whereHas('entitlements', fn (Builder $query) => $query->where('offer', Offer::Sponsorise)->active());
+    }
+
+    /**
+     * @return HasMany<Entitlement, $this>
+     */
+    public function entitlements(): HasMany
+    {
+        return $this->hasMany(Entitlement::class);
     }
 
     public function isOwnedBy(?User $user): bool

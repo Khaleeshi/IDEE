@@ -36,7 +36,12 @@
             @forelse ($programmes as $programme)
                 <div class="mt-2 flex items-center justify-between gap-2 border-t border-stone-100 pt-2 text-sm">
                     <a href="{{ route('opportunities.show', $programme) }}" class="font-medium underline">{{ $programme->title }}</a>
-                    <a href="{{ route('programmes.edit', $programme) }}" class="py-2 text-xs text-brand-700 underline">Modifier</a>
+                    <span class="flex shrink-0 gap-3">
+                        @if ($programme->accepts_applications)
+                            <a href="{{ route('programmes.applications', $programme) }}" class="py-2 text-xs text-brand-700 underline">Candidatures</a>
+                        @endif
+                        <a href="{{ route('programmes.edit', $programme) }}" class="py-2 text-xs text-brand-700 underline">Modifier</a>
+                    </span>
                 </div>
             @empty
                 <p class="mt-1 text-sm text-stone-600">{{ $organisation->canPublishProgrammes() ? 'Publiez vos appels, concours et financements : ils rejoignent le répertoire d\'IDEE.' : 'Vous pourrez publier vos programmes une fois la page vérifiée.' }}</p>
@@ -44,6 +49,23 @@
             @if ($organisation->canPublishProgrammes())
                 <x-button :href="route('programmes.create', $organisation)" variant="secondary" class="mt-3 w-full">Publier un programme</x-button>
             @endif
+            @if ($organisation->canPublishProgrammes())
+                {{-- OR-03 : suivi des projets accompagnés. --}}
+                <x-button :href="route('cohorts.index', $organisation)" variant="ghost" class="mt-2 w-full">Suivre mes cohortes</x-button>
+            @endif
+        </x-card>
+    @endif
+
+    @if ($organisation->invoices->isNotEmpty())
+        {{-- PA-03 : factures de l'espace organisations. --}}
+        <x-card class="mt-3">
+            <h2 class="font-semibold">Factures</h2>
+            @foreach ($organisation->invoices as $invoice)
+                <div class="mt-2 flex items-center justify-between gap-2 border-t border-stone-100 pt-2 text-sm">
+                    <a href="{{ route('invoices.show', $invoice) }}" target="_blank" class="font-medium underline">{{ $invoice->number }}</a>
+                    <span class="text-xs text-stone-500">{{ number_format($invoice->amount_fcfa, 0, ',', "\u{00A0}") }} FCFA · {{ $invoice->status->label() }}</span>
+                </div>
+            @endforeach
         </x-card>
     @endif
 

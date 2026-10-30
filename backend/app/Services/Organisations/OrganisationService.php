@@ -164,8 +164,13 @@ class OrganisationService
         }
 
         $programme ??= new Opportunity(['slug' => Str::slug($attributes['title']).'-'.Str::lower(Str::random(6))]);
+        // OR-02 : jusqu'à trois questions propres au programme, une par ligne.
+        $questions = array_slice(array_values(array_filter(array_map('trim', explode("\n", (string) ($attributes['application_questions'] ?? ''))))), 0, config('idee.programmes.max_questions'));
+
         $programme->fill([
-            ...$attributes,
+            ...collect($attributes)->except(['accepts_applications', 'application_questions'])->all(),
+            'accepts_applications' => (bool) ($attributes['accepts_applications'] ?? false),
+            'application_questions' => $questions ?: null,
             'stages' => ($attributes['stages'] ?? null) ?: null,
             'sectors' => ($attributes['sectors'] ?? null) ?: null,
             'organisation' => $organisation->name,

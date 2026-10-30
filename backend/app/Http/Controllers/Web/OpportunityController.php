@@ -10,6 +10,7 @@ use App\Models\Opportunity;
 use App\Models\Project;
 use App\Services\Opportunities\EligibilityService;
 use App\Services\Opportunities\OpportunityService;
+use App\Services\Organisations\ProgrammeService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -39,7 +40,7 @@ class OpportunityController extends Controller
         ]);
     }
 
-    public function show(Request $request, Opportunity $opportunity): View
+    public function show(Request $request, Opportunity $opportunity, ProgrammeService $programmes): View
     {
         abort_unless($opportunity->is_published, 404);
 
@@ -50,6 +51,12 @@ class OpportunityController extends Controller
             'application' => $this->opportunities->applicationOf($request->user(), $opportunity),
             'statuses' => ApplicationStatus::cases(),
             'eligibilities' => $projects->map(fn (Project $project) => ['project' => $project, ...$this->eligibility->check($opportunity, $project)]),
+            // OR-02 : candidature structurée depuis IDEE, quand le programme l'accepte.
+            'myProjects' => $projects,
+            'questions' => $programmes->questions($opportunity),
+            'programmeApplication' => $request->user()
+                ? $opportunity->programmeApplications()->where('user_id', $request->user()->id)->with('project')->first()
+                : null,
         ]);
     }
 
