@@ -3,20 +3,28 @@
 namespace App\Services\Assistant;
 
 use App\Contracts\Assistant;
+use App\Enums\AssistantDocumentKind;
 use App\Enums\AssistantStatus;
+use App\Enums\MeetingStatus;
+use App\Enums\UserRole;
 use App\Exceptions\AssistantUnavailable;
+use App\Jobs\GenerateAssistantDocument;
 use App\Jobs\GenerateBusinessPlan;
 use App\Jobs\GenerateClarification;
+use App\Models\AssistantDocument;
 use App\Models\BusinessPlan;
 use App\Models\IdeaClarification;
+use App\Models\Meeting;
 use App\Models\Project;
+use App\Models\User;
 use App\Services\Projects\ReadinessScore;
 use Illuminate\Validation\ValidationException;
 
 /**
- * Assistant IA (section 7) : il structure l'idée par des questions (IA-01) et
- * rédige un business plan modifiable (IA-02). Il structure, explique et
- * recommande, mais ne décide jamais à la place du porteur.
+ * Assistant IA (section 7) : il structure l'idée par des questions (IA-01),
+ * rédige un business plan modifiable (IA-02), prépare les rendez-vous (IA-05)
+ * et la présentation du projet (IA-06). Il structure, explique et recommande,
+ * mais ne décide jamais à la place du porteur.
  */
 class AssistantService
 {
@@ -34,6 +42,21 @@ class AssistantService
         'financement' => 'Besoins et utilisation des fonds',
         'risques' => 'Risques et réponses',
         'prochaines_etapes' => 'Prochaines étapes',
+    ];
+
+    /**
+     * Diapositives de la présentation du projet (IA-06), dans l'ordre.
+     */
+    public const SLIDES = [
+        'probleme' => 'Le problème',
+        'solution' => 'Notre solution',
+        'marche' => 'Le marché et les clients',
+        'modele' => 'Comment le projet gagne de l\'argent',
+        'avancement' => 'Où nous en sommes',
+        'concurrence' => 'Concurrence et différence',
+        'equipe' => 'L\'équipe',
+        'besoins' => 'Ce que nous cherchons',
+        'suite' => 'Prochaines étapes',
     ];
 
     /**
@@ -223,15 +246,227 @@ class AssistantService
     }
 
     /**
-     * Ce que l'assistant sait du projet : la fiche, les besoins, les réponses aux questions.
+     * Lance la préparation d'un rendez-vous pour l'une des deux personnes (IA-05).
+     *
+     * @throws ValidationException
      */
-    private function describe(Project $project): string
+    public function requestMeetingPreparation(Meeting $meeting, User $user): AssistantDocument
+    {
+        $this->ensureEnabled();
+
+        if (! in_array($meeting->status, [MeetingStatus::Proposee, MeetingStatus::Confirmee], true) || $meeting->starts_at->isPast()) {
+            throw ValidationException::withMessages(['assistant' => 'Ce rendez-vous n\'est plus à préparer.']);
+        }
+
+        $today = AssistantDocument::where('kind', AssistantDocumentKind::PreparationRendezVous)
+            ->whereBelongsTo($user)
+            ->where('created_at', '>=', today())
+            ->count();
+        if ($today >= config('idee.ai.meeting_preparations_per_day')) {
+            throw ValidationException::withMessages(['assistant' => 'Vous avez atteint le nombre de préparations du jour. Revenez demain.']);
+        }
+
+        return $this->startDocument(AssistantDocumentKind::PreparationRendezVous, $user, $meeting->contactRequest->project, $meeting);
+    }
+
+    /**
+     * Lance la rédaction d'une présentation du projet (IA-06).
+     *
+     * @throws ValidationException
+     */
+    public function requestPitchDeck(Project $project, User $owner): AssistantDocument
+    {
+        $this->ensureEnabled();
+
+        $decks = AssistantDocument::where('kind', AssistantDocumentKind::Presentation)->where('project_id', $project->id);
+
+        if ((clone $decks)->where('created_at', '>=', now()->startOfMonth())->count() >= config('idee.ai.pitch_decks_per_month')) {
+            throw ValidationException::withMessages(['assistant' => 'Vous avez atteint le nombre de présentations générées ce mois-ci. Modifiez la dernière version, ou revenez le mois prochain.']);
+        }
+
+        if ((clone $decks)->where('status', AssistantStatus::EnCours)->exists()) {
+            throw ValidationException::withMessages(['assistant' => 'Une présentation est déjà en préparation.']);
+        }
+
+        return $this->startDocument(AssistantDocumentKind::Presentation, $owner, $project, version: (int) $decks->max('version') + 1);
+    }
+
+    public function completeDocument(AssistantDocument $document): void
+    {
+        $this->complete($document, fn () => match ($document->kind) {
+            AssistantDocumentKind::PreparationRendezVous => $this->writeMeetingPreparation($document),
+            AssistantDocumentKind::Presentation => $this->writePitchDeck($document),
+        });
+    }
+
+    /**
+     * Le porteur corrige les diapositives : titres, points et notes.
+     *
+     * @param  array<string, array{title?: string|null, bullets?: string|null, notes?: string|null}>  $slides
+     */
+    public function editPitchDeck(AssistantDocument $deck, array $slides): AssistantDocument
+    {
+        $deck->content = [
+            ...$deck->content,
+            'slides' => collect($deck->content['slides'] ?? [])->map(function (array $slide) use ($slides) {
+                $input = $slides[$slide['key']] ?? null;
+
+                return $input === null ? $slide : [
+                    ...$slide,
+                    'title' => trim((string) ($input['title'] ?? $slide['title'])),
+                    'bullets' => array_values(array_filter(array_map('trim', explode("\n", (string) ($input['bullets'] ?? ''))))),
+                    'notes' => trim((string) ($input['notes'] ?? '')),
+                ];
+            })->all(),
+        ];
+        $deck->edited_at = now();
+        $deck->save();
+
+        return $deck;
+    }
+
+    /**
+     * @return array{0: AssistantReply, 1: array<string, mixed>}
+     */
+    private function writeMeetingPreparation(AssistantDocument $document): array
+    {
+        $meeting = $document->meeting;
+        $conversation = $meeting->contactRequest;
+        $user = $document->user;
+        $other = $conversation->otherParty($user);
+
+        $context = [
+            'Rendez-vous le '.$meeting->starts_at->translatedFormat('d F Y à H\hi').', '.mb_strtolower($meeting->mode->label()).'.',
+            'Ordre du jour : '.($meeting->agenda ?: 'non précisé'),
+            "Vous préparez ce rendez-vous pour {$user->name}.",
+            "Son interlocuteur : {$other?->name}".($other ? $this->publicProfile($other) : ''),
+            'Premier message de la conversation : '.$conversation->message,
+        ];
+
+        foreach ($conversation->agreements()->get() as $agreement) {
+            $context[] = "Étape convenue ({$agreement->status->label()}) : {$agreement->objective}, avant le {$agreement->due_on->translatedFormat('d F')}.";
+        }
+
+        if ($conversation->project) {
+            // Les détails privés du projet ne sont donnés qu'à son porteur.
+            $context[] = "Projet concerné :\n".$this->describe($conversation->project, private: $conversation->project->isOwnedBy($user));
+        }
+
+        $reply = $this->assistant->ask(
+            self::INSTRUCTIONS,
+            "Aide à préparer ce rendez-vous.\n\n".implode("\n", $context)
+                ."\n\nDonne l'objectif du rendez-vous en une phrase, 4 à 6 questions à poser, 3 à 5 points à présenter, "
+                .'les documents ou chiffres à apporter, et 2 à 4 prochaines étapes à proposer en fin de rendez-vous. Une phrase par élément.',
+            [
+                'type' => 'object',
+                'properties' => [
+                    'objective' => ['type' => 'string'],
+                    'questions' => ['type' => 'array', 'items' => ['type' => 'string']],
+                    'talking_points' => ['type' => 'array', 'items' => ['type' => 'string']],
+                    'to_bring' => ['type' => 'array', 'items' => ['type' => 'string']],
+                    'next_steps' => ['type' => 'array', 'items' => ['type' => 'string']],
+                ],
+                'required' => ['objective', 'questions', 'talking_points', 'to_bring', 'next_steps'],
+                'additionalProperties' => false,
+            ],
+            'low',
+        );
+
+        $list = fn (string $key, int $max) => array_slice(array_values(array_filter($reply->data[$key] ?? [], 'is_string')), 0, $max);
+
+        return [$reply, ['content' => [
+            'objective' => (string) ($reply->data['objective'] ?? ''),
+            'questions' => $list('questions', 6),
+            'talking_points' => $list('talking_points', 5),
+            'to_bring' => $list('to_bring', 5),
+            'next_steps' => $list('next_steps', 4),
+        ]]];
+    }
+
+    /**
+     * @return array{0: AssistantReply, 1: array<string, mixed>}
+     */
+    private function writePitchDeck(AssistantDocument $document): array
+    {
+        $reply = $this->assistant->ask(
+            self::INSTRUCTIONS."\nUne présentation s'adresse à des partenaires et investisseurs rencontrés un par un : elle ne constitue jamais une offre au public.",
+            "Rédige la présentation de ce projet, en diapositives.\n\n".$this->describe($document->project)
+                ."\n\nPour chaque diapositive : un titre court, 2 à 4 points de 15 mots au plus, et des notes de 2 à 4 phrases pour l'oral. "
+                .'Quand un chiffre manque, écris « à compléter » plutôt que de l\'inventer.',
+            [
+                'type' => 'object',
+                'properties' => [
+                    'tagline' => ['type' => 'string'],
+                    'slides' => ['type' => 'array', 'items' => [
+                        'type' => 'object',
+                        'properties' => [
+                            'key' => ['type' => 'string', 'enum' => array_keys(self::SLIDES)],
+                            'title' => ['type' => 'string'],
+                            'bullets' => ['type' => 'array', 'items' => ['type' => 'string']],
+                            'notes' => ['type' => 'string'],
+                        ],
+                        'required' => ['key', 'title', 'bullets', 'notes'],
+                        'additionalProperties' => false,
+                    ]],
+                ],
+                'required' => ['tagline', 'slides'],
+                'additionalProperties' => false,
+            ],
+            'medium',
+        );
+
+        $written = collect($reply->data['slides'] ?? [])->keyBy('key');
+
+        return [$reply, ['content' => [
+            'tagline' => (string) ($reply->data['tagline'] ?? ''),
+            'slides' => collect(self::SLIDES)->map(fn (string $title, string $key) => [
+                'key' => $key,
+                'title' => (string) ($written[$key]['title'] ?? $title),
+                'bullets' => array_slice(array_values(array_filter($written[$key]['bullets'] ?? [], 'is_string')), 0, 4),
+                'notes' => (string) ($written[$key]['notes'] ?? ''),
+            ])->values()->all(),
+        ]]];
+    }
+
+    private function startDocument(AssistantDocumentKind $kind, User $user, ?Project $project, ?Meeting $meeting = null, int $version = 1): AssistantDocument
+    {
+        $document = new AssistantDocument;
+        $document->kind = $kind;
+        $document->user()->associate($user);
+        $document->project()->associate($project);
+        $document->meeting()->associate($meeting);
+        $document->version = $version;
+        $document->status = AssistantStatus::EnCours;
+        $document->save();
+
+        GenerateAssistantDocument::dispatch($document);
+
+        return $document;
+    }
+
+    /**
+     * Profil public d'un membre : rôles, présentation, services. Jamais ses coordonnées.
+     */
+    private function publicProfile(User $user): string
+    {
+        $roles = collect($user->publicRoles())->map(fn (UserRole $role) => $role->label())->join(', ');
+
+        return ($roles ? " ({$roles})" : '')
+            .($user->bio ? ". Présentation : {$user->bio}" : '')
+            .($user->expertise ? ". Services : {$user->expertise}" : '');
+    }
+
+    /**
+     * Ce que l'assistant sait du projet : la fiche, les besoins, les réponses aux questions.
+     * Les détails privés ne sont donnés que pour le porteur lui-même.
+     */
+    private function describe(Project $project, bool $private = true): string
     {
         $project->loadMissing(['sector', 'openNeeds']);
         $lines = [
             "Titre : {$project->title}",
             "Résumé : {$project->summary}",
-            'Détails : '.($project->details ?: 'non précisés'),
+            'Détails : '.($private ? ($project->details ?: 'non précisés') : 'confidentiels'),
             'Secteur : '.($project->sector?->name ?? 'non précisé'),
             'Région : '.($project->region ?: 'non précisée'),
             'Stade : '.$project->stage->label(),
@@ -242,7 +477,7 @@ class AssistantService
                 .($need->amount_fcfa ? " Montant recherché : {$need->amount_fcfa} FCFA." : '');
         }
 
-        $clarification = IdeaClarification::where('project_id', $project->id)->whereNotNull('answers')->latest()->first();
+        $clarification = $private ? IdeaClarification::where('project_id', $project->id)->whereNotNull('answers')->latest()->first() : null;
         foreach ($clarification?->questions ?? [] as $index => $question) {
             if (filled($clarification->answers[$index] ?? null)) {
                 $lines[] = "Question : {$question}\nRéponse du porteur : {$clarification->answers[$index]}";
@@ -257,7 +492,7 @@ class AssistantService
      *
      * @param  callable(): array{0: AssistantReply, 1: array<string, mixed>}  $work
      */
-    private function complete(IdeaClarification|BusinessPlan $record, callable $work): void
+    private function complete(IdeaClarification|BusinessPlan|AssistantDocument $record, callable $work): void
     {
         try {
             [$reply, $attributes] = $work();

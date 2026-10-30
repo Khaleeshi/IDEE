@@ -84,6 +84,7 @@ class ContactRequestController extends Controller
             'contactRequest' => $contactRequest->load([
                 ...self::RELATIONS, 'messages', 'agreements.owner', 'meetings', 'collaborations.declarer', 'collaborations.partner',
             ]),
+            'assistantEnabled' => (bool) config('idee.ai.enabled'),
             'canSeeTasks' => $contactRequest->project !== null && $tasks->canManage($contactRequest->project, $request->user()),
             'canRespond' => $contactRequest->recipient_id === $request->user()->getKey() && $contactRequest->status->isPending(),
             'responses' => ContactRequestStatus::responses(),

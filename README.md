@@ -94,7 +94,11 @@ clients, matériel) et chaque demande de contact reçoit une réponse.
 - Sessions de pitch en ligne ou en présentiel, organisées par l'équipe ou une
   organisation vérifiée : inscription, candidature avec un projet, sélection dans
   la limite des places, lien de visio réservé aux inscrits, rappel la veille (EV-01)
-- 168 tests automatisés au total
+- Assistant IA : préparation d'un rendez-vous (questions, points à présenter,
+  prochaines étapes), sans livrer les détails privés d'un projet à qui n'en est pas
+  le porteur (IA-05) ; présentation du projet en neuf diapositives, modifiable et
+  imprimable (IA-06)
+- 172 tests automatisés au total
 
 **Reste à faire** : saisie vocale par IA (la dictée du clavier est proposée en
 attendant), la suite de la V2 (groupes, alertes, pages d'organisation, experts,
@@ -150,6 +154,7 @@ de connexion ne sont pas envoyés par SMS : ils sont écrits dans
 | `/experts` | Experts vérifiés et leurs tarifs ; `/membres/{id}/contacter` pour écrire à propos de son projet |
 | `/groupes` | Groupes par secteur et par région ; `/groupes/{secteur ou region}/{id}` |
 | `/evenements` | Sessions de pitch ; `/evenements/{id}` pour s'inscrire ou candidater |
+| `/projets/{id}/presentation` | Présentation du projet rédigée par l'assistant, à corriger et projeter |
 | `/opportunites?projet={id}` | Programmes compatibles avec l'un de mes projets |
 | `/profil` | Mon profil, mes rôles, mes préférences |
 | `/membres/{id}` | Profil public d'un membre et sa réactivité |
@@ -227,6 +232,8 @@ l'en-tête `Authorization: Bearer <jeton>` reçu à la connexion.
 | GET | `/api/experts` | public | Experts vérifiés (`q`, `sector`, `region`) |
 | GET | `/api/groups` · `/api/groups/{secteur ou region}/{id}` | public | Groupes, leurs projets et leurs messages |
 | POST, DELETE | `/api/groups/{type}/{id}/posts` · `/api/group-posts/{id}` | connecté, auteur | Écrire au groupe, supprimer son message |
+| GET, POST | `/api/projects/{id}/pitch-deck` | porteur | Présentation du projet (IA-06) ; `PUT /api/pitch-decks/{id}` pour la corriger |
+| POST | `/api/meetings/{id}/preparation` | concerné | Préparer un rendez-vous (IA-05) ; `GET /api/assistant-documents/{id}` pour la lire |
 | GET | `/api/events` · `/api/events/{id}` | public | Sessions de pitch à venir (le lien de visio seulement pour les inscrits) |
 | POST | `/api/events` | équipe, organisation vérifiée | Organiser une session |
 | POST, DELETE | `/api/events/{id}/registration` | connecté | S'inscrire, ou candidater avec `project_id` ; se désinscrire |
@@ -267,7 +274,7 @@ Les valeurs se règlent dans `backend/config/idee.php` ou dans le fichier `.env`
 | RG-05 | Documents privés visibles après accord du porteur ; accès journalisés et révocables | — |
 | RG-11 | Rôle d'investisseur ou d'expert affiché seulement après vérification d'identité | — |
 | Modération | Durée d'une suspension, délai pour contester une décision | 30 jours, 14 jours |
-| Assistant IA | Business plans par projet et par mois, questions par jour | 3, 3 |
+| Assistant IA | Business plans et présentations par projet et par mois ; questions par jour ; préparations de rendez-vous par membre et par jour | 3 ; 3 ; 3 |
 | Rendez-vous | Rappel envoyé aux deux personnes avant un rendez-vous confirmé | 24 heures |
 | RG-12 | Rapprochement proposé seulement entre porteurs volontaires, sans rien révéler de privé | désactivé par défaut |
 | CF-03 | Badge « Vérifiée » après contrôle du RCCM et du NINEA ; justificatif effacé après la décision | — |

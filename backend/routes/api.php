@@ -117,6 +117,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('projects/{project}/business-plan', [AssistantController::class, 'businessPlan']);
     Route::post('projects/{project}/business-plan', [AssistantController::class, 'generate']);
     Route::put('business-plans/{businessPlan}', [AssistantController::class, 'update']);
+    Route::get('projects/{project}/pitch-deck', [AssistantController::class, 'pitchDeck']);
+    Route::post('projects/{project}/pitch-deck', [AssistantController::class, 'generatePitchDeck']);
+    Route::put('pitch-decks/{assistantDocument}', [AssistantController::class, 'updatePitchDeck']);
+    Route::post('meetings/{meeting}/preparation', [AssistantController::class, 'prepareMeeting']);
+    Route::get('assistant-documents/{assistantDocument}', [AssistantController::class, 'document']);
 
     Route::get('projects/{project}/documents', [DocumentController::class, 'index']);
     Route::post('projects/{project}/documents', [DocumentController::class, 'store']);

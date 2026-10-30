@@ -96,6 +96,13 @@
                         </form>
                     </div>
                 @endif
+                @if ($assistantEnabled && in_array($meeting->status->value, ['proposee', 'confirmee'], true) && $meeting->starts_at->isFuture())
+                    {{-- IA-05 : l'assistant prépare les questions et les points à aborder. --}}
+                    <form method="POST" action="{{ route('meetings.prepare', $meeting) }}" class="mt-2">
+                        @csrf
+                        <x-button variant="ghost" class="w-full min-h-10 py-2 text-sm">Préparer ce rendez-vous avec l'assistant</x-button>
+                    </form>
+                @endif
                 @if (in_array($meeting->status->value, ['proposee', 'confirmee'], true) && $meeting->starts_at->isFuture())
                     <form method="POST" action="{{ route('meetings.cancel', $meeting) }}" data-confirm="Annuler ce rendez-vous ?" class="mt-1">
                         @csrf

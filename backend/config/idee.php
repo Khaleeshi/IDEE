@@ -123,6 +123,9 @@ return [
         'enabled' => (bool) env('IDEE_AI_ENABLED', false),
         'business_plans_per_month' => (int) env('IDEE_AI_PLANS_PER_MONTH', 3),
         'clarifications_per_day' => (int) env('IDEE_AI_CLARIFICATIONS_PER_DAY', 3),
+        // IA-05 et IA-06 : préparations de rendez-vous par membre et par jour, présentations par projet et par mois.
+        'meeting_preparations_per_day' => (int) env('IDEE_AI_PREPARATIONS_PER_DAY', 3),
+        'pitch_decks_per_month' => (int) env('IDEE_AI_DECKS_PER_MONTH', 3),
     ],
 
     // RG-10 : une fiche pratique non revue depuis ce délai (en mois) est signalée à l'équipe.

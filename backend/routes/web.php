@@ -58,6 +58,12 @@ Route::middleware('auth')->group(function () {
     Route::post('/projets/{project}/business-plan', [AssistantController::class, 'generate'])->name('business-plans.generate');
     Route::get('/projets/{project}/business-plan/impression', [AssistantController::class, 'print'])->name('business-plans.print');
     Route::put('/business-plans/{businessPlan}', [AssistantController::class, 'update'])->name('business-plans.update');
+    Route::get('/projets/{project}/presentation', [AssistantController::class, 'pitchDeck'])->name('pitch-decks.show');
+    Route::post('/projets/{project}/presentation', [AssistantController::class, 'generatePitchDeck'])->name('pitch-decks.generate');
+    Route::get('/projets/{project}/presentation/impression', [AssistantController::class, 'printPitchDeck'])->name('pitch-decks.print');
+    Route::put('/presentations/{assistantDocument}', [AssistantController::class, 'updatePitchDeck'])->name('pitch-decks.update');
+    Route::post('/rendez-vous/{meeting}/preparation', [AssistantController::class, 'prepareMeeting'])->name('meetings.prepare');
+    Route::get('/assistant/{assistantDocument}', [AssistantController::class, 'document'])->name('assistant.document');
     Route::post('/projets/{project}/documents', [DocumentController::class, 'store'])->name('documents.store');
     Route::get('/documents/{projectDocument}', [DocumentController::class, 'show'])->name('documents.show');
     Route::delete('/documents/{projectDocument}', [DocumentController::class, 'destroy'])->name('documents.destroy');
