@@ -1,0 +1,93 @@
+<?php
+
+namespace App\Models;
+
+use App\Enums\ContactRequestStatus;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Concerns\HasUlids;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
+#[Fillable(['project_id', 'need_id', 'message', 'expires_at'])]
+class ContactRequest extends Model
+{
+    use HasUlids;
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'status' => ContactRequestStatus::class,
+            'read_at' => 'datetime',
+            'responded_at' => 'datetime',
+            'reminded_at' => 'datetime',
+            'expires_at' => 'datetime',
+        ];
+    }
+
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function sender(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'sender_id');
+    }
+
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function recipient(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'recipient_id');
+    }
+
+    /**
+     * @return BelongsTo<Project, $this>
+     */
+    public function project(): BelongsTo
+    {
+        return $this->belongsTo(Project::class);
+    }
+
+    /**
+     * @return BelongsTo<Need, $this>
+     */
+    public function need(): BelongsTo
+    {
+        return $this->belongsTo(Need::class);
+    }
+
+    /**
+     * @return HasMany<ContactRequestEvent, $this>
+     */
+    public function events(): HasMany
+    {
+        return $this->hasMany(ContactRequestEvent::class);
+    }
+
+    public function involves(User $user): bool
+    {
+        return in_array($user->getKey(), [$this->sender_id, $this->recipient_id], true);
+    }
+
+    /**
+     * Change le statut et garde la trace du changement dans l'historique.
+     */
+    public function transitionTo(ContactRequestStatus $status, ?User $actor = null): void
+    {
+        $from = $this->status;
+        $this->status = $status;
+        $this->save();
+
+        $this->events()->create([
+            'actor_id' => $actor?->getKey(),
+            'from_status' => $from,
+            'to_status' => $status,
+        ]);
+    }
+}

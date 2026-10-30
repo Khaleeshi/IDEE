@@ -1,0 +1,143 @@
+<?php
+
+namespace App\Models;
+
+use App\Enums\UserRole;
+use App\Enums\VerificationLevel;
+use Database\Factories\UserFactory;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Concerns\HasUlids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
+
+#[Fillable(['name', 'phone', 'email', 'region', 'languages', 'bio', 'skills', 'sectors', 'contact_preferences'])]
+#[Hidden(['password', 'remember_token', 'phone', 'email'])]
+class User extends Authenticatable
+{
+    /** @use HasFactory<UserFactory> */
+    use HasApiTokens, HasFactory, HasUlids, Notifiable, SoftDeletes;
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'phone_verified_at' => 'datetime',
+            'email_verified_at' => 'datetime',
+            'password' => 'hashed',
+            'languages' => 'array',
+            'skills' => 'array',
+            'sectors' => 'array',
+            'contact_preferences' => 'array',
+            'verification_level' => VerificationLevel::class,
+        ];
+    }
+
+    /**
+     * @return HasMany<RoleAssignment, $this>
+     */
+    public function roleAssignments(): HasMany
+    {
+        return $this->hasMany(RoleAssignment::class);
+    }
+
+    /**
+     * @return HasMany<Project, $this>
+     */
+    public function projects(): HasMany
+    {
+        return $this->hasMany(Project::class, 'owner_id');
+    }
+
+    /**
+     * @return HasMany<ContactRequest, $this>
+     */
+    public function sentContactRequests(): HasMany
+    {
+        return $this->hasMany(ContactRequest::class, 'sender_id');
+    }
+
+    /**
+     * @return HasMany<ContactRequest, $this>
+     */
+    public function receivedContactRequests(): HasMany
+    {
+        return $this->hasMany(ContactRequest::class, 'recipient_id');
+    }
+
+    /**
+     * @return HasMany<HelpOffer, $this>
+     */
+    public function helpOffers(): HasMany
+    {
+        return $this->hasMany(HelpOffer::class);
+    }
+
+    /**
+     * @return list<UserRole>
+     */
+    public function roles(): array
+    {
+        return $this->roleAssignments->pluck('role')->all();
+    }
+
+    public function hasRole(UserRole $role): bool
+    {
+        return $this->roleAssignments->contains(fn (RoleAssignment $assignment) => $assignment->role === $role);
+    }
+
+    /**
+     * Remplace les rôles du membre par la liste donnée.
+     *
+     * @param  list<UserRole>  $roles
+     */
+    public function syncRoles(array $roles): void
+    {
+        $values = array_values(array_unique(array_map(fn (UserRole $role) => $role->value, $roles)));
+
+        $this->roleAssignments()->whereNotIn('role', $values)->delete();
+
+        foreach ($values as $value) {
+            $this->roleAssignments()->firstOrCreate(['role' => $value]);
+        }
+
+        $this->unsetRelation('roleAssignments');
+    }
+
+    /**
+     * Rôles affichés publiquement : un investisseur ou un expert n'apparaît
+     * comme tel qu'après vérification de son identité (RG-11).
+     *
+     * @return list<UserRole>
+     */
+    public function publicRoles(): array
+    {
+        return array_values(array_filter(
+            $this->roles(),
+            fn (UserRole $role) => ! $role->requiresIdentityVerification() || $this->hasVerifiedIdentity(),
+        ));
+    }
+
+    public function hasVerifiedIdentity(): bool
+    {
+        return $this->verification_level->isAtLeast(VerificationLevel::Identity);
+    }
+
+    /**
+     * Nombre de demandes de contact autorisées par semaine (RG-04).
+     */
+    public function weeklyContactQuota(): int
+    {
+        return $this->hasVerifiedIdentity()
+            ? config('idee.weekly_contact_quota.verified')
+            : config('idee.weekly_contact_quota.unverified');
+    }
+}
