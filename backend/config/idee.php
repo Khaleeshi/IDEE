@@ -16,6 +16,9 @@ return [
     // RG-01 : nombre maximum de besoins ouverts en même temps par projet.
     'max_open_needs_per_project' => (int) env('IDEE_MAX_OPEN_NEEDS', 10),
 
+    // PR-02 : nombre de personnes affichées dans l'équipe d'un projet.
+    'max_team_members' => (int) env('IDEE_MAX_TEAM_MEMBERS', 12),
+
     // RG-02 : longueur minimale du message d'une demande de contact.
     'contact_message_min_length' => (int) env('IDEE_CONTACT_MESSAGE_MIN', 100),
 

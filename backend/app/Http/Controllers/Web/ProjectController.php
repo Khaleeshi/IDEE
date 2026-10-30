@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Web;
 use App\Enums\NeedType;
 use App\Enums\ProjectStage;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreProjectMemberRequest;
 use App\Http\Requests\StoreProjectRequest;
 use App\Http\Requests\StoreProjectUpdateRequest;
 use App\Http\Requests\UpdateProjectRequest;
@@ -12,6 +13,7 @@ use App\Models\BusinessPlan;
 use App\Models\IdeaClarification;
 use App\Models\JourneyStep;
 use App\Models\Project;
+use App\Models\ProjectMember;
 use App\Models\Sector;
 use App\Services\Assistant\AssistantService;
 use App\Services\ContactRequests\ReactivityIndicator;
@@ -49,6 +51,7 @@ class ProjectController extends Controller
             'readiness' => $isOwner ? $readiness->evaluate($project) : null,
             'reactivity' => $reactivity->for($project->owner),
             'updates' => $project->updates()->limit(10)->get(),
+            'team' => $project->team,
             'following' => $follows->isFollowing($request->user(), $project),
             // Documents privés : visibles seulement par le porteur et les membres autorisés (RG-05).
             'documents' => $documents->canRead($request->user(), $project) ? $project->documents : null,
@@ -75,6 +78,24 @@ class ProjectController extends Controller
         $this->projects->publishUpdate($project, $request->user(), $request->validated('body'));
 
         return redirect()->to(route('projects.show', $project).'#journal')->with('status', 'Mise à jour publiée dans le fil.');
+    }
+
+    public function addTeamMember(StoreProjectMemberRequest $request, Project $project): RedirectResponse
+    {
+        Gate::authorize('update', $project);
+
+        $this->projects->addTeamMember($project, $request->validated());
+
+        return redirect()->to(route('projects.show', $project).'#equipe')->with('status', 'Équipe mise à jour.');
+    }
+
+    public function removeTeamMember(ProjectMember $projectMember): RedirectResponse
+    {
+        Gate::authorize('update', $projectMember->project);
+
+        $this->projects->removeTeamMember($projectMember);
+
+        return redirect()->to(route('projects.show', $projectMember->project).'#equipe')->with('status', 'Personne retirée de l\'équipe.');
     }
 
     public function mine(Request $request): View

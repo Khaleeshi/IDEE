@@ -77,6 +77,16 @@ class Project extends Model
     }
 
     /**
+     * Équipe du projet, hors porteur (PR-02).
+     *
+     * @return HasMany<ProjectMember, $this>
+     */
+    public function team(): HasMany
+    {
+        return $this->hasMany(ProjectMember::class)->orderBy('position')->orderBy('created_at');
+    }
+
+    /**
      * @return HasMany<ProjectDocument, $this>
      */
     public function documents(): HasMany

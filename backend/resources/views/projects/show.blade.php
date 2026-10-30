@@ -77,6 +77,41 @@
         @endauth
     </x-card>
 
+    <section id="equipe" class="mt-6" aria-labelledby="titre-equipe">
+        <h2 id="titre-equipe" class="mb-2 text-lg font-bold">Équipe</h2>
+        <ul class="space-y-2 text-sm">
+            <li class="flex items-center gap-2 rounded-xl border border-stone-200 bg-white p-3">
+                <x-avatar :user="$project->owner" size="h-8 w-8 text-xs" />
+                <span><span class="font-medium">{{ $project->owner->name }}</span> <span class="text-stone-500">· porteur du projet</span></span>
+            </li>
+            @foreach ($team as $member)
+                <li class="flex items-center justify-between gap-2 rounded-xl border border-stone-200 bg-white p-3">
+                    <span><span class="font-medium">{{ $member->name }}</span> <span class="text-stone-500">· {{ $member->role }}</span></span>
+                    @if ($isOwner)
+                        <form method="POST" action="{{ route('projects.team.destroy', $member) }}">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="py-1 text-xs text-stone-500 underline">Retirer</button>
+                        </form>
+                    @endif
+                </li>
+            @endforeach
+        </ul>
+        @if ($isOwner)
+            <details class="mt-2" @if ($errors->hasAny(['name', 'role'])) open @endif>
+                <summary class="cursor-pointer py-2 text-sm font-medium text-brand-700">+ Ajouter une personne</summary>
+                <form method="POST" action="{{ route('projects.team.store', $project) }}" class="mt-2 grid gap-2 sm:grid-cols-2">
+                    @csrf
+                    <label class="sr-only" for="equipe-nom">Nom</label>
+                    <input id="equipe-nom" name="name" required maxlength="120" placeholder="Nom" class="rounded-xl border border-stone-300 px-3 py-3 text-base">
+                    <label class="sr-only" for="equipe-role">Rôle</label>
+                    <input id="equipe-role" name="role" required maxlength="120" placeholder="Rôle, ex. : production" class="rounded-xl border border-stone-300 px-3 py-3 text-base">
+                    <x-button variant="secondary" class="sm:col-span-2">Ajouter</x-button>
+                </form>
+            </details>
+        @endif
+    </section>
+
     @if ($isOwner)
         @include('projects.partials.assistant')
     @endif

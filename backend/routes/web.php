@@ -39,6 +39,8 @@ Route::middleware('auth')->group(function () {
     Route::delete('/projets/{project}', [ProjectController::class, 'destroy'])->name('projects.destroy');
 
     Route::post('/projets/{project}/mises-a-jour', [ProjectController::class, 'publishUpdate'])->name('projects.updates.store');
+    Route::post('/projets/{project}/equipe', [ProjectController::class, 'addTeamMember'])->name('projects.team.store');
+    Route::delete('/equipe/{projectMember}', [ProjectController::class, 'removeTeamMember'])->name('projects.team.destroy');
     Route::post('/projets/{project}/besoins', [NeedController::class, 'store'])->name('needs.store');
     Route::post('/projets/{project}/assistant/questions', [AssistantController::class, 'clarify'])->name('assistant.clarify');
     Route::put('/clarifications/{ideaClarification}', [AssistantController::class, 'answer'])->name('assistant.answer');

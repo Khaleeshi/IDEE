@@ -6,11 +6,13 @@ use App\Enums\ActivityType;
 use App\Enums\ProjectStatus;
 use App\Enums\UserRole;
 use App\Models\Project;
+use App\Models\ProjectMember;
 use App\Models\ProjectUpdate;
 use App\Models\User;
 use App\Services\Feed\FeedService;
 use App\Services\Needs\NeedService;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class ProjectService
 {
@@ -73,6 +75,33 @@ class ProjectService
 
             return $project;
         });
+    }
+
+    /**
+     * Ajoute une personne à l'équipe affichée sur la fiche (PR-02).
+     *
+     * @param  array{name: string, role: string}  $attributes
+     *
+     * @throws ValidationException
+     */
+    public function addTeamMember(Project $project, array $attributes): ProjectMember
+    {
+        if ($project->team()->count() >= config('idee.max_team_members')) {
+            throw ValidationException::withMessages(['name' => 'L\'équipe affichée compte au plus '.config('idee.max_team_members').' personnes.']);
+        }
+
+        $member = $project->team()->create([...$attributes, 'position' => $project->team()->count() + 1]);
+        $project->recordActivity();
+        $this->readiness->refresh($project);
+
+        return $member;
+    }
+
+    public function removeTeamMember(ProjectMember $member): void
+    {
+        $project = $member->project;
+        $member->delete();
+        $this->readiness->refresh($project);
     }
 
     /**

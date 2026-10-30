@@ -10,6 +10,7 @@ use App\Jobs\GenerateClarification;
 use App\Models\BusinessPlan;
 use App\Models\IdeaClarification;
 use App\Models\Project;
+use App\Services\Projects\ReadinessScore;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -49,7 +50,10 @@ class AssistantService
         Ne propose jamais de collecter de l'argent auprès du public, de vendre des parts ou des actions au public, ni de faire transiter de l'argent par IDEE.
         TXT;
 
-    public function __construct(private readonly Assistant $assistant) {}
+    public function __construct(
+        private readonly Assistant $assistant,
+        private readonly ReadinessScore $readiness,
+    ) {}
 
     public function isEnabled(): bool
     {
@@ -196,6 +200,9 @@ class AssistantService
                 'generated_at' => now(),
             ]];
         });
+
+        // Un business plan prêt compte dans le score de préparation (RG-06).
+        $this->readiness->refresh($plan->project);
     }
 
     /**
