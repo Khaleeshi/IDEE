@@ -10,10 +10,22 @@
     <h1 class="mt-1 text-2xl font-bold leading-tight">{{ $project->title }}</h1>
     <p class="mt-3 whitespace-pre-line text-stone-700">{{ $project->summary }}</p>
 
-    <a href="https://wa.me/?text={{ rawurlencode($project->title.' · découvrez ce projet sur IDEE : '.route('projects.show', $project)) }}"
-       target="_blank" rel="noopener" class="mt-3 inline-flex min-h-11 items-center gap-2 rounded-xl border border-stone-300 bg-white px-4 text-sm font-semibold text-stone-800">
-        Partager sur WhatsApp
-    </a>
+    <div class="mt-3 flex flex-wrap gap-2">
+        <a href="https://wa.me/?text={{ rawurlencode($project->title.' · découvrez ce projet sur IDEE : '.route('projects.show', $project)) }}"
+           target="_blank" rel="noopener" class="inline-flex min-h-11 items-center rounded-xl border border-stone-300 bg-white px-4 text-sm font-semibold text-stone-800">
+            Partager sur WhatsApp
+        </a>
+        @auth
+            @unless ($isOwner)
+                <form method="POST" action="{{ route('follows.project', $project) }}">
+                    @csrf
+                    <button type="submit" class="inline-flex min-h-11 items-center rounded-xl border px-4 text-sm font-semibold {{ $following ? 'border-brand-100 bg-brand-50 text-brand-800' : 'border-stone-300 bg-white text-stone-800' }}">
+                        {{ $following ? '✓ Suivi' : 'Suivre ce projet' }}
+                    </button>
+                </form>
+            @endunless
+        @endauth
+    </div>
 
     @if ($isOwner)
         <div class="mt-4 flex gap-2">
@@ -117,6 +129,7 @@
                             <a href="{{ route('members.show', $offer->user) }}" class="font-semibold underline">{{ $offer->user->name }}</a>
                             <x-status :status="$offer->status" />
                         </div>
+                        <p class="text-xs font-medium text-stone-500">{{ $offer->kind->label() }}</p>
                         <p class="mt-1 whitespace-pre-line text-stone-700">{{ $offer->message }}</p>
                         @if ($offer->status->value === 'proposee')
                             <div class="mt-2 flex gap-2">
@@ -155,6 +168,18 @@
                             <x-field name="message" type="textarea" rows="3" label="Ce que vous pouvez apporter" required
                                      placeholder="Une compétence, un contact, du matériel, un local…" />
                             <x-button class="w-full">Proposer mon aide</x-button>
+                        </form>
+                    </details>
+                    <details>
+                        <summary class="cursor-pointer py-2 text-sm font-semibold text-brand-700">Je connais quelqu'un</summary>
+                        <form method="POST" action="{{ route('help-offers.store', $need) }}" class="mt-2">
+                            @csrf
+                            <input type="hidden" name="kind" value="mise_en_relation">
+                            <label for="connaissance-{{ $need->id }}" class="block text-sm font-medium text-stone-800">Qui connaissez-vous, et comment le joindre ?</label>
+                            <textarea id="connaissance-{{ $need->id }}" name="message" rows="3" required minlength="20" maxlength="2000"
+                                      placeholder="Ex. : mon cousin est grossiste à Tilène, je peux vous le présenter"
+                                      class="mt-1 mb-3 block w-full rounded-xl border border-stone-300 px-3 py-3 text-base focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-100"></textarea>
+                            <x-button variant="secondary" class="w-full">Signaler cette personne</x-button>
                         </form>
                     </details>
                     <a href="{{ route('contact-requests.create', [$project, 'besoin' => $need->id]) }}" class="mt-1 inline-block py-2 text-sm text-stone-600 underline">Contacter à propos de ce besoin</a>

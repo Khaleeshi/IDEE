@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Web\ContactRequestController;
 use App\Http\Controllers\Web\FeedController;
+use App\Http\Controllers\Web\FollowController;
 use App\Http\Controllers\Web\JourneyController;
 use App\Http\Controllers\Web\LoginController;
 use App\Http\Controllers\Web\MemberController;
@@ -35,6 +36,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/besoins/{need}/cloture', [NeedController::class, 'close'])->name('needs.close');
     Route::post('/besoins/{need}/aide', [NeedController::class, 'offerHelp'])->name('help-offers.store');
     Route::post('/aides/{helpOffer}/reponse', [NeedController::class, 'respondToOffer'])->name('help-offers.respond');
+
+    Route::post('/suivre/projet/{project}', [FollowController::class, 'project'])->name('follows.project');
+    Route::post('/suivre/membre/{user}', [FollowController::class, 'member'])->name('follows.member');
+    Route::post('/suivre/secteur/{sector:slug}', [FollowController::class, 'sector'])->name('follows.sector');
 
     Route::get('/demandes', [ContactRequestController::class, 'index'])->name('contact-requests.index');
     Route::get('/projets/{project}/contacter', [ContactRequestController::class, 'create'])->name('contact-requests.create');

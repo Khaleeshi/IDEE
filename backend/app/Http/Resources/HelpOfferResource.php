@@ -21,6 +21,7 @@ class HelpOfferResource extends JsonResource
             'need_id' => $this->need_id,
             'helper' => new MemberResource($this->whenLoaded('user')),
             'message' => $this->message,
+            'kind' => EnumResource::make($this->kind),
             'status' => EnumResource::make($this->status),
             'responded_at' => $this->responded_at?->toIso8601String(),
             'created_at' => $this->created_at?->toIso8601String(),

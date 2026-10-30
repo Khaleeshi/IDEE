@@ -35,6 +35,13 @@ return [
     // Indicateur de réactivité : période d'observation (en jours).
     'reactivity_window_days' => (int) env('IDEE_REACTIVITY_WINDOW_DAYS', 90),
 
+    // RR-02 / RR-03 : recommandations quotidiennes selon le profil, chacune expliquée.
+    // Les poids classent les raisons : rôle, compétence, secteur, suivi, région.
+    'recommendations' => [
+        'per_day' => (int) env('IDEE_RECOMMENDATIONS_PER_DAY', 5),
+        'weights' => ['role' => 3, 'skill' => 3, 'sector' => 2, 'followed' => 2, 'region' => 1],
+    ],
+
     // RG-10 : une fiche pratique non revue depuis ce délai (en mois) est signalée à l'équipe.
     'guide_review_after_months' => (int) env('IDEE_GUIDE_REVIEW_MONTHS', 6),
 

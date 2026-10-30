@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\HelpOfferController;
 use App\Http\Controllers\Api\JourneyController;
 use App\Http\Controllers\Api\MemberController;
 use App\Http\Controllers\Api\NeedController;
+use App\Http\Controllers\Api\NetworkController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\ProjectController;
 use App\Http\Controllers\Api\ProjectUpdateController;
@@ -37,6 +38,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('me', [ProfileController::class, 'update']);
     Route::get('me/projects', [ProfileController::class, 'projects']);
     Route::get('me/journeys', [JourneyController::class, 'mine']);
+    Route::get('me/feed', [NetworkController::class, 'followedFeed']);
+    Route::get('me/recommendations', [NetworkController::class, 'recommendations']);
+    Route::post('follows/projects/{project}', [NetworkController::class, 'followProject']);
+    Route::post('follows/members/{user}', [NetworkController::class, 'followMember']);
+    Route::post('follows/sectors/{sector:slug}', [NetworkController::class, 'followSector']);
 
     Route::post('journeys/{journey}/start', [JourneyController::class, 'start']);
     Route::delete('journeys/{journey}/start', [JourneyController::class, 'leave']);

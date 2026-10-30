@@ -31,19 +31,35 @@
         </details>
     </form>
 
-    <nav aria-label="Affichage de l'accueil" class="mb-4 grid grid-cols-2 rounded-xl bg-stone-100 p-1 text-sm font-medium">
-        <a href="{{ route('home') }}" @if ($tab === 'activite') aria-current="page" @endif
-           class="rounded-lg py-2 text-center {{ $tab === 'activite' ? 'bg-white text-brand-800 shadow-sm' : 'text-stone-600' }}">Activité</a>
-        <a href="{{ route('home', ['vue' => 'projets']) }}" @if ($tab === 'projets') aria-current="page" @endif
-           class="rounded-lg py-2 text-center {{ $tab === 'projets' ? 'bg-white text-brand-800 shadow-sm' : 'text-stone-600' }}">Projets</a>
+    @php($tabs = ['activite' => ['Activité', route('home')], 'projets' => ['Projets', route('home', ['vue' => 'projets'])]] + (auth()->check() ? ['suivis' => ['Suivis', route('home', ['vue' => 'suivis'])]] : []))
+    <nav aria-label="Affichage de l'accueil" class="mb-4 grid rounded-xl bg-stone-100 p-1 text-sm font-medium {{ count($tabs) === 3 ? 'grid-cols-3' : 'grid-cols-2' }}">
+        @foreach ($tabs as $key => [$label, $href])
+            <a href="{{ $href }}" @if ($tab === $key) aria-current="page" @endif
+               class="rounded-lg py-2 text-center {{ $tab === $key ? 'bg-white text-brand-800 shadow-sm' : 'text-stone-600' }}">{{ $label }}</a>
+        @endforeach
     </nav>
 
-    @if ($tab === 'activite')
+    @if ($recommendations->isNotEmpty())
+        <section class="mb-4 rounded-2xl border border-brand-100 bg-brand-50 p-4" aria-labelledby="pour-vous">
+            <h2 id="pour-vous" class="font-semibold text-brand-900">Pour vous aujourd'hui</h2>
+            <ul class="mt-2 divide-y divide-brand-100">
+                @foreach ($recommendations as $pick)
+                    <li class="py-2">
+                        <a href="{{ route('projects.show', $pick['need']->project) }}" class="font-medium text-stone-900 underline">{{ $pick['need']->title }}</a>
+                        <span class="block text-xs text-stone-600">{{ $pick['need']->project->title }}</span>
+                        <span class="mt-1 block text-xs text-brand-800">Pourquoi : {{ implode(' ', $pick['reasons']) }}</span>
+                    </li>
+                @endforeach
+            </ul>
+        </section>
+    @endif
+
+    @if ($tab !== 'projets')
         @forelse ($activities as $activity)
             <x-activity-item :activity="$activity" />
         @empty
             <x-card class="text-center text-stone-600">
-                <p>Le fil est encore calme. Publiez un projet ou un appel à action pour le lancer.</p>
+                <p>{{ $tab === 'suivis' ? 'Rien de neuf chez ce que vous suivez. Suivez des projets, des personnes ou des secteurs depuis leur page.' : 'Le fil est encore calme. Publiez un projet ou un appel à action pour le lancer.' }}</p>
                 @auth
                     <x-button :href="route('projects.create')" class="mt-3">Publier mon projet</x-button>
                 @endauth
@@ -55,6 +71,15 @@
         <h2 class="mb-3 text-sm font-semibold uppercase tracking-wide text-stone-500">
             {{ $projects->total() }} {{ $projects->total() > 1 ? 'projets cherchent' : 'projet cherche' }} du soutien
         </h2>
+
+        @if ($sector)
+            @auth
+                <form method="POST" action="{{ route('follows.sector', $sector) }}" class="mb-3">
+                    @csrf
+                    <x-button variant="secondary" class="w-full">{{ $followingSector ? 'Ne plus suivre' : 'Suivre' }} le secteur {{ $sector->name }}</x-button>
+                </form>
+            @endauth
+        @endif
 
         @forelse ($projects as $project)
             <x-project-card :project="$project" />

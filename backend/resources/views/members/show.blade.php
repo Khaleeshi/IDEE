@@ -13,6 +13,15 @@
             </ul>
         @endif
 
+        @auth
+            @unless ($member->is(auth()->user()))
+                <form method="POST" action="{{ route('follows.member', $member) }}" class="mt-3">
+                    @csrf
+                    <x-button :variant="$following ? 'secondary' : 'primary'" class="min-h-10 px-4 py-2 text-sm">{{ $following ? '✓ Suivi' : 'Suivre' }}</x-button>
+                </form>
+            @endunless
+        @endauth
+
         @if ($member->bio)
             <p class="mt-3 whitespace-pre-line text-stone-700">{{ $member->bio }}</p>
         @endif

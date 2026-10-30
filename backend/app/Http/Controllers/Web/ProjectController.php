@@ -13,6 +13,7 @@ use App\Models\Project;
 use App\Models\Sector;
 use App\Services\ContactRequests\ReactivityIndicator;
 use App\Services\Journeys\JourneyService;
+use App\Services\Network\FollowService;
 use App\Services\Projects\ProjectService;
 use App\Services\Projects\ReadinessScore;
 use Illuminate\Http\RedirectResponse;
@@ -26,7 +27,7 @@ class ProjectController extends Controller
 {
     public function __construct(private readonly ProjectService $projects) {}
 
-    public function show(Request $request, Project $project, ReadinessScore $readiness, ReactivityIndicator $reactivity, JourneyService $journeys): View
+    public function show(Request $request, Project $project, ReadinessScore $readiness, ReactivityIndicator $reactivity, JourneyService $journeys, FollowService $follows): View
     {
         abort_unless(Gate::allows('view', $project), Response::HTTP_NOT_FOUND);
 
@@ -44,6 +45,7 @@ class ProjectController extends Controller
             'readiness' => $isOwner ? $readiness->evaluate($project) : null,
             'reactivity' => $reactivity->for($project->owner),
             'updates' => $project->updates()->limit(10)->get(),
+            'following' => $follows->isFollowing($request->user(), $project),
             'needTypes' => $this->needTypes(),
             // Demande d'aide lancée depuis une étape de parcours guidé.
             'needDraft' => $isOwner && ($step = JourneyStep::find($request->string('etape')->toString()))
