@@ -148,7 +148,22 @@ avec les vrais services : faites un essai avec votre propre numéro avant
 d'ouvrir le site au public. En cas d'échec, le motif est écrit dans
 `storage/logs`.
 
-## 7. Activer l'assistant IA (business plan)
+## 7. Activer les notifications push (gratuites)
+
+Les membres peuvent recevoir les alertes sur leur téléphone, même IDEE fermé.
+Sur le serveur, lancez une seule fois :
+
+```bash
+/usr/local/apps/php83/bin/php artisan idee:cles-push
+```
+
+Copiez les deux lignes affichées dans `.env`, indiquez votre adresse de contact
+dans `WEBPUSH_SUBJECT` (forme `mailto:contact@votre-domaine.com`), puis lancez
+`php artisan optimize`. Chaque membre active ensuite les notifications depuis
+la page « Notifications » de son téléphone. Ne changez plus ces clés : les
+abonnements existants cesseraient de fonctionner.
+
+## 8. Activer l'assistant IA (business plan)
 
 L'assistant utilise Claude Opus 5.5 d'Anthropic, payé à l'usage : 4 $ par million
 de jetons (morceaux de mots) lus et 20 $ par million écrits, soit de l'ordre de 100 à

@@ -20,7 +20,8 @@ class NewMessage extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['database'];
+        // En push mais pas sur WhatsApp : les messages sont trop fréquents.
+        return AlertChannels::for($notifiable, whatsapp: false);
     }
 
     /**

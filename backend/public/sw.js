@@ -63,3 +63,20 @@ self.addEventListener('fetch', (event) => {
         );
     }
 });
+
+// Notifications push (NO-01) : affichage, puis ouverture de la page concernée au toucher.
+self.addEventListener('push', (event) => {
+    const data = event.data ? event.data.json() : {};
+
+    event.waitUntil(self.registration.showNotification(data.title || 'IDEE', {
+        body: data.body || '',
+        icon: '/icons/icon-192.png',
+        badge: '/icons/icon-192.png',
+        data: { url: data.url || '/notifications' },
+    }));
+});
+
+self.addEventListener('notificationclick', (event) => {
+    event.notification.close();
+    event.waitUntil(self.clients.openWindow(event.notification.data.url));
+});

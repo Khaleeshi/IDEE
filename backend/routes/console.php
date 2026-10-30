@@ -9,6 +9,7 @@ use App\Support\PhoneNumber;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schedule;
+use Minishlink\WebPush\VAPID;
 
 Artisan::command('idee:contact-requests', function (ContactRequestService $requests) {
     $result = $requests->processDeadlines();
@@ -55,6 +56,14 @@ Artisan::command('idee:admin {phone} {--retirer}', function (string $phone) {
     $user->forceFill(['is_admin' => ! $this->option('retirer')])->save();
     $this->info($user->is_admin ? "{$user->name} fait maintenant partie de l'équipe d'administration." : "{$user->name} n'a plus accès à l'administration.");
 })->purpose('Donne (ou retire avec --retirer) l\'accès à l\'administration à un membre');
+
+Artisan::command('idee:cles-push', function () {
+    $keys = VAPID::createVapidKeys();
+
+    $this->info('Ajoutez ces deux lignes au fichier .env, puis lancez « php artisan optimize » :');
+    $this->line("WEBPUSH_PUBLIC_KEY={$keys['publicKey']}");
+    $this->line("WEBPUSH_PRIVATE_KEY={$keys['privateKey']}");
+})->purpose('Crée les clés des notifications push (NO-01), à faire une seule fois');
 
 // Tâches en arrière-plan (assistant IA) : traitées chaque minute par la tâche planifiée.
 Schedule::command('queue:work --stop-when-empty --max-time=55')->everyMinute()->withoutOverlapping();

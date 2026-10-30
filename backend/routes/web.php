@@ -15,6 +15,7 @@ use App\Http\Controllers\Web\NotificationController;
 use App\Http\Controllers\Web\OpportunityController;
 use App\Http\Controllers\Web\ProfileController;
 use App\Http\Controllers\Web\ProjectController;
+use App\Http\Controllers\Web\PushSubscriptionController;
 use App\Http\Controllers\Web\TrustController;
 use Illuminate\Support\Facades\Route;
 
@@ -83,6 +84,8 @@ Route::middleware('auth')->group(function () {
     Route::delete('/opportunites/{opportunity}/candidature', [OpportunityController::class, 'forget'])->name('opportunities.forget');
 
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/notifications/abonnement', [PushSubscriptionController::class, 'store'])->name('push.subscribe');
+    Route::delete('/notifications/abonnement', [PushSubscriptionController::class, 'destroy'])->name('push.unsubscribe');
 
     Route::get('/profil', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profil', [ProfileController::class, 'update'])->name('profile.update');

@@ -6,6 +6,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="theme-color" content="#077a3f">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     @php($description ??= 'IDEE, le réseau où les projets trouvent les personnes qui les font avancer.')
     <meta name="description" content="{{ $description }}">
     <title>{{ $title ? $title.' · IDEE' : 'IDEE · Projets et actions' }}</title>

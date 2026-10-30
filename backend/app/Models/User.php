@@ -113,6 +113,14 @@ class User extends Authenticatable
     }
 
     /**
+     * @return HasMany<PushSubscription, $this>
+     */
+    public function pushSubscriptions(): HasMany
+    {
+        return $this->hasMany(PushSubscription::class);
+    }
+
+    /**
      * @return HasMany<Verification, $this>
      */
     public function verifications(): HasMany
