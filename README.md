@@ -37,8 +37,20 @@ clients, matériel) et chaque demande de contact reçoit une réponse.
 - Marche à suivre : [MISE-EN-LIGNE.md](MISE-EN-LIGNE.md)
 - 69 tests automatisés au total
 
-**Prochaines étapes** : assistant IA pour le business plan, parcours guidés de
-création d'entreprise et d'export, messagerie intégrée, application Flutter.
+**Étape 4 — parcours guidés** : terminée.
+
+- Cinq situations de départ, un parcours chacune : valider une idée, formaliser une
+  activité informelle, créer une société, chercher un financement, exporter (38 étapes)
+- Chaque étape : explication, pièces à réunir, organisme, coût et délai indicatifs,
+  source et date de consultation ; mention « à valider avec un expert » quand les sources divergent
+- Questionnaire « Quelle forme juridique choisir ? » : entreprenant, entreprise individuelle, SARL, SAS
+- Suivi personnel étape par étape (à faire, en cours, en attente, terminée), note et rappel daté
+- « Demander de l'aide pour cette étape » : un appel à action prérempli sur le projet du membre
+- Parcours consultables sans compte et hors connexion
+- 85 tests automatisés au total
+
+**Prochaines étapes** : assistant IA pour le business plan, répertoire des
+programmes et financements, messagerie intégrée, application Flutter.
 
 ## Structure du dépôt
 
@@ -46,6 +58,7 @@ création d'entreprise et d'export, messagerie intégrée, application Flutter.
 | --- | --- |
 | `backend/` | Serveur Laravel 13 (PHP 8.3+) : API, site web, base de données, règles de gestion, tests |
 | `backend/resources/views/` | Pages du site web (Blade et Tailwind CSS) |
+| `backend/database/data/` | Contenu des parcours guidés : étapes, pièces, coûts, sources |
 | `backend/deploy/` | Scripts d'installation et de mise à jour du serveur |
 | `.github/workflows/` | Tests à chaque envoi de code, mise en ligne à chaque fusion dans `main` |
 
@@ -83,6 +96,9 @@ de connexion ne sont pas envoyés par SMS : ils sont écrits dans
 | `/demandes` | Demandes de contact reçues et envoyées |
 | `/profil` | Mon profil, mes rôles, mes préférences |
 | `/membres/{id}` | Profil public d'un membre et sa réactivité |
+| `/parcours` | Parcours guidés : choix de la situation, mes démarches, rappels |
+| `/parcours/{id}` | Les étapes d'un parcours et mon avancement |
+| `/parcours/forme-juridique` | Questionnaire « Quelle forme juridique choisir ? » |
 
 ## Routes de l'API
 
@@ -114,6 +130,13 @@ l'en-tête `Authorization: Bearer <jeton>` reçu à la connexion.
 | POST | `/api/contact-requests` | connecté | Envoyer une demande de contact |
 | GET | `/api/contact-requests/{id}` | concerné | Lire une demande (la marque comme lue) |
 | POST | `/api/contact-requests/{id}/respond` | destinataire | Répondre : intéressé, pas maintenant ou refusée avec motif |
+| GET | `/api/journeys` | public | Parcours guidés |
+| GET | `/api/journeys/{id}` | public | Étapes d'un parcours, avec mon avancement si je suis connecté |
+| GET | `/api/legal-form` | public | Questionnaire de forme juridique ; avec `associes`, `protection` et `taille`, l'orientation |
+| GET | `/api/me/journeys` | connecté | Mes parcours et le nombre d'étapes terminées |
+| POST | `/api/journeys/{id}/start` | connecté | Commencer un parcours |
+| DELETE | `/api/journeys/{id}/start` | connecté | Retirer un parcours de mes démarches |
+| PATCH | `/api/journey-steps/{id}/progress` | connecté | Statut, note et date de rappel d'une étape |
 
 ## Règles de gestion appliquées
 
@@ -128,8 +151,15 @@ Les valeurs se règlent dans `backend/config/idee.php` ou dans le fichier `.env`
 | RG-06 | Score de préparation sur des critères publics, sans juger la rentabilité | sur 100 |
 | RG-07 | Mise en sommeil d'un projet sans mise à jour | 90 jours |
 | RG-09 | Montants indicatifs : aucun argent ne transite par la plateforme | — |
+| RG-10 | Chaque fiche affiche sa source et sa date ; une fiche non revue est signalée à l'équipe | 6 mois |
 | RG-11 | Rôle d'investisseur ou d'expert affiché seulement après vérification d'identité | — |
 
 Les relances et expirations tournent toutes les heures, la mise en sommeil
-chaque nuit, via le planificateur Laravel (`php artisan schedule:work` en local,
-une tâche cron en production).
+chaque nuit, les rappels d'étapes chaque matin et le signalement des fiches à
+revoir chaque lundi, via le planificateur Laravel (`php artisan schedule:work`
+en local, une tâche cron en production).
+
+Le contenu des parcours est dans `backend/database/data/parcours.php`. Après une
+correction, mettez à jour la date `checked_on` de l'étape : le contenu est
+rechargé à chaque mise en ligne (`php artisan db:seed --class=JourneySeeder`),
+sans perdre l'avancement des membres.

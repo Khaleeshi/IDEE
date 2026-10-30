@@ -35,6 +35,9 @@ return [
     // Indicateur de réactivité : période d'observation (en jours).
     'reactivity_window_days' => (int) env('IDEE_REACTIVITY_WINDOW_DAYS', 90),
 
+    // RG-10 : une fiche pratique non revue depuis ce délai (en mois) est signalée à l'équipe.
+    'guide_review_after_months' => (int) env('IDEE_GUIDE_REVIEW_MONTHS', 6),
+
     // Code de connexion à usage unique (section 10).
     'otp' => [
         'length' => 6,

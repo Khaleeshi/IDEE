@@ -144,13 +144,13 @@
     @endforelse
 
     @if ($isOwner)
-        <details class="mb-4 rounded-2xl border border-brand-100 bg-brand-50 p-4" @if ($errors->hasAny(['type', 'title', 'description', 'need'])) open @endif>
+        <details id="nouveau-besoin" class="mb-4 rounded-2xl border border-brand-100 bg-brand-50 p-4" @if ($needDraft || $errors->hasAny(['type', 'title', 'description', 'need'])) open @endif>
             <summary class="cursor-pointer font-semibold text-brand-800">+ Ajouter un appel à action</summary>
             <form method="POST" action="{{ route('needs.store', $project) }}" class="mt-3">
                 @csrf
-                <x-select name="type" label="Type de besoin" :options="$needTypes" placeholder="Choisir…" />
-                <x-field name="title" label="Titre" required placeholder="Ex. : Trouver un associé commercial" />
-                <x-field name="description" type="textarea" label="Description" required placeholder="Ce que vous cherchez, pourquoi, pour quand." />
+                <x-select name="type" label="Type de besoin" :options="$needTypes" :value="$needDraft['type'] ?? null" placeholder="Choisir…" />
+                <x-field name="title" label="Titre" :value="$needDraft['title'] ?? null" required placeholder="Ex. : Trouver un associé commercial" />
+                <x-field name="description" type="textarea" label="Description" :value="$needDraft['description'] ?? null" required placeholder="Ce que vous cherchez, pourquoi, pour quand." />
                 <x-field name="amount_fcfa" type="number" inputmode="numeric" label="Montant en FCFA (si financement)" min="1000" hint="Indicatif : aucun argent ne transite par IDEE." />
                 <x-field name="profile_sought" label="Profil recherché (facultatif)" placeholder="Ex. : commercial avec un réseau à Dakar" />
                 <x-field name="deadline" type="date" label="Échéance (facultatif)" />

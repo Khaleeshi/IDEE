@@ -7,9 +7,11 @@ use App\Enums\ProjectStage;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreProjectRequest;
 use App\Http\Requests\UpdateProjectRequest;
+use App\Models\JourneyStep;
 use App\Models\Project;
 use App\Models\Sector;
 use App\Services\ContactRequests\ReactivityIndicator;
+use App\Services\Journeys\JourneyService;
 use App\Services\Projects\ProjectService;
 use App\Services\Projects\ReadinessScore;
 use Illuminate\Http\RedirectResponse;
@@ -23,7 +25,7 @@ class ProjectController extends Controller
 {
     public function __construct(private readonly ProjectService $projects) {}
 
-    public function show(Request $request, Project $project, ReadinessScore $readiness, ReactivityIndicator $reactivity): View
+    public function show(Request $request, Project $project, ReadinessScore $readiness, ReactivityIndicator $reactivity, JourneyService $journeys): View
     {
         abort_unless(Gate::allows('view', $project), Response::HTTP_NOT_FOUND);
 
@@ -41,6 +43,10 @@ class ProjectController extends Controller
             'readiness' => $isOwner ? $readiness->evaluate($project) : null,
             'reactivity' => $reactivity->for($project->owner),
             'needTypes' => $this->needTypes(),
+            // Demande d'aide lancée depuis une étape de parcours guidé.
+            'needDraft' => $isOwner && ($step = JourneyStep::find($request->string('etape')->toString()))
+                ? $journeys->needDraft($step)
+                : null,
         ]);
     }
 

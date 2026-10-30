@@ -3,9 +3,16 @@
 const CACHE = 'idee-v1';
 const OFFLINE_URL = '/hors-ligne';
 
-// Pages publiques qui peuvent être gardées en cache. Les pages personnelles
-// (demandes, profil, mes projets) ne le sont jamais.
-const CACHEABLE_PAGES = [/^\/$/, /^\/projets\/[0-9A-Za-z]{26}$/, /^\/membres\/[0-9A-Za-z]{26}$/];
+// Pages publiques qui peuvent être gardées en cache, dont les parcours guidés,
+// utiles sur le terrain. Les pages personnelles (demandes, profil, mes projets)
+// ne le sont jamais.
+const CACHEABLE_PAGES = [
+    /^\/$/,
+    /^\/projets\/[0-9A-Za-z]{26}$/,
+    /^\/membres\/[0-9A-Za-z]{26}$/,
+    /^\/parcours$/,
+    /^\/parcours\/[0-9A-Za-z]{26}$/,
+];
 
 self.addEventListener('install', (event) => {
     event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll([OFFLINE_URL, '/icons/icon-192.png'])));

@@ -3,7 +3,10 @@
         <section class="mb-6 rounded-2xl bg-brand-700 px-5 py-6 text-white">
             <h1 class="text-2xl font-bold leading-tight">Ton projet ne reste plus un dossier sans réponse.</h1>
             <p class="mt-2 text-brand-50">Publie ce qui te manque : financement, associé, compétence, clients. Le réseau te répond.</p>
-            <a href="{{ route('login') }}" class="mt-4 inline-flex min-h-12 items-center rounded-xl bg-white px-5 font-semibold text-brand-800">Rejoindre IDEE</a>
+            <div class="mt-4 flex flex-wrap gap-2">
+                <a href="{{ route('login') }}" class="inline-flex min-h-12 items-center rounded-xl bg-white px-5 font-semibold text-brand-800">Rejoindre IDEE</a>
+                <a href="{{ route('journeys.index') }}" class="inline-flex min-h-12 items-center rounded-xl border border-white/60 px-5 font-semibold text-white">Parcours guidés</a>
+            </div>
         </section>
     @endguest
 

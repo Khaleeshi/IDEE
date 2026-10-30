@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ContactRequestController;
 use App\Http\Controllers\Api\HelpOfferController;
+use App\Http\Controllers\Api\JourneyController;
 use App\Http\Controllers\Api\MemberController;
 use App\Http\Controllers\Api\NeedController;
 use App\Http\Controllers\Api\ProfileController;
@@ -23,11 +24,19 @@ Route::get('projects', [ProjectController::class, 'index']);
 Route::get('projects/{project}', [ProjectController::class, 'show']);
 Route::get('projects/{project}/needs', [NeedController::class, 'index']);
 Route::get('members/{user}', [MemberController::class, 'show']);
+Route::get('journeys', [JourneyController::class, 'index']);
+Route::get('journeys/{journey}', [JourneyController::class, 'show']);
+Route::get('legal-form', [JourneyController::class, 'legalForm']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('me', [ProfileController::class, 'show']);
     Route::patch('me', [ProfileController::class, 'update']);
     Route::get('me/projects', [ProfileController::class, 'projects']);
+    Route::get('me/journeys', [JourneyController::class, 'mine']);
+
+    Route::post('journeys/{journey}/start', [JourneyController::class, 'start']);
+    Route::delete('journeys/{journey}/start', [JourneyController::class, 'leave']);
+    Route::patch('journey-steps/{journeyStep}/progress', [JourneyController::class, 'updateStep']);
 
     Route::post('projects', [ProjectController::class, 'store']);
     Route::patch('projects/{project}', [ProjectController::class, 'update']);

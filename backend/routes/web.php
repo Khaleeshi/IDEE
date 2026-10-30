@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Web\ContactRequestController;
 use App\Http\Controllers\Web\FeedController;
+use App\Http\Controllers\Web\JourneyController;
 use App\Http\Controllers\Web\LoginController;
 use App\Http\Controllers\Web\MemberController;
 use App\Http\Controllers\Web\NeedController;
@@ -40,6 +41,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/demandes/{contactRequest}', [ContactRequestController::class, 'show'])->name('contact-requests.show');
     Route::post('/demandes/{contactRequest}/reponse', [ContactRequestController::class, 'respond'])->name('contact-requests.respond');
 
+    Route::post('/parcours/{journey}/commencer', [JourneyController::class, 'start'])->name('journeys.start');
+    Route::delete('/parcours/{journey}/suivi', [JourneyController::class, 'leave'])->name('journeys.leave');
+    Route::put('/etapes/{journeyStep}', [JourneyController::class, 'updateStep'])->name('journey-steps.update');
+
     Route::get('/profil', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profil', [ProfileController::class, 'update'])->name('profile.update');
 });
@@ -47,3 +52,8 @@ Route::middleware('auth')->group(function () {
 // Pages publiques : à déclarer après « /projets/nouveau » pour ne pas l'intercepter.
 Route::get('/projets/{project}', [ProjectController::class, 'show'])->name('projects.show');
 Route::get('/membres/{user}', [MemberController::class, 'show'])->name('members.show');
+
+// Parcours guidés, consultables sans compte (PG-01 à PG-06).
+Route::get('/parcours', [JourneyController::class, 'index'])->name('journeys.index');
+Route::get('/parcours/forme-juridique', [JourneyController::class, 'legalForm'])->name('journeys.legal-form');
+Route::get('/parcours/{journey}', [JourneyController::class, 'show'])->name('journeys.show');

@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Contracts\CodeSender;
 use App\Enums\ContactRequestStatus;
+use App\Services\Journeys\JourneyService;
 use App\Services\Messaging\FallbackCodeSender;
 use App\Services\Messaging\LogCodeSender;
 use App\Services\Messaging\OrangeSmsCodeSender;
@@ -44,13 +45,14 @@ class AppServiceProvider extends ServiceProvider
 
         RateLimiter::for('otp-verify', fn (Request $request) => Limit::perMinute(10)->by($request->ip()));
 
-        // Nombre de demandes reçues qui attendent une réponse, affiché dans la navigation.
+        // Demandes reçues qui attendent une réponse et rappels de parcours échus, affichés dans la navigation.
         View::composer('components.layout', function (ViewInstance $view) {
             $user = request()->user();
 
             $view->with('pendingRequestsCount', $user
                 ? $user->receivedContactRequests()->whereIn('status', [ContactRequestStatus::Envoyee, ContactRequestStatus::Lue])->count()
                 : 0);
+            $view->with('dueRemindersCount', $user ? app(JourneyService::class)->dueRemindersCount($user) : 0);
         });
     }
 }

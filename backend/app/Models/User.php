@@ -82,6 +82,14 @@ class User extends Authenticatable
     }
 
     /**
+     * @return HasMany<StepProgress, $this>
+     */
+    public function stepProgress(): HasMany
+    {
+        return $this->hasMany(StepProgress::class);
+    }
+
+    /**
      * @return list<UserRole>
      */
     public function roles(): array

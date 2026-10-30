@@ -23,7 +23,7 @@
             @guest
                 <a href="{{ route('login') }}" class="rounded-full bg-brand-700 px-4 py-2 text-sm font-semibold text-white">Se connecter</a>
             @else
-                <a href="{{ route('members.show', auth()->user()) }}" class="text-sm text-stone-600">{{ auth()->user()->name }}</a>
+                <a href="{{ route('projects.create') }}" class="rounded-full bg-brand-700 px-4 py-2 text-sm font-semibold text-white">+ Publier</a>
             @endguest
         </div>
     </header>
@@ -53,8 +53,8 @@
         <nav aria-label="Navigation principale" class="fixed inset-x-0 bottom-0 z-10 border-t border-stone-200 bg-white pb-[env(safe-area-inset-bottom)]">
             <div class="mx-auto grid max-w-2xl grid-cols-5 text-xs">
                 <x-nav-link :href="route('home')" :active="request()->routeIs('home')" icon="home">Accueil</x-nav-link>
-                <x-nav-link :href="route('projects.mine')" :active="request()->routeIs('projects.mine')" icon="folder">Mes projets</x-nav-link>
-                <x-nav-link :href="route('projects.create')" :active="request()->routeIs('projects.create')" icon="plus">Publier</x-nav-link>
+                <x-nav-link :href="route('projects.mine')" :active="request()->routeIs('projects.mine', 'projects.create')" icon="folder">Mes projets</x-nav-link>
+                <x-nav-link :href="route('journeys.index')" :active="request()->routeIs('journeys.*')" icon="route" :badge="$dueRemindersCount ?? 0">Parcours</x-nav-link>
                 <x-nav-link :href="route('contact-requests.index')" :active="request()->routeIs('contact-requests.*')" icon="inbox" :badge="$pendingRequestsCount ?? 0">Demandes</x-nav-link>
                 <x-nav-link :href="route('profile.edit')" :active="request()->routeIs('profile.*')" icon="user">Profil</x-nav-link>
             </div>

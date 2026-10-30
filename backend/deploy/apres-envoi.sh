@@ -14,6 +14,7 @@ fi
 "$PHP" artisan down --retry=15 || true
 "$PHP" artisan migrate --force
 "$PHP" artisan db:seed --class=SectorSeeder --force
+"$PHP" artisan db:seed --class=JourneySeeder --force
 "$PHP" artisan optimize
 "$PHP" artisan up
 
