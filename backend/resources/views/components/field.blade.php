@@ -18,7 +18,8 @@
     <label for="{{ $id }}" class="block text-sm font-medium text-stone-800">{{ $label }}</label>
 
     @if ($type === 'textarea')
-        <textarea id="{{ $id }}" name="{{ $name }}" rows="{{ $attributes->get('rows', 4) }}"
+        {{-- IA-03 : bouton « Dicter » ajouté par le navigateur quand il sait reconnaître la voix. --}}
+        <textarea id="{{ $id }}" name="{{ $name }}" rows="{{ $attributes->get('rows', 4) }}" data-dictation
                   @if ($minLength) data-min-length="{{ $minLength }}" data-counter="{{ $id }}-compteur" @endif
                   {{ $attributes->except(['class', 'rows'])->merge(['class' => $classes]) }}>{{ $current }}</textarea>
     @else

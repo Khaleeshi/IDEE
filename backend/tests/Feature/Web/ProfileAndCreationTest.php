@@ -18,7 +18,9 @@ class ProfileAndCreationTest extends TestCase
 
         $this->actingAs($user)->get(route('projects.create'))
             ->assertSee('2. Quel problème résolvez-vous, et pour qui ?')
-            ->assertSee('5. De quoi avez-vous besoin en premier ?');
+            ->assertSee('5. De quoi avez-vous besoin en premier ?')
+            // IA-03 : les réponses longues se dictent à la voix.
+            ->assertSee('data-dictation', false);
 
         $this->post(route('projects.store'), [
             'title' => 'Savons au karité',

@@ -106,10 +106,11 @@ clients, matériel) et chaque demande de contact reçoit une réponse.
   Wave (API Checkout, statut toujours relu auprès de Wave) ou par Orange Money
   (transfert vérifié par l'équipe), reçus numérotés, factures des organisations,
   statistiques de visibilité pour l'offre Pro (PA-01 à PA-03)
+- Saisie vocale en français : bouton « Dicter » sur les champs de texte, avec la
+  reconnaissance vocale du navigateur, sans frais (IA-03)
 - 181 tests automatisés au total
 
-**Reste à faire** : saisie vocale par IA (la dictée du clavier est proposée en
-attendant) ; traduction et enregistrement des fiches en wolof ; paiement par carte
+**Reste à faire** : saisie vocale en wolof (IA-04, après des tests de qualité) ; traduction et enregistrement des fiches en wolof ; paiement par carte
 (avec un agrégateur comme PayDunya ou PayTech) ; fonctions prévues en
 V3 (rencontres ciblées, devis d'experts, candidatures structurées, suivi de
 cohortes) ; application Flutter.

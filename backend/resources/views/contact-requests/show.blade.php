@@ -89,7 +89,7 @@
             <form method="POST" action="{{ route('messages.store', $contactRequest) }}" enctype="multipart/form-data" class="mt-3 rounded-2xl border border-stone-200 bg-white p-3">
                 @csrf
                 <label for="message-texte" class="sr-only">Votre message</label>
-                <textarea id="message-texte" name="body" rows="2" maxlength="4000" placeholder="Votre message…"
+                <textarea id="message-texte" name="body" rows="2" maxlength="4000" data-dictation placeholder="Votre message…"
                           class="block w-full rounded-xl border border-stone-300 px-3 py-3 text-base focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-100">{{ old('body') }}</textarea>
                 <label for="message-fichier" class="mt-2 block text-sm text-stone-600">Joindre un document ou une photo (facultatif)</label>
                 <input id="message-fichier" name="attachment" type="file" accept=".pdf,image/*,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt" class="mt-1 block w-full text-sm">
