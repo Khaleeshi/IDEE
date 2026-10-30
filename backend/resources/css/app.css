@@ -3,7 +3,26 @@
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 
+/*
+ * Police du système : aucune police à télécharger, pour des pages légères
+ * sur les connexions 3G (cahier des charges, section 10).
+ */
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans', Arial, sans-serif;
+
+    --color-brand-50: #ecfdf3;
+    --color-brand-100: #d1fadf;
+    --color-brand-600: #0b8a4a;
+    --color-brand-700: #077a3f;
+    --color-brand-800: #065f32;
+}
+
+@layer base {
+    html {
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+        padding-bottom: env(safe-area-inset-bottom);
+    }
 }

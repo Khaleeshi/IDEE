@@ -2,14 +2,13 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateProfileRequest;
 use App\Http\Resources\ProfileResource;
 use App\Http\Resources\ProjectResource;
+use App\Services\Members\ProfileService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
-use Illuminate\Support\Arr;
 
 class ProfileController extends Controller
 {
@@ -18,15 +17,9 @@ class ProfileController extends Controller
         return new ProfileResource($request->user()->load('roleAssignments'));
     }
 
-    public function update(UpdateProfileRequest $request): ProfileResource
+    public function update(UpdateProfileRequest $request, ProfileService $profiles): ProfileResource
     {
-        $user = $request->user();
-        $user->fill(Arr::except($request->validated(), ['roles']));
-        $user->save();
-
-        if ($request->has('roles')) {
-            $user->syncRoles(array_map(UserRole::from(...), $request->validated('roles')));
-        }
+        $user = $profiles->update($request->user(), $request->validated());
 
         return new ProfileResource($user->load('roleAssignments'));
     }

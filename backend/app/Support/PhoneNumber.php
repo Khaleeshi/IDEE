@@ -25,4 +25,16 @@ class PhoneNumber
 
         return preg_match('/^\+[1-9]\d{7,14}$/', $number) === 1 ? $number : null;
     }
+
+    /**
+     * Présentation lisible : +221 77 123 45 67 pour un numéro sénégalais.
+     */
+    public static function format(string $number): string
+    {
+        if (preg_match('/^\+221(\d{2})(\d{3})(\d{2})(\d{2})$/', $number, $parts) === 1) {
+            return sprintf('+221 %s %s %s %s', $parts[1], $parts[2], $parts[3], $parts[4]);
+        }
+
+        return $number;
+    }
 }

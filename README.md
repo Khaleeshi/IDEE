@@ -18,24 +18,38 @@ clients, matériel) et chaque demande de contact reçoit une réponse.
 - Recherche de projets par mot-clé, secteur, région, stade et type de besoin
 - 40 tests automatisés
 
-**Prochaines étapes** : interface web mobile (site installable), envoi des codes
-par WhatsApp et SMS Orange, assistant IA pour le business plan, parcours guidés,
-application Flutter.
+**Étape 2 — site web mobile** : terminée.
+
+- Pages pensées pour le téléphone, avec une barre de navigation en bas de l'écran
+- Fil des projets avec recherche et filtres, fiche projet, profil public des membres
+- Connexion par code, publication et modification de projets, appels à action
+- « Je peux aider », demandes de contact et réponses, compteur de demandes en attente
+- Numéros partagés, avec un lien WhatsApp, seulement quand les deux parties sont intéressées
+- Application installable sur l'écran d'accueil ; pages publiques consultables hors connexion
+- Pages très légères : environ 10 Ko de HTML, 6 Ko de CSS et moins de 1 Ko de JavaScript compressés
+- 63 tests automatisés au total
+
+**Prochaines étapes** : envoi des codes par WhatsApp et SMS Orange, assistant IA
+pour le business plan, parcours guidés de création d'entreprise et d'export,
+messagerie intégrée, application Flutter.
 
 ## Structure du dépôt
 
 | Dossier | Contenu |
 | --- | --- |
-| `backend/` | Serveur Laravel 13 (PHP 8.3+) : API, base de données, règles de gestion, tests |
+| `backend/` | Serveur Laravel 13 (PHP 8.3+) : API, site web, base de données, règles de gestion, tests |
+| `backend/resources/views/` | Pages du site web (Blade et Tailwind CSS) |
 | `.github/workflows/` | Tests lancés automatiquement par GitHub à chaque envoi de code |
 
 ## Installer et lancer le serveur en local
 
-Prérequis : PHP 8.3 ou plus récent, Composer et l'extension SQLite.
+Prérequis : PHP 8.3 ou plus récent, Composer, l'extension SQLite et Node.js 22.
 
 ```bash
 cd backend
 composer install
+npm install
+npm run build
 cp .env.example .env
 php artisan key:generate
 touch database/database.sqlite
@@ -43,9 +57,24 @@ php artisan migrate --seed
 php artisan serve
 ```
 
-L'API répond alors sur `http://127.0.0.1:8000/api`. En développement, les codes
+Le site s'ouvre alors sur `http://127.0.0.1:8000` et l'API répond sur
+`http://127.0.0.1:8000/api`. Les données de démonstration créent quelques
+membres et projets fictifs. En développement, les codes
 de connexion ne sont pas envoyés par SMS : ils sont écrits dans
 `backend/storage/logs/laravel.log`.
+
+## Pages du site
+
+| Adresse | Page |
+| --- | --- |
+| `/` | Fil des projets, recherche et filtres |
+| `/connexion` | Connexion par numéro de téléphone et code |
+| `/projets/{id}` | Fiche projet : besoins, « Je peux aider », contacter le porteur |
+| `/projets/nouveau` | Publier un projet |
+| `/mes-projets` | Mes projets et leur score de préparation |
+| `/demandes` | Demandes de contact reçues et envoyées |
+| `/profil` | Mon profil, mes rôles, mes préférences |
+| `/membres/{id}` | Profil public d'un membre et sa réactivité |
 
 ## Routes de l'API
 

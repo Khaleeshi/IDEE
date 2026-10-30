@@ -125,8 +125,8 @@ class ProjectTest extends TestCase
 
     public function test_projects_can_be_searched_by_keyword_and_region(): void
     {
-        Project::factory()->create(['title' => 'Farine de mil enrichie', 'region' => 'Kaolack']);
-        Project::factory()->create(['title' => 'Application de livraison', 'region' => 'Dakar']);
+        Project::factory()->create(['title' => 'Farine de mil enrichie', 'summary' => 'Céréales locales transformées.', 'region' => 'Kaolack']);
+        Project::factory()->create(['title' => 'Application de livraison', 'summary' => 'Livraison de repas en ville.', 'region' => 'Dakar']);
 
         $this->getJson('/api/projects?q=mil')->assertJsonCount(1, 'data');
         $this->getJson('/api/projects?region=Dakar')->assertJsonCount(1, 'data')

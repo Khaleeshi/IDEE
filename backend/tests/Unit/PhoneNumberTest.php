@@ -23,6 +23,12 @@ class PhoneNumberTest extends TestCase
         ];
     }
 
+    public function test_it_formats_senegalese_numbers_for_display(): void
+    {
+        $this->assertSame('+221 77 123 45 67', PhoneNumber::format('+221771234567'));
+        $this->assertSame('+33612345678', PhoneNumber::format('+33612345678'));
+    }
+
     #[DataProvider('numbers')]
     public function test_it_normalizes_phone_numbers(string $input, ?string $expected): void
     {
