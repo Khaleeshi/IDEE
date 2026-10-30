@@ -6,7 +6,9 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CollaborationController;
 use App\Http\Controllers\Api\ContactRequestController;
 use App\Http\Controllers\Api\DocumentController;
+use App\Http\Controllers\Api\ExpertController;
 use App\Http\Controllers\Api\FeedController;
+use App\Http\Controllers\Api\GroupController;
 use App\Http\Controllers\Api\HelpOfferController;
 use App\Http\Controllers\Api\JourneyController;
 use App\Http\Controllers\Api\MatchingController;
@@ -44,6 +46,9 @@ Route::get('members/{user}/collaborations', [CollaborationController::class, 'fo
 Route::get('journeys', [JourneyController::class, 'index']);
 Route::get('journeys/{journey}', [JourneyController::class, 'show']);
 Route::get('legal-form', [JourneyController::class, 'legalForm']);
+Route::get('experts', [ExpertController::class, 'index']);
+Route::get('groups', [GroupController::class, 'index']);
+Route::get('groups/{type}/{key}', [GroupController::class, 'show']);
 Route::get('organisations', [OrganisationController::class, 'index']);
 Route::get('organisations/{organisation}', [OrganisationController::class, 'show']);
 Route::get('opportunities', [OpportunityController::class, 'index']);
@@ -66,6 +71,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('organisations/{organisation}/programmes', [OrganisationController::class, 'storeProgramme']);
     Route::put('programmes/{opportunity}', [OrganisationController::class, 'updateProgramme']);
     Route::delete('programmes/{opportunity}', [OrganisationController::class, 'destroyProgramme']);
+    Route::post('groups/{type}/{key}/posts', [GroupController::class, 'store']);
+    Route::delete('group-posts/{groupPost}', [GroupController::class, 'destroy']);
     Route::get('me/alerts', [AlertController::class, 'index']);
     Route::post('me/alerts', [AlertController::class, 'store']);
     Route::delete('alerts/{savedSearch}', [AlertController::class, 'destroy']);

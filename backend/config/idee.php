@@ -78,6 +78,11 @@ return [
         'nda_version' => '2026-10',
     ],
 
+    // FC-05 : messages par membre et par jour dans les groupes, contre les envois en masse.
+    'groups' => [
+        'posts_per_day' => (int) env('IDEE_GROUP_POSTS_PER_DAY', 10),
+    ],
+
     // PR-08 : nombre de projets proches proposés au porteur.
     'matching' => [
         'suggestions' => (int) env('IDEE_MATCHING_SUGGESTIONS', 5),

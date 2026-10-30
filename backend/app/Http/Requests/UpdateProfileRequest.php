@@ -19,6 +19,8 @@ class UpdateProfileRequest extends FormRequest
             'email' => ['sometimes', 'nullable', 'email', 'max:255', Rule::unique('users')->ignore($this->user())],
             'region' => ['sometimes', 'nullable', 'string', 'max:80'],
             'bio' => ['sometimes', 'nullable', 'string', 'max:2000'],
+            'expertise' => ['sometimes', 'nullable', 'string', 'max:300'],
+            'rate' => ['sometimes', 'nullable', 'string', 'max:120'],
             'languages' => ['sometimes', 'array', 'max:10'],
             'languages.*' => ['string', 'max:40'],
             'skills' => ['sometimes', 'array', 'max:30'],

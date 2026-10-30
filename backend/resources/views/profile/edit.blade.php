@@ -20,6 +20,12 @@
             <x-field name="name" label="Nom" :value="$user->name" required autocomplete="name" />
             <x-field name="region" label="Région" :value="$user->region" placeholder="Ex. : Dakar, ou Paris pour la diaspora" />
             <x-field name="bio" type="textarea" rows="3" label="Présentation" :value="$user->bio" placeholder="Votre parcours, ce que vous cherchez, ce que vous pouvez apporter." />
+            {{-- SE-01 : visibles dans l'annuaire des experts une fois l'identité vérifiée (RG-11). --}}
+            <x-field name="expertise" label="Si vous êtes expert : vos services" :value="$user->expertise" maxlength="300"
+                     placeholder="Ex. : comptabilité des PME, dossiers de financement, statuts de SARL" />
+            <x-field name="rate" label="Votre tarif indicatif" :value="$user->rate" maxlength="120"
+                     placeholder="Ex. : 15 000 FCFA l'heure, premier échange offert"
+                     hint="Réglé directement entre vous et le client : IDEE ne prend aucune commission." />
             <x-field name="skills" label="Compétences" :value="implode(', ', $user->skills ?? [])" hint="Séparées par des virgules. Ex. : vente, comptabilité, Flutter" />
             <x-field name="languages" label="Langues" :value="implode(', ', $user->languages ?? [])" hint="Ex. : français, wolof, pulaar" />
 
@@ -120,6 +126,8 @@
     <nav aria-label="Autres réglages" class="mb-4 grid grid-cols-2 gap-2 text-sm">
         <a href="{{ route('alerts.index') }}" class="rounded-xl border border-stone-200 bg-white p-3 text-center font-medium text-stone-800">Mes alertes</a>
         <a href="{{ route('organisations.index') }}" class="rounded-xl border border-stone-200 bg-white p-3 text-center font-medium text-stone-800">Organisations</a>
+        <a href="{{ route('experts.index') }}" class="rounded-xl border border-stone-200 bg-white p-3 text-center font-medium text-stone-800">Experts vérifiés</a>
+        <a href="{{ route('groups.index') }}" class="rounded-xl border border-stone-200 bg-white p-3 text-center font-medium text-stone-800">Groupes</a>
     </nav>
 
     <form method="POST" action="{{ route('logout') }}" class="text-center">

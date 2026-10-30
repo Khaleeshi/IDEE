@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Enums\ReportReason;
+use App\Models\GroupPost;
 use App\Models\Message;
 use App\Models\Organisation;
 use App\Models\Project;
@@ -12,7 +13,7 @@ use Illuminate\Validation\Rule;
 
 class StoreReportRequest extends FormRequest
 {
-    private const TARGETS = ['membre' => User::class, 'projet' => Project::class, 'message' => Message::class, 'organisation' => Organisation::class];
+    private const TARGETS = ['membre' => User::class, 'projet' => Project::class, 'message' => Message::class, 'organisation' => Organisation::class, 'publication' => GroupPost::class];
 
     /**
      * @return array<string, mixed>
@@ -35,7 +36,7 @@ class StoreReportRequest extends FormRequest
         return ['reason.required' => 'Choisissez le motif du signalement.'];
     }
 
-    public function target(): User|Project|Message|Organisation
+    public function target(): User|Project|Message|Organisation|GroupPost
     {
         return self::TARGETS[$this->validated('target_type')]::findOrFail($this->validated('target_id'));
     }

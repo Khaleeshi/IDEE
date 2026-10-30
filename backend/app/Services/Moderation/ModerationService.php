@@ -6,6 +6,7 @@ use App\Enums\ModerationDecision;
 use App\Enums\OrganisationRole;
 use App\Enums\ReportReason;
 use App\Enums\ReportStatus;
+use App\Models\GroupPost;
 use App\Models\Message;
 use App\Models\Organisation;
 use App\Models\Project;
@@ -26,13 +27,14 @@ class ModerationService
     /**
      * @throws ValidationException
      */
-    public function report(User $reporter, User|Project|Message|Organisation $target, ReportReason $reason, ?string $details = null): Report
+    public function report(User $reporter, User|Project|Message|Organisation|GroupPost $target, ReportReason $reason, ?string $details = null): Report
     {
         $targetUser = match (true) {
             $target instanceof User => $target,
             $target instanceof Project => $target->owner,
             $target instanceof Message => $target->sender,
             $target instanceof Organisation => $target->members()->where('role', OrganisationRole::Administrateur)->first()?->user,
+            $target instanceof GroupPost => $target->user,
         };
 
         if ($targetUser?->is($reporter)) {
@@ -196,6 +198,7 @@ class ModerationService
             $target instanceof Message => $target->forceFill(['removed_at' => now()])->save(),
             $target instanceof User => $this->hideProfile($report, $target),
             $target instanceof Organisation => $this->hideOrganisation($report, $target),
+            $target instanceof GroupPost => $target->forceFill(['removed_at' => now()])->save(),
             default => null,
         };
     }
@@ -236,6 +239,7 @@ class ModerationService
                 $target instanceof Message => $target->forceFill(['removed_at' => null])->save(),
                 $target instanceof User => $target->forceFill(['bio' => $report->removed_content])->save(),
                 $target instanceof Organisation => $target->forceFill(['description' => $report->removed_content])->save(),
+                $target instanceof GroupPost => $target->forceFill(['removed_at' => null])->save(),
                 default => null,
             },
             ModerationDecision::Suspension => $user?->forceFill(['suspended_until' => null])->save(),

@@ -6,8 +6,10 @@ use App\Http\Controllers\Web\AssistantController;
 use App\Http\Controllers\Web\CollaborationController;
 use App\Http\Controllers\Web\ContactRequestController;
 use App\Http\Controllers\Web\DocumentController;
+use App\Http\Controllers\Web\ExpertController;
 use App\Http\Controllers\Web\FeedController;
 use App\Http\Controllers\Web\FollowController;
+use App\Http\Controllers\Web\GroupController;
 use App\Http\Controllers\Web\JourneyController;
 use App\Http\Controllers\Web\LoginController;
 use App\Http\Controllers\Web\MatchingController;
@@ -118,6 +120,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/programmes/{opportunity}/modifier', [OrganisationController::class, 'editProgramme'])->name('programmes.edit');
     Route::put('/programmes/{opportunity}', [OrganisationController::class, 'updateProgramme'])->name('programmes.update');
     Route::delete('/programmes/{opportunity}', [OrganisationController::class, 'destroyProgramme'])->name('programmes.destroy');
+    Route::get('/membres/{user}/contacter', [MemberController::class, 'contact'])->name('members.contact');
+    Route::post('/groupes/{type}/{key}', [GroupController::class, 'store'])->name('groups.posts.store');
+    Route::delete('/messages-groupe/{groupPost}', [GroupController::class, 'destroy'])->name('groups.posts.destroy');
     Route::get('/alertes', [AlertController::class, 'index'])->name('alerts.index');
     Route::post('/alertes', [AlertController::class, 'store'])->name('alerts.store');
     Route::get('/alertes/{savedSearch}', [AlertController::class, 'show'])->name('alerts.show');
@@ -166,6 +171,9 @@ Route::get('/parcours/forme-juridique', [JourneyController::class, 'legalForm'])
 Route::get('/parcours/{journey}', [JourneyController::class, 'show'])->name('journeys.show');
 
 // Répertoire des programmes, concours et financements (OP-01).
+Route::get('/experts', [ExpertController::class, 'index'])->name('experts.index');
+Route::get('/groupes', [GroupController::class, 'index'])->name('groups.index');
+Route::get('/groupes/{type}/{key}', [GroupController::class, 'show'])->name('groups.show');
 Route::get('/organisations', [OrganisationController::class, 'index'])->name('organisations.index');
 Route::get('/organisations/{organisation}', [OrganisationController::class, 'show'])->name('organisations.show');
 Route::get('/opportunites', [OpportunityController::class, 'index'])->name('opportunities.index');

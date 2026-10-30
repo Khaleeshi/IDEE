@@ -55,6 +55,6 @@
     @if ($project)
         <p class="mt-4 text-xs text-stone-500">La compatibilité se fonde sur le stade, le secteur et le montant de votre projet. Les autres critères (âge, ancienneté, pièces…) restent à vérifier auprès de l'organisme.</p>
     @endif
-    <p class="mt-4 text-sm"><a href="{{ route('organisations.index', ['type' => 'accompagnement']) }}" class="font-medium text-brand-700 underline">Voir les incubateurs et organisations qui publient ces programmes</a></p>
+    <p class="mt-4 text-sm"><a href="{{ route('organisations.index', ['type' => 'accompagnement']) }}" class="font-medium text-brand-700 underline">Voir les incubateurs et organisations qui publient ces programmes</a> · <a href="{{ route('experts.index') }}" class="font-medium text-brand-700 underline">trouver un expert pour monter son dossier</a></p>
     <p class="mt-4 text-xs text-stone-500">Les démarches auprès des organismes officiels sont gratuites. Méfiez-vous de toute personne qui demande de l'argent pour « faciliter » un dossier, et signalez-la.</p>
 </x-layout>
