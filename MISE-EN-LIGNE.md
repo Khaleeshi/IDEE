@@ -148,8 +148,8 @@ d'ouvrir le site au public. En cas d'échec, le motif est écrit dans
 
 ## 7. Activer l'assistant IA (business plan)
 
-L'assistant utilise Claude Opus 5.5 d'Anthropic, payé à l'usage : environ 4 $ par
-million de mots-jetons lus et 20 $ par million écrits, soit de l'ordre de 100 à
+L'assistant utilise Claude Opus 5.5 d'Anthropic, payé à l'usage : 4 $ par million
+de jetons (morceaux de mots) lus et 20 $ par million écrits, soit de l'ordre de 100 à
 200 FCFA par business plan. Des plafonds par projet limitent la dépense
 (`IDEE_AI_PLANS_PER_MONTH`, 3 par défaut).
 

@@ -49,8 +49,29 @@ clients, matériel) et chaque demande de contact reçoit une réponse.
 - Parcours consultables sans compte et hors connexion
 - 85 tests automatisés au total
 
-**Prochaines étapes** : assistant IA pour le business plan, répertoire des
-programmes et financements, messagerie intégrée, application Flutter.
+**Étape 5 — le reste du cahier des charges (version 1)** : terminée.
+
+- Fil d'activité (nouveaux projets, appels à action, mises à jour, réussites), journal
+  de progression daté, partage sur WhatsApp avec aperçu, recherche par montant
+- Suivre un projet, une personne ou un secteur ; « Je connais quelqu'un » ;
+  recommandations du jour expliquées
+- Messagerie après acceptation : texte, messages vocaux, documents, accusé de lecture
+- Documents privés partagés sur autorisation, révocables, avec journal d'accès
+- Signalements, modération avec recours devant un second modérateur, suspension et exclusion
+- Vérification d'identité des investisseurs et experts, pièce effacée après examen
+- Administration : indicateurs de la section 18, signalements, vérifications,
+  fiches pratiques et opportunités
+- Répertoire des programmes et financements, avec suivi de ses candidatures et rappels
+- Centre de notifications et alertes WhatsApp (à activer)
+- Publication d'un projet en cinq questions, photo de profil et disponibilité
+- Assistant IA (Claude Opus 5.5) : questions pour clarifier l'idée, business plan
+  modifiable et imprimable (à activer avec une clé d'API)
+- 126 tests automatisés au total
+
+**Reste à faire** : connexion par e-mail, notifications push du navigateur, SMS de
+secours pour les alertes, saisie vocale par IA, équipe du projet sur la fiche, puis
+les fonctions prévues en V2 (collaborations confirmées, groupes, rendez-vous,
+paiements, wolof) et l'application Flutter.
 
 ## Structure du dépôt
 
@@ -99,6 +120,11 @@ de connexion ne sont pas envoyés par SMS : ils sont écrits dans
 | `/parcours` | Parcours guidés : choix de la situation, mes démarches, rappels |
 | `/parcours/{id}` | Les étapes d'un parcours et mon avancement |
 | `/parcours/forme-juridique` | Questionnaire « Quelle forme juridique choisir ? » |
+| `/?vue=suivis` | Activité de ce que je suis |
+| `/opportunites` | Programmes et financements, et mes candidatures |
+| `/projets/{id}/business-plan` | Business plan rédigé par l'assistant, à corriger et imprimer |
+| `/notifications` | Mes notifications |
+| `/administration` | Équipe IDEE : indicateurs, signalements, vérifications, fiches, opportunités |
 
 ## Routes de l'API
 
@@ -137,6 +163,30 @@ l'en-tête `Authorization: Bearer <jeton>` reçu à la connexion.
 | POST | `/api/journeys/{id}/start` | connecté | Commencer un parcours |
 | DELETE | `/api/journeys/{id}/start` | connecté | Retirer un parcours de mes démarches |
 | PATCH | `/api/journey-steps/{id}/progress` | connecté | Statut, note et date de rappel d'une étape |
+| GET | `/api/feed` | public | Fil d'activité |
+| GET | `/api/me/feed` | connecté | Fil de ce que je suis |
+| GET | `/api/me/recommendations` | connecté | Recommandations du jour, avec leurs raisons |
+| POST | `/api/follows/projects/{id}` · `members/{id}` · `sectors/{slug}` | connecté | Suivre ou ne plus suivre |
+| GET, POST | `/api/projects/{id}/updates` | public, porteur | Journal de progression |
+| GET, POST | `/api/contact-requests/{id}/messages` | concerné | Messagerie (texte, vocal, document) |
+| GET | `/api/messages/{id}/attachment` | concerné | Pièce jointe d'un message |
+| GET, POST | `/api/projects/{id}/documents` | autorisé, porteur | Documents privés |
+| GET | `/api/documents/{id}` | autorisé | Télécharger un document (consultation journalisée) |
+| GET, POST | `/api/projects/{id}/document-accesses` | porteur, connecté | Demandes d'accès aux documents |
+| POST | `/api/document-accesses/{id}/decide` · `revoke` | porteur | Accorder, refuser ou révoquer un accès |
+| POST | `/api/reports` | connecté | Signaler un profil, un projet ou un message |
+| GET | `/api/me/moderation` | connecté | Décisions de modération me concernant |
+| POST | `/api/reports/{id}/appeal` | concerné | Contester une décision, une seule fois |
+| GET, POST | `/api/me/verification` | connecté | Vérification d'identité |
+| GET | `/api/opportunities` | public | Programmes et financements (`type`, `q`) |
+| GET | `/api/me/applications` | connecté | Mes candidatures |
+| PUT, DELETE | `/api/opportunities/{id}/application` | connecté | Suivre ou retirer une candidature |
+| GET | `/api/me/notifications` | connecté | Mes notifications |
+| POST | `/api/me/notifications/read` | connecté | Tout marquer comme lu |
+| GET, POST | `/api/projects/{id}/clarification` | porteur | Questions de l'assistant IA |
+| PUT | `/api/clarifications/{id}` | porteur | Répondre aux questions |
+| GET, POST | `/api/projects/{id}/business-plan` | porteur | Business plan : lire, en rédiger une version |
+| PUT | `/api/business-plans/{id}` | porteur | Corriger les sections |
 
 ## Règles de gestion appliquées
 
@@ -152,7 +202,10 @@ Les valeurs se règlent dans `backend/config/idee.php` ou dans le fichier `.env`
 | RG-07 | Mise en sommeil d'un projet sans mise à jour | 90 jours |
 | RG-09 | Montants indicatifs : aucun argent ne transite par la plateforme | — |
 | RG-10 | Chaque fiche affiche sa source et sa date ; une fiche non revue est signalée à l'équipe | 6 mois |
+| RG-05 | Documents privés visibles après accord du porteur ; accès journalisés et révocables | — |
 | RG-11 | Rôle d'investisseur ou d'expert affiché seulement après vérification d'identité | — |
+| Modération | Durée d'une suspension, délai pour contester une décision | 30 jours, 14 jours |
+| Assistant IA | Business plans par projet et par mois, questions par jour | 3, 3 |
 
 Les relances et expirations tournent toutes les heures, la mise en sommeil
 chaque nuit, les rappels d'étapes chaque matin et le signalement des fiches à
