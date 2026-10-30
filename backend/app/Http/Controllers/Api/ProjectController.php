@@ -12,6 +12,7 @@ use App\Models\Project;
 use App\Models\ProjectMember;
 use App\Services\Projects\ProjectSearch;
 use App\Services\Projects\ProjectService;
+use App\Services\Projects\VisibilityStats;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -41,9 +42,10 @@ class ProjectController extends Controller
             ->setStatusCode(Response::HTTP_CREATED);
     }
 
-    public function show(Project $project): ProjectResource
+    public function show(Project $project, VisibilityStats $visibility): ProjectResource
     {
         abort_unless(Gate::forUser(request()->user('sanctum'))->allows('view', $project), Response::HTTP_NOT_FOUND);
+        $visibility->recordView($project, request()->user('sanctum'));
 
         return new ProjectResource($project->load(['owner.roleAssignments', 'sector', 'openNeeds', 'team']));
     }

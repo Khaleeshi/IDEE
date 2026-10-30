@@ -1,8 +1,12 @@
-@props(['project'])
+@props(['project', 'sponsored' => false])
 
 <article class="mb-3 rounded-2xl border border-stone-200 bg-white p-4 shadow-sm">
     <a href="{{ route('projects.show', $project) }}" class="block">
         <div class="flex flex-wrap items-center gap-2 text-xs text-stone-500">
+            @if ($sponsored)
+                {{-- RG-08 : une mise en avant payante est toujours signalée. --}}
+                <span class="rounded-full bg-amber-100 px-2 py-0.5 font-semibold text-amber-900">Sponsorisé</span>
+            @endif
             @if ($project->sector)
                 <span>{{ $project->sector->name }}</span><span aria-hidden="true">·</span>
             @endif

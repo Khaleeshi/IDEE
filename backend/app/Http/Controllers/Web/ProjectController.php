@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Web;
 
 use App\Enums\CollaborationStatus;
 use App\Enums\NeedType;
+use App\Enums\Offer;
 use App\Enums\ProjectStage;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreProjectMemberRequest;
@@ -25,6 +26,7 @@ use App\Services\Journeys\JourneyService;
 use App\Services\Network\FollowService;
 use App\Services\Projects\ProjectService;
 use App\Services\Projects\ReadinessScore;
+use App\Services\Projects\VisibilityStats;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -36,9 +38,11 @@ class ProjectController extends Controller
 {
     public function __construct(private readonly ProjectService $projects) {}
 
-    public function show(Request $request, Project $project, ReadinessScore $readiness, ReactivityIndicator $reactivity, JourneyService $journeys, FollowService $follows, DocumentService $documents, AssistantService $assistant, TaskService $tasks): View
+    public function show(Request $request, Project $project, ReadinessScore $readiness, ReactivityIndicator $reactivity, JourneyService $journeys, FollowService $follows, DocumentService $documents, AssistantService $assistant, TaskService $tasks, VisibilityStats $visibility): View
     {
         abort_unless(Gate::allows('view', $project), Response::HTTP_NOT_FOUND);
+
+        $visibility->recordView($project, $request->user());
 
         $isOwner = $project->isOwnedBy($request->user());
 
@@ -58,6 +62,9 @@ class ProjectController extends Controller
             // Réussites confirmées par les deux parties (FC-06) et tableau de tâches partagé (CO-02).
             'collaborations' => $project->collaborations()->where('status', CollaborationStatus::Confirmee)->with(['declarer', 'partner'])->latest('confirmed_at')->limit(10)->get(),
             'canManageTasks' => $tasks->canManage($project, $request->user()),
+            // PA-02 et offre Pro : mise en avant en cours et statistiques de visibilité.
+            'sponsoredUntil' => $project->entitlements()->where('offer', Offer::Sponsorise)->active()->max('ends_at'),
+            'stats' => $isOwner && $visibility->isAvailableTo($request->user()) ? $visibility->for($project) : null,
             'following' => $follows->isFollowing($request->user(), $project),
             // Documents privés : visibles seulement par le porteur et les membres autorisés (RG-05).
             'documents' => $documents->canRead($request->user(), $project) ? $project->documents : null,

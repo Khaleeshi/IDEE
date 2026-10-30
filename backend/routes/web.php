@@ -20,6 +20,7 @@ use App\Http\Controllers\Web\NeedController;
 use App\Http\Controllers\Web\NotificationController;
 use App\Http\Controllers\Web\OpportunityController;
 use App\Http\Controllers\Web\OrganisationController;
+use App\Http\Controllers\Web\PaymentController;
 use App\Http\Controllers\Web\ProfileController;
 use App\Http\Controllers\Web\ProjectController;
 use App\Http\Controllers\Web\PushSubscriptionController;
@@ -136,6 +137,14 @@ Route::middleware('auth')->group(function () {
     Route::delete('/evenements/{event}/inscription', [EventController::class, 'unregister'])->name('events.unregister');
     Route::post('/evenements/{event}/annulation', [EventController::class, 'cancel'])->name('events.cancel');
     Route::post('/inscriptions/{eventRegistration}/decision', [EventController::class, 'decide'])->name('events.decide');
+    Route::get('/offres/{offer}/paiement', [PaymentController::class, 'checkout'])->name('offers.checkout');
+    Route::post('/paiements', [PaymentController::class, 'store'])->name('payments.store');
+    Route::get('/paiements/{payment}', [PaymentController::class, 'show'])->name('payments.show');
+    Route::get('/paiements/{payment}/retour', [PaymentController::class, 'returnFromWave'])->name('payments.return');
+    Route::post('/paiements/{payment}/verification', [PaymentController::class, 'check'])->name('payments.check');
+    Route::post('/paiements/{payment}/reference', [PaymentController::class, 'reference'])->name('payments.reference');
+    Route::get('/paiements/{payment}/recu', [PaymentController::class, 'receipt'])->name('payments.receipt');
+    Route::get('/factures/{invoice}', [PaymentController::class, 'invoice'])->name('invoices.show');
     Route::get('/alertes', [AlertController::class, 'index'])->name('alerts.index');
     Route::post('/alertes', [AlertController::class, 'store'])->name('alerts.store');
     Route::get('/alertes/{savedSearch}', [AlertController::class, 'show'])->name('alerts.show');
@@ -160,6 +169,10 @@ Route::middleware(['auth', 'can:administrer'])->prefix('administration')->name('
     Route::get('/organisations', [AdminController::class, 'organisations'])->name('organisations');
     Route::get('/organisations/{organisation}/piece', [AdminController::class, 'organisationDocument'])->name('organisations.document');
     Route::post('/organisations/{organisation}/decision', [AdminController::class, 'decideOrganisation'])->name('organisations.decide');
+    Route::get('/paiements', [AdminController::class, 'payments'])->name('payments');
+    Route::post('/paiements/{payment}/decision', [AdminController::class, 'decidePayment'])->name('payments.decide');
+    Route::post('/factures', [AdminController::class, 'storeInvoice'])->name('invoices.store');
+    Route::post('/factures/{invoice}/reglement', [AdminController::class, 'settleInvoice'])->name('invoices.settle');
     Route::get('/opportunites', [AdminController::class, 'opportunities'])->name('opportunities');
     Route::get('/opportunites/nouvelle', [AdminController::class, 'createOpportunity'])->name('opportunities.create');
     Route::post('/opportunites', [AdminController::class, 'storeOpportunity'])->name('opportunities.store');
@@ -184,6 +197,7 @@ Route::get('/parcours/forme-juridique', [JourneyController::class, 'legalForm'])
 Route::get('/parcours/{journey}', [JourneyController::class, 'show'])->name('journeys.show');
 
 // Répertoire des programmes, concours et financements (OP-01).
+Route::get('/offres', [PaymentController::class, 'offers'])->name('offers.index');
 Route::get('/experts', [ExpertController::class, 'index'])->name('experts.index');
 Route::get('/evenements', [EventController::class, 'index'])->name('events.index');
 Route::get('/evenements/{event}', [EventController::class, 'show'])->name('events.show');

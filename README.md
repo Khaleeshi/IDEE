@@ -101,12 +101,16 @@ clients, matériel) et chaque demande de contact reçoit une réponse.
 - Fiches pratiques en wolof : texte et enregistrement audio saisis par l'équipe dans
   l'administration, bouton Français / Wolof sur les parcours (PG-07, contenu à
   produire avec des locuteurs natifs)
-- 173 tests automatisés au total
+- Paiements : offres Pro et investisseur, mise en avant « Sponsorisé » signalée et
+  sans effet sur le score ni les recommandations (RG-08), packs prépayés payés par
+  Wave (API Checkout, statut toujours relu auprès de Wave) ou par Orange Money
+  (transfert vérifié par l'équipe), reçus numérotés, factures des organisations,
+  statistiques de visibilité pour l'offre Pro (PA-01 à PA-03)
+- 181 tests automatisés au total
 
 **Reste à faire** : saisie vocale par IA (la dictée du clavier est proposée en
-attendant) ; traduction et enregistrement des fiches en wolof ; paiements
-(abonnements Wave, Orange Money ou carte, mise en avant « Sponsorisé », factures),
-qui demandent des comptes marchands et une grille de prix ; fonctions prévues en
+attendant) ; traduction et enregistrement des fiches en wolof ; paiement par carte
+(avec un agrégateur comme PayDunya ou PayTech) ; fonctions prévues en
 V3 (rencontres ciblées, devis d'experts, candidatures structurées, suivi de
 cohortes) ; application Flutter.
 
@@ -161,6 +165,7 @@ de connexion ne sont pas envoyés par SMS : ils sont écrits dans
 | `/groupes` | Groupes par secteur et par région ; `/groupes/{secteur ou region}/{id}` |
 | `/evenements` | Sessions de pitch ; `/evenements/{id}` pour s'inscrire ou candidater |
 | `/projets/{id}/presentation` | Présentation du projet rédigée par l'assistant, à corriger et projeter |
+| `/offres` | Offres payantes, mes offres en cours et mes paiements ; `/paiements/{id}/recu` pour le reçu |
 | `/opportunites?projet={id}` | Programmes compatibles avec l'un de mes projets |
 | `/profil` | Mon profil, mes rôles, mes préférences |
 | `/membres/{id}` | Profil public d'un membre et sa réactivité |
@@ -240,6 +245,11 @@ l'en-tête `Authorization: Bearer <jeton>` reçu à la connexion.
 | POST, DELETE | `/api/groups/{type}/{id}/posts` · `/api/group-posts/{id}` | connecté, auteur | Écrire au groupe, supprimer son message |
 | GET, POST | `/api/projects/{id}/pitch-deck` | porteur | Présentation du projet (IA-06) ; `PUT /api/pitch-decks/{id}` pour la corriger |
 | POST | `/api/meetings/{id}/preparation` | concerné | Préparer un rendez-vous (IA-05) ; `GET /api/assistant-documents/{id}` pour la lire |
+| GET | `/api/offers` | public | Offres, prix et moyens de paiement disponibles |
+| POST, GET | `/api/payments` · `/api/me/payments` · `/api/payments/{id}` | connecté | Acheter une offre (lien Wave en retour), suivre ses paiements |
+| POST | `/api/payments/{id}/reference` | acheteur | Identifiant du transfert Orange Money |
+| POST | `/api/webhooks/wave` | Wave | Avis de paiement, qui déclenche une relecture auprès de Wave |
+| GET | `/api/projects/{id}/stats` | porteur avec l'offre Pro | Statistiques de visibilité du projet |
 | GET | `/api/events` · `/api/events/{id}` | public | Sessions de pitch à venir (le lien de visio seulement pour les inscrits) |
 | POST | `/api/events` | équipe, organisation vérifiée | Organiser une session |
 | POST, DELETE | `/api/events/{id}/registration` | connecté | S'inscrire, ou candidater avec `project_id` ; se désinscrire |
@@ -286,6 +296,8 @@ Les valeurs se règlent dans `backend/config/idee.php` ou dans le fichier `.env`
 | CF-03 | Badge « Vérifiée » après contrôle du RCCM et du NINEA ; justificatif effacé après la décision | — |
 | CF-05 | Accord de confidentialité accepté avant toute demande d'accès aux documents | version 2026-10 |
 | Groupes | Messages par membre et par jour dans les groupes | 10 |
+| RG-08 | Mise en avant payante signalée « Sponsorisé », sans effet sur le score ni sur l'ordre des recommandations | 2 projets au plus en tête |
+| Offres | Pro : 5 000 FCFA / 30 jours ; investisseur : 20 000 FCFA / 30 jours ; « Sponsorisé » : 5 000 FCFA / semaine | prix à tester pendant le pilote |
 | Alertes | Alertes enregistrées par membre ; rappels avant une date limite | 10 ; 7 jours puis 1 jour |
 | Résumé hebdomadaire | Envoyé le lundi aux adresses e-mail confirmées, s'il y a du nouveau | activé |
 | Collaboration | Étapes, rendez-vous et collaborations ne comptent qu'avec l'accord des deux | — |

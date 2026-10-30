@@ -58,6 +58,14 @@ class Organisation extends Model
         return $this->hasMany(Opportunity::class)->latest();
     }
 
+    /**
+     * @return HasMany<Invoice, $this>
+     */
+    public function invoices(): HasMany
+    {
+        return $this->hasMany(Invoice::class)->latest();
+    }
+
     public function isVerified(): bool
     {
         return $this->verification_status === OrganisationVerification::Verifiee;

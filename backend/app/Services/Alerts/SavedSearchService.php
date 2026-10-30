@@ -41,7 +41,7 @@ class SavedSearchService
             return $existing;
         }
 
-        if ($user->savedSearches()->count() >= config('idee.alerts.max_saved_searches')) {
+        if ($user->savedSearches()->count() >= $user->savedSearchLimit()) {
             throw ValidationException::withMessages(['filters' => 'Vous avez atteint le nombre maximum d\'alertes. Supprimez-en une pour en créer une autre.']);
         }
 

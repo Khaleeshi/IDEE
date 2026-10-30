@@ -134,6 +134,49 @@ return [
     // PG-07 : taille maximale de l'enregistrement audio en wolof d'une fiche (en Ko).
     'guide_audio_max_kb' => (int) env('IDEE_GUIDE_AUDIO_KB', 10240),
 
+    // Section 13 et PA-01 à PA-03 : offres payantes en packs prépayés, sans prélèvement
+    // automatique. Prix de départ choisis dans les fourchettes du cahier des charges,
+    // à ajuster après le pilote. Prix toutes taxes comprises, en FCFA.
+    'offers' => [
+        'pro' => [
+            'price' => (int) env('IDEE_PRICE_PRO', 5000),
+            'days' => 30,
+            'weekly_contacts' => 15,
+            'saved_searches' => 30,
+        ],
+        'investisseur' => [
+            'price' => (int) env('IDEE_PRICE_INVESTOR', 20000),
+            'days' => 30,
+            'weekly_contacts' => 40,
+            'saved_searches' => 50,
+        ],
+        // PA-02 et RG-08 : mise en avant signalée « Sponsorisé », sans effet sur le score
+        // ni sur l'ordre des recommandations personnalisées.
+        'sponsorise' => [
+            'price' => (int) env('IDEE_PRICE_SPONSORED_WEEK', 5000),
+            'days' => 7,
+            'max_weeks' => 4,
+            'slots' => 2,
+        ],
+    ],
+
+    // Moyens de paiement. Wave : API Checkout, clé à créer dans l'espace Wave Business.
+    // Orange Money : transfert vers le numéro marchand d'IDEE, vérifié à la main par l'équipe.
+    'payments' => [
+        'wave' => (bool) env('IDEE_PAY_WAVE', false),
+        'orange_money_number' => env('IDEE_ORANGE_MONEY_NUMBER'),
+        // Un paiement Wave non confirmé passe « expiré » après ce délai (en heures).
+        'expire_after_hours' => 24,
+    ],
+
+    // Mentions des reçus et factures (PA-03).
+    'company' => [
+        'name' => env('IDEE_COMPANY_NAME', 'IDEE'),
+        'address' => env('IDEE_COMPANY_ADDRESS'),
+        'ninea' => env('IDEE_COMPANY_NINEA'),
+        'rccm' => env('IDEE_COMPANY_RCCM'),
+    ],
+
     // Code de connexion à usage unique (section 10).
     'otp' => [
         'length' => 6,

@@ -47,6 +47,19 @@
         </x-card>
     @endif
 
+    @if ($organisation->invoices->isNotEmpty())
+        {{-- PA-03 : factures de l'espace organisations. --}}
+        <x-card class="mt-3">
+            <h2 class="font-semibold">Factures</h2>
+            @foreach ($organisation->invoices as $invoice)
+                <div class="mt-2 flex items-center justify-between gap-2 border-t border-stone-100 pt-2 text-sm">
+                    <a href="{{ route('invoices.show', $invoice) }}" target="_blank" class="font-medium underline">{{ $invoice->number }}</a>
+                    <span class="text-xs text-stone-500">{{ number_format($invoice->amount_fcfa, 0, ',', "\u{00A0}") }} FCFA · {{ $invoice->status->label() }}</span>
+                </div>
+            @endforeach
+        </x-card>
+    @endif
+
     <x-card class="mt-3">
         <h2 class="font-semibold">Membres</h2>
         @foreach ($organisation->members as $member)
