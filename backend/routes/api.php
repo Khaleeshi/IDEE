@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\DocumentController;
 use App\Http\Controllers\Api\FeedController;
 use App\Http\Controllers\Api\HelpOfferController;
 use App\Http\Controllers\Api\JourneyController;
+use App\Http\Controllers\Api\MatchingController;
 use App\Http\Controllers\Api\MemberController;
 use App\Http\Controllers\Api\MessageController;
 use App\Http\Controllers\Api\NeedController;
@@ -78,6 +79,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('projects/{project}', [ProjectController::class, 'update']);
     Route::delete('projects/{project}', [ProjectController::class, 'destroy']);
     Route::post('projects/{project}/team', [ProjectController::class, 'addTeamMember']);
+    Route::patch('team-members/{projectMember}', [ProjectController::class, 'updateTeamMember']);
     Route::delete('team-members/{projectMember}', [ProjectController::class, 'removeTeamMember']);
 
     Route::post('projects/{project}/updates', [ProjectUpdateController::class, 'store']);
@@ -122,6 +124,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('meetings/{meeting}/cancel', [CollaborationController::class, 'cancelMeeting']);
     Route::post('contact-requests/{contactRequest}/collaborations', [CollaborationController::class, 'declare']);
     Route::post('collaborations/{collaboration}/respond', [CollaborationController::class, 'respondCollaboration']);
+
+    Route::get('projects/{project}/matches', [MatchingController::class, 'index']);
+    Route::put('projects/{project}/matching', [MatchingController::class, 'toggle']);
+    Route::post('projects/{project}/matches', [MatchingController::class, 'store']);
+    Route::post('project-matches/{projectMatch}/respond', [MatchingController::class, 'respond']);
 
     Route::get('projects/{project}/tasks', [TaskController::class, 'index']);
     Route::post('projects/{project}/tasks', [TaskController::class, 'store']);

@@ -9,6 +9,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreProjectMemberRequest;
 use App\Http\Requests\StoreProjectRequest;
 use App\Http\Requests\StoreProjectUpdateRequest;
+use App\Http\Requests\UpdateProjectMemberRequest;
 use App\Http\Requests\UpdateProjectRequest;
 use App\Models\BusinessPlan;
 use App\Models\IdeaClarification;
@@ -60,6 +61,8 @@ class ProjectController extends Controller
             'following' => $follows->isFollowing($request->user(), $project),
             // Documents privés : visibles seulement par le porteur et les membres autorisés (RG-05).
             'documents' => $documents->canRead($request->user(), $project) ? $project->documents : null,
+            // PR-07 : parts envisagées réservées au porteur et aux lecteurs liés par l'accord de confidentialité.
+            'showShares' => $documents->canRead($request->user(), $project),
             'documentsCount' => $project->documents()->count(),
             'documentAccess' => $documents->accessOf($request->user(), $project),
             'accesses' => $isOwner ? $project->documentAccesses()->with('user')->latest()->get() : collect(),
@@ -92,6 +95,15 @@ class ProjectController extends Controller
         $this->projects->addTeamMember($project, $request->validated());
 
         return redirect()->to(route('projects.show', $project).'#equipe')->with('status', 'Équipe mise à jour.');
+    }
+
+    public function updateTeamMember(UpdateProjectMemberRequest $request, ProjectMember $projectMember): RedirectResponse
+    {
+        Gate::authorize('update', $projectMember->project);
+
+        $this->projects->updateTeamMember($projectMember, $request->validated());
+
+        return redirect()->to(route('projects.show', $projectMember->project).'#equipe')->with('status', 'Équipe mise à jour.');
     }
 
     public function removeTeamMember(ProjectMember $projectMember): RedirectResponse

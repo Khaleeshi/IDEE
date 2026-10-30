@@ -10,6 +10,7 @@ use App\Http\Controllers\Web\FeedController;
 use App\Http\Controllers\Web\FollowController;
 use App\Http\Controllers\Web\JourneyController;
 use App\Http\Controllers\Web\LoginController;
+use App\Http\Controllers\Web\MatchingController;
 use App\Http\Controllers\Web\MemberController;
 use App\Http\Controllers\Web\MessageController;
 use App\Http\Controllers\Web\NeedController;
@@ -44,6 +45,7 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/projets/{project}/mises-a-jour', [ProjectController::class, 'publishUpdate'])->name('projects.updates.store');
     Route::post('/projets/{project}/equipe', [ProjectController::class, 'addTeamMember'])->name('projects.team.store');
+    Route::patch('/equipe/{projectMember}', [ProjectController::class, 'updateTeamMember'])->name('projects.team.update');
     Route::delete('/equipe/{projectMember}', [ProjectController::class, 'removeTeamMember'])->name('projects.team.destroy');
     Route::post('/projets/{project}/besoins', [NeedController::class, 'store'])->name('needs.store');
     Route::post('/projets/{project}/assistant/questions', [AssistantController::class, 'clarify'])->name('assistant.clarify');
@@ -81,6 +83,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/rendez-vous/{meeting}/annulation', [CollaborationController::class, 'cancelMeeting'])->name('meetings.cancel');
     Route::post('/demandes/{contactRequest}/collaborations', [CollaborationController::class, 'declare'])->name('collaborations.store');
     Route::post('/collaborations/{collaboration}/reponse', [CollaborationController::class, 'respondCollaboration'])->name('collaborations.respond');
+    Route::get('/projets/{project}/rapprochements', [MatchingController::class, 'index'])->name('matches.index');
+    Route::post('/projets/{project}/rapprochements/ouverture', [MatchingController::class, 'toggle'])->name('matches.toggle');
+    Route::post('/projets/{project}/rapprochements', [MatchingController::class, 'store'])->name('matches.store');
+    Route::post('/rapprochements/{projectMatch}/reponse', [MatchingController::class, 'respond'])->name('matches.respond');
     Route::get('/projets/{project}/taches', [TaskController::class, 'index'])->name('tasks.index');
     Route::post('/projets/{project}/taches', [TaskController::class, 'store'])->name('tasks.store');
     Route::post('/taches/{projectTask}/colonne', [TaskController::class, 'move'])->name('tasks.move');

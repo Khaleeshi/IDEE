@@ -35,7 +35,13 @@ class ProjectResource extends JsonResource
             'readiness_advice' => $this->when($isOwner, fn () => app(ReadinessScore::class)->evaluate($this->resource)['missing']),
             'owner' => new MemberResource($this->whenLoaded('owner')),
             'open_needs' => NeedResource::collection($this->whenLoaded('openNeeds')),
-            'team' => $this->whenLoaded('team', fn () => $this->team->map(fn ($member) => ['id' => $member->id, 'name' => $member->name, 'role' => $member->role])->all()),
+            // PR-07 : les parts envisagées restent visibles du seul porteur.
+            'team' => $this->whenLoaded('team', fn () => $this->team->map(fn ($member) => [
+                'id' => $member->id,
+                'name' => $member->name,
+                'role' => $member->role,
+                ...($this->isOwnedBy($request->user('sanctum')) ? ['share_percent' => $member->share_percent] : []),
+            ])->all()),
             'is_owner' => $isOwner,
             'last_activity_at' => $this->last_activity_at?->toIso8601String(),
             'created_at' => $this->created_at?->toIso8601String(),

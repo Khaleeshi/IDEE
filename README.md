@@ -80,7 +80,11 @@ clients, matériel) et chaque demande de contact reçoit une réponse.
 - Alertes : recherches enregistrées sur les nouveaux projets (RR-04), programmes
   compatibles avec son projet (OP-02), rappels 7 jours puis 1 jour avant la date
   limite d'une candidature (OP-03), résumé de la semaine par e-mail (NO-04)
-- 149 tests automatisés au total
+- Projets : parts envisagées dans l'équipe, privées et plafonnées à 100 % (PR-07) ;
+  rapprochement de projets proches entre porteurs volontaires, conversation ouverte
+  seulement avec l'accord des deux (PR-08, RG-12) ; accord de confidentialité accepté
+  avant toute demande d'accès aux documents (CF-05)
+- 153 tests automatisés au total
 
 **Reste à faire** : saisie vocale par IA (la dictée du clavier est proposée en
 attendant), la suite de la V2 (groupes, alertes, pages d'organisation, experts,
@@ -131,6 +135,7 @@ de connexion ne sont pas envoyés par SMS : ils sont écrits dans
 | `/demandes/{id}` | Conversation : messages, prochaines étapes, rendez-vous, collaboration |
 | `/projets/{id}/taches` | Tableau de tâches partagé avec les partenaires du projet |
 | `/alertes` | Mes alertes sur les nouveaux projets |
+| `/projets/{id}/rapprochements` | Projets proches du mien et propositions de rapprochement |
 | `/opportunites?projet={id}` | Programmes compatibles avec l'un de mes projets |
 | `/profil` | Mon profil, mes rôles, mes préférences |
 | `/membres/{id}` | Profil public d'un membre et sa réactivité |
@@ -197,6 +202,9 @@ l'en-tête `Authorization: Bearer <jeton>` reçu à la connexion.
 | GET, POST | `/api/me/alerts` | connecté | Alertes enregistrées (mêmes filtres que la recherche de projets) |
 | DELETE | `/api/alerts/{id}` | auteur | Supprimer une alerte |
 | GET | `/api/projects/{id}/opportunities` | porteur | Opportunités compatibles avec le projet, et pourquoi |
+| PATCH | `/api/team-members/{id}` | porteur | Rôle et part envisagée d'une personne de l'équipe |
+| GET, PUT | `/api/projects/{id}/matches` · `matching` | porteur | Projets proches, propositions ; activer les rapprochements |
+| POST | `/api/projects/{id}/matches` · `/api/project-matches/{id}/respond` | porteurs | Proposer un rapprochement, y répondre |
 | PATCH, DELETE | `/api/tasks/{id}` | porteur, partenaires | Changer la colonne d'une tâche, la retirer |
 | GET, POST | `/api/projects/{id}/documents` | autorisé, porteur | Documents privés |
 | GET | `/api/documents/{id}` | autorisé | Télécharger un document (consultation journalisée) |
@@ -235,6 +243,8 @@ Les valeurs se règlent dans `backend/config/idee.php` ou dans le fichier `.env`
 | Modération | Durée d'une suspension, délai pour contester une décision | 30 jours, 14 jours |
 | Assistant IA | Business plans par projet et par mois, questions par jour | 3, 3 |
 | Rendez-vous | Rappel envoyé aux deux personnes avant un rendez-vous confirmé | 24 heures |
+| RG-12 | Rapprochement proposé seulement entre porteurs volontaires, sans rien révéler de privé | désactivé par défaut |
+| CF-05 | Accord de confidentialité accepté avant toute demande d'accès aux documents | version 2026-10 |
 | Alertes | Alertes enregistrées par membre ; rappels avant une date limite | 10 ; 7 jours puis 1 jour |
 | Résumé hebdomadaire | Envoyé le lundi aux adresses e-mail confirmées, s'il y a du nouveau | activé |
 | Collaboration | Étapes, rendez-vous et collaborations ne comptent qu'avec l'accord des deux | — |

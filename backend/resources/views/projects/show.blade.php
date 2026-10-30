@@ -85,20 +85,45 @@
                 <span><span class="font-medium">{{ $project->owner->name }}</span> <span class="text-stone-500">· porteur du projet</span></span>
             </li>
             @foreach ($team as $member)
-                <li class="flex items-center justify-between gap-2 rounded-xl border border-stone-200 bg-white p-3">
-                    <span><span class="font-medium">{{ $member->name }}</span> <span class="text-stone-500">· {{ $member->role }}</span></span>
+                <li class="rounded-xl border border-stone-200 bg-white p-3">
+                    <div class="flex items-center justify-between gap-2">
+                        <span>
+                            <span class="font-medium">{{ $member->name }}</span> <span class="text-stone-500">· {{ $member->role }}</span>
+                            @if ($showShares && $member->share_percent !== null)
+                                <span class="text-stone-500">· part envisagée {{ rtrim(rtrim(number_format($member->share_percent, 2, ',', ''), '0'), ',') }} %</span>
+                            @endif
+                        </span>
+                        @if ($isOwner)
+                            <form method="POST" action="{{ route('projects.team.destroy', $member) }}">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="py-1 text-xs text-stone-500 underline">Retirer</button>
+                            </form>
+                        @endif
+                    </div>
                     @if ($isOwner)
-                        <form method="POST" action="{{ route('projects.team.destroy', $member) }}">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="py-1 text-xs text-stone-500 underline">Retirer</button>
-                        </form>
+                        <details class="mt-1">
+                            <summary class="cursor-pointer py-1 text-xs font-medium text-brand-700">Modifier le rôle ou la part</summary>
+                            <form method="POST" action="{{ route('projects.team.update', $member) }}" class="mt-2 grid grid-cols-2 gap-2">
+                                @csrf
+                                @method('PATCH')
+                                <label class="sr-only" for="role-{{ $member->id }}">Rôle</label>
+                                <input id="role-{{ $member->id }}" name="role" required maxlength="120" value="{{ $member->role }}" class="rounded-xl border border-stone-300 px-3 py-2 text-base">
+                                <label class="sr-only" for="part-{{ $member->id }}">Part envisagée (%)</label>
+                                <input id="part-{{ $member->id }}" name="share_percent" type="number" inputmode="decimal" min="0" max="100" step="0.01" value="{{ $member->share_percent }}" placeholder="Part %" class="rounded-xl border border-stone-300 px-3 py-2 text-base">
+                                <x-button variant="secondary" class="col-span-2 min-h-10 py-2 text-sm">Enregistrer</x-button>
+                            </form>
+                        </details>
                     @endif
                 </li>
             @endforeach
         </ul>
+        @if ($showShares && $team->whereNotNull('share_percent')->isNotEmpty())
+            {{-- PR-07 : répartition indicative ; IDEE n'organise ni vente ni échange de parts (EX-02). --}}
+            <p class="mt-2 text-xs text-stone-500">Parts envisagées entre associés, indicatives et visibles seulement du porteur et des personnes qui ont accepté l'accord de confidentialité. IDEE n'organise aucune vente ni aucun échange de parts.</p>
+        @endif
         @if ($isOwner)
-            <details class="mt-2" @if ($errors->hasAny(['name', 'role'])) open @endif>
+            <details class="mt-2" @if ($errors->hasAny(['name', 'role', 'share_percent'])) open @endif>
                 <summary class="cursor-pointer py-2 text-sm font-medium text-brand-700">+ Ajouter une personne</summary>
                 <form method="POST" action="{{ route('projects.team.store', $project) }}" class="mt-2 grid gap-2 sm:grid-cols-2">
                     @csrf
@@ -106,6 +131,8 @@
                     <input id="equipe-nom" name="name" required maxlength="120" placeholder="Nom" class="rounded-xl border border-stone-300 px-3 py-3 text-base">
                     <label class="sr-only" for="equipe-role">Rôle</label>
                     <input id="equipe-role" name="role" required maxlength="120" placeholder="Rôle, ex. : production" class="rounded-xl border border-stone-300 px-3 py-3 text-base">
+                    <label class="sr-only" for="equipe-part">Part envisagée (%)</label>
+                    <input id="equipe-part" name="share_percent" type="number" inputmode="decimal" min="0" max="100" step="0.01" placeholder="Part envisagée en % (facultatif)" class="rounded-xl border border-stone-300 px-3 py-3 text-base sm:col-span-2">
                     <x-button variant="secondary" class="sm:col-span-2">Ajouter</x-button>
                 </form>
             </details>
@@ -114,6 +141,9 @@
 
     @if ($canManageTasks)
         <a href="{{ route('tasks.index', $project) }}" class="mt-4 block rounded-xl border border-brand-100 bg-brand-50 p-3 text-sm font-medium text-brand-800">Tableau de tâches partagé →</a>
+    @endif
+    @if ($isOwner)
+        <a href="{{ route('matches.index', $project) }}" class="mt-2 block rounded-xl border border-stone-200 bg-white p-3 text-sm font-medium text-stone-800">Projets proches du vôtre →</a>
     @endif
 
     {{-- FC-06 : réussites confirmées par les deux parties. --}}

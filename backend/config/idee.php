@@ -71,8 +71,16 @@ return [
     ],
 
     // PR-05 : documents privés d'un projet (taille maximale en Ko).
+    // CF-05 : version de l'accord de confidentialité à accepter avant d'y accéder ;
+    // la changer quand le texte change, pour garder la trace de ce qui a été accepté.
     'documents' => [
         'max_kb' => (int) env('IDEE_DOCUMENT_KB', 10240),
+        'nda_version' => '2026-10',
+    ],
+
+    // PR-08 : nombre de projets proches proposés au porteur.
+    'matching' => [
+        'suggestions' => (int) env('IDEE_MATCHING_SUGGESTIONS', 5),
     ],
 
     // Modération (section 8) : durée d'une suspension et délai pour contester une décision (en jours).

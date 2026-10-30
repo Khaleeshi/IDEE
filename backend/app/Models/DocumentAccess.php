@@ -21,6 +21,7 @@ class DocumentAccess extends Model
         return [
             'status' => DocumentAccessStatus::class,
             'decided_at' => 'datetime',
+            'nda_accepted_at' => 'datetime',
         ];
     }
 

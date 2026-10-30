@@ -33,6 +33,7 @@ class Project extends Model
             'stage' => ProjectStage::class,
             'status' => ProjectStatus::class,
             'last_activity_at' => 'datetime',
+            'open_to_matching' => 'boolean',
         ];
     }
 
