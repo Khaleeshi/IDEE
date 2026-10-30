@@ -113,12 +113,12 @@ clients, matériel) et chaque demande de contact reçoit une réponse.
   suivi des cohortes : score, besoins, activité et points de suivi (OR-03)
 - Devis et prestations : demande de devis à un expert vérifié, devis, acceptation,
   livraison puis confirmation par le client ; règlement direct entre eux (SE-02)
-- 187 tests automatisés au total
+- Rencontres ciblées en ligne : porteurs et partenaires en binômes, tour par tour,
+  sans se revoir, avec un lien de visio gratuit (Jitsi) et un rappel la veille (EV-02)
+- 188 tests automatisés au total
 
 **Reste à faire** : saisie vocale en wolof (IA-04, après des tests de qualité) ; traduction et enregistrement des fiches en wolof ; paiement par carte
-(avec un agrégateur comme PayDunya ou PayTech) ; fonctions prévues en
-V3 (rencontres ciblées, devis d'experts, candidatures structurées, suivi de
-cohortes) ; application Flutter.
+(avec un agrégateur comme PayDunya ou PayTech) ; application Flutter.
 
 ## Structure du dépôt
 
@@ -169,7 +169,7 @@ de connexion ne sont pas envoyés par SMS : ils sont écrits dans
 | `/organisations` | Annuaire des organisations ; `/organisations/{id}` leur page, `/gestion` pour la gérer |
 | `/experts` | Experts vérifiés et leurs tarifs ; `/membres/{id}/contacter` pour écrire à propos de son projet |
 | `/groupes` | Groupes par secteur et par région ; `/groupes/{secteur ou region}/{id}` |
-| `/evenements` | Sessions de pitch ; `/evenements/{id}` pour s'inscrire ou candidater |
+| `/evenements` | Sessions de pitch et rencontres ciblées ; `/evenements/{id}` pour s'inscrire, candidater ou voir ses rencontres |
 | `/projets/{id}/presentation` | Présentation du projet rédigée par l'assistant, à corriger et projeter |
 | `/candidatures/{id}` | Candidature à un programme : réponses, business plan joint, décision |
 | `/organisations/{id}/cohortes` | Cohortes suivies par une organisation ; `/cohortes/{id}` leur tableau de suivi |
@@ -269,6 +269,7 @@ l'en-tête `Authorization: Bearer <jeton>` reçu à la connexion.
 | POST | `/api/events` | équipe, organisation vérifiée | Organiser une session |
 | POST, DELETE | `/api/events/{id}/registration` | connecté | S'inscrire, ou candidater avec `project_id` ; se désinscrire |
 | GET, POST | `/api/events/{id}/registrations` · `/api/event-registrations/{id}/decide` | organisateur | Candidatures et sélection |
+| POST, GET | `/api/events/{id}/pairings` · `/api/events/{id}/my-meetings` | organisateur, inscrit | Former les binômes ; mes rencontres |
 | PATCH, DELETE | `/api/tasks/{id}` | porteur, partenaires | Changer la colonne d'une tâche, la retirer |
 | GET, POST | `/api/projects/{id}/documents` | autorisé, porteur | Documents privés |
 | GET | `/api/documents/{id}` | autorisé | Télécharger un document (consultation journalisée) |
@@ -311,6 +312,7 @@ Les valeurs se règlent dans `backend/config/idee.php` ou dans le fichier `.env`
 | CF-03 | Badge « Vérifiée » après contrôle du RCCM et du NINEA ; justificatif effacé après la décision | — |
 | CF-05 | Accord de confidentialité accepté avant toute demande d'accès aux documents | version 2026-10 |
 | Groupes | Messages par membre et par jour dans les groupes | 10 |
+| Rencontres ciblées | Durée d'une rencontre ; nombre de tours au plus | 10 minutes ; 6 |
 | RG-08 | Mise en avant payante signalée « Sponsorisé », sans effet sur le score ni sur l'ordre des recommandations | 2 projets au plus en tête |
 | Offres | Pro : 5 000 FCFA / 30 jours ; investisseur : 20 000 FCFA / 30 jours ; « Sponsorisé » : 5 000 FCFA / semaine | prix à tester pendant le pilote |
 | Alertes | Alertes enregistrées par membre ; rappels avant une date limite | 10 ; 7 jours puis 1 jour |

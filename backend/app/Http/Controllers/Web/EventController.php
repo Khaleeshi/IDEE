@@ -45,6 +45,12 @@ class EventController extends Controller
             'showPlace' => $event->mode !== MeetingMode::Visio || $canManage || $registration?->status->attends(),
             'candidates' => $canManage ? $event->registrations()->where('kind', 'pitch')->with(['user', 'project'])->oldest()->get() : collect(),
             'attendees' => $event->registrations()->count(),
+            // EV-02 : binômes de l'organisateur, ou rencontres du participant.
+            'pairings' => $event->isSpeedMeeting()
+                ? $event->pairings()->with(['first', 'second'])
+                    ->when(! $canManage, fn ($query) => $query->where(fn ($query) => $query->where('first_user_id', $user?->id)->orWhere('second_user_id', $user?->id)))
+                    ->get()
+                : collect(),
         ]);
     }
 
@@ -69,7 +75,7 @@ class EventController extends Controller
     public function register(Request $request, Event $event): RedirectResponse
     {
         $project = $request->filled('project_id') ? Project::findOrFail($request->input('project_id')) : null;
-        $this->events->register($event, $request->user(), $project);
+        $this->events->register($event, $request->user(), $project, $request->input('side'));
 
         return redirect()->route('events.show', $event)->with('status', $project
             ? 'Candidature envoyée. L\'organisateur vous dira si votre projet est retenu.'
@@ -90,6 +96,15 @@ class EventController extends Controller
         $this->events->decide($eventRegistration, $request->boolean('accepted'));
 
         return redirect()->to(route('events.show', $eventRegistration->event).'#candidatures')->with('status', 'Décision enregistrée et transmise.');
+    }
+
+    public function pair(Request $request, Event $event): RedirectResponse
+    {
+        abort_unless($this->events->canManage($request->user(), $event), 403);
+
+        $pairings = $this->events->pair($event);
+
+        return redirect()->to(route('events.show', $event).'#binomes')->with('status', $pairings->count().' rencontres organisées ; les participants sont prévenus.');
     }
 
     public function cancel(Request $request, Event $event): RedirectResponse

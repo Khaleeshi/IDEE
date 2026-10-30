@@ -138,6 +138,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/evenements/{event}/inscription', [EventController::class, 'register'])->name('events.register');
     Route::delete('/evenements/{event}/inscription', [EventController::class, 'unregister'])->name('events.unregister');
     Route::post('/evenements/{event}/annulation', [EventController::class, 'cancel'])->name('events.cancel');
+    Route::post('/evenements/{event}/binomes', [EventController::class, 'pair'])->name('events.pair');
     Route::post('/inscriptions/{eventRegistration}/decision', [EventController::class, 'decide'])->name('events.decide');
     Route::get('/offres/{offer}/paiement', [PaymentController::class, 'checkout'])->name('offers.checkout');
     Route::post('/paiements', [PaymentController::class, 'store'])->name('payments.store');

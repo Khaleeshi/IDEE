@@ -87,6 +87,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('events/{event}/registration', [EventController::class, 'register']);
     Route::delete('events/{event}/registration', [EventController::class, 'unregister']);
     Route::get('events/{event}/registrations', [EventController::class, 'registrations']);
+    Route::post('events/{event}/pairings', [EventController::class, 'pair']);
+    Route::get('events/{event}/my-meetings', [EventController::class, 'meetings']);
     Route::post('event-registrations/{eventRegistration}/decide', [EventController::class, 'decide']);
     Route::post('payments', [PaymentController::class, 'store']);
     Route::get('me/payments', [PaymentController::class, 'index']);

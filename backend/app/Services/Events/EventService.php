@@ -5,12 +5,14 @@ namespace App\Services\Events;
 use App\Enums\OrganisationRole;
 use App\Enums\RegistrationStatus;
 use App\Models\Event;
+use App\Models\EventPairing;
 use App\Models\EventRegistration;
 use App\Models\Organisation;
 use App\Models\Project;
 use App\Models\User;
 use App\Notifications\EventNotice;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -78,8 +80,12 @@ class EventService
      *
      * @throws ValidationException
      */
-    public function register(Event $event, User $user, ?Project $project = null): EventRegistration
+    public function register(Event $event, User $user, ?Project $project = null, ?string $side = null): EventRegistration
     {
+        if ($event->isSpeedMeeting() && ! in_array($side, ['porteur', 'partenaire'], true)) {
+            throw ValidationException::withMessages(['side' => 'Indiquez si vous venez comme porteur de projet ou comme partenaire.']);
+        }
+
         if ($event->isCancelled() || $event->starts_at->isPast()) {
             throw ValidationException::withMessages(['event' => 'Les inscriptions à cette session sont closes.']);
         }
@@ -102,11 +108,60 @@ class EventService
         $registration->event()->associate($event);
         $registration->user()->associate($user);
         $registration->project()->associate($project);
-        $registration->kind = $project ? 'pitch' : 'auditeur';
-        $registration->status = $project ? RegistrationStatus::Candidat : RegistrationStatus::Inscrit;
+        $registration->kind = $project && ! $event->isSpeedMeeting() ? 'pitch' : 'auditeur';
+        $registration->side = $event->isSpeedMeeting() ? $side : null;
+        $registration->status = $project && ! $event->isSpeedMeeting() ? RegistrationStatus::Candidat : RegistrationStatus::Inscrit;
         $registration->save();
 
         return $registration;
+    }
+
+    /**
+     * Forme les binômes porteur / partenaire, tour par tour, sans se revoir (EV-02).
+     *
+     * @return Collection<int, EventPairing>
+     *
+     * @throws ValidationException
+     */
+    public function pair(Event $event): Collection
+    {
+        if (! $event->isSpeedMeeting()) {
+            throw ValidationException::withMessages(['event' => 'Les binômes ne concernent que les rencontres ciblées.']);
+        }
+
+        $registrations = $event->registrations()->where('status', RegistrationStatus::Inscrit)->oldest()->get();
+        $founders = $registrations->where('side', 'porteur')->pluck('user_id')->values();
+        $partners = $registrations->where('side', 'partenaire')->pluck('user_id')->values();
+
+        if ($founders->isEmpty() || $partners->isEmpty()) {
+            throw ValidationException::withMessages(['event' => 'Il faut au moins un porteur et un partenaire inscrits.']);
+        }
+
+        [$small, $large] = $founders->count() <= $partners->count() ? [$founders, $partners] : [$partners, $founders];
+        $rounds = min(config('idee.speed_meeting.max_rounds'), $large->count());
+
+        $event->pairings()->delete();
+
+        for ($round = 0; $round < $rounds; $round++) {
+            foreach ($small as $index => $userId) {
+                $pairing = new EventPairing;
+                $pairing->forceFill([
+                    'event_id' => $event->id,
+                    'round' => $round + 1,
+                    'starts_at' => $event->starts_at->copy()->addMinutes($round * config('idee.speed_meeting.minutes')),
+                    'first_user_id' => $userId,
+                    'second_user_id' => $large[($index + $round) % $large->count()],
+                    'room_url' => rtrim(config('idee.speed_meeting.video_base'), '/').'/IDEE-'.Str::random(16),
+                ])->save();
+            }
+        }
+
+        $registrations->each(fn (EventRegistration $registration) => $registration->user->notify(new EventNotice(
+            $event,
+            'Vos rencontres pour « '.$event->title.' » sont prêtes : horaires et liens sur la page de l\'événement.',
+        )));
+
+        return $event->pairings()->get();
     }
 
     public function unregister(Event $event, User $user): void

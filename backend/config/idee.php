@@ -83,6 +83,13 @@ return [
         'posts_per_day' => (int) env('IDEE_GROUP_POSTS_PER_DAY', 10),
     ],
 
+    // EV-02 : rencontres ciblées en ligne, par tours de quelques minutes, sur une salle de visio gratuite.
+    'speed_meeting' => [
+        'minutes' => (int) env('IDEE_SPEED_MEETING_MINUTES', 10),
+        'max_rounds' => (int) env('IDEE_SPEED_MEETING_ROUNDS', 6),
+        'video_base' => env('IDEE_VIDEO_BASE', 'https://meet.jit.si/'),
+    ],
+
     // OR-02 : questions propres à un programme, en plus des trois questions communes.
     'programmes' => [
         'max_questions' => 3,

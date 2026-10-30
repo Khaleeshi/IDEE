@@ -8,6 +8,7 @@ use App\Http\Requests\DecisionRequest;
 use App\Http\Requests\EventRequest;
 use App\Http\Resources\EnumResource;
 use App\Models\Event;
+use App\Models\EventPairing;
 use App\Models\EventRegistration;
 use App\Models\Organisation;
 use App\Models\Project;
@@ -63,7 +64,31 @@ class EventController extends Controller
     {
         $project = $request->filled('project_id') ? Project::findOrFail($request->input('project_id')) : null;
 
-        return response()->json(['data' => $this->registration($this->events->register($event, $request->user(), $project))], Response::HTTP_CREATED);
+        return response()->json(['data' => $this->registration($this->events->register($event, $request->user(), $project, $request->input('side')))], Response::HTTP_CREATED);
+    }
+
+    /**
+     * Forme les binômes des rencontres ciblées (EV-02), pour l'organisateur.
+     */
+    public function pair(Request $request, Event $event): JsonResponse
+    {
+        abort_unless($this->events->canManage($request->user(), $event), Response::HTTP_FORBIDDEN);
+
+        return response()->json(['data' => $this->events->pair($event)->map($this->pairing(...))]);
+    }
+
+    /**
+     * Mes rencontres : horaires, interlocuteur et lien de visio.
+     */
+    public function meetings(Request $request, Event $event): JsonResponse
+    {
+        $user = $request->user();
+
+        return response()->json(['data' => $event->pairings()
+            ->where(fn ($query) => $query->where('first_user_id', $user->id)->orWhere('second_user_id', $user->id))
+            ->with(['first', 'second'])
+            ->get()
+            ->map(fn (EventPairing $pairing) => [...$this->pairing($pairing), 'with' => ['id' => $pairing->partnerOf($user)?->id, 'name' => $pairing->partnerOf($user)?->name]])]);
     }
 
     public function unregister(Request $request, Event $event): Response
@@ -102,6 +127,7 @@ class EventController extends Controller
         return [
             'id' => $event->id,
             'title' => $event->title,
+            'format' => $event->format ?? 'pitch',
             'description' => $event->description,
             'mode' => EnumResource::make($event->mode),
             'starts_at' => $event->starts_at->toIso8601String(),
@@ -117,11 +143,25 @@ class EventController extends Controller
     /**
      * @return array<string, mixed>
      */
+    private function pairing(EventPairing $pairing): array
+    {
+        return [
+            'id' => $pairing->id,
+            'round' => $pairing->round,
+            'starts_at' => $pairing->starts_at->toIso8601String(),
+            'room_url' => $pairing->room_url,
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
     private function registration(EventRegistration $registration): array
     {
         return [
             'id' => $registration->id,
             'kind' => $registration->kind,
+            'side' => $registration->side,
             'status' => EnumResource::make($registration->status),
             'project_id' => $registration->project_id,
         ];

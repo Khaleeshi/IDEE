@@ -139,4 +139,41 @@ class EventTest extends TestCase
         $this->post(route('events.register', $id))->assertRedirect(route('events.show', $id));
         $this->get(route('events.show', $id))->assertSee('https://meet.example.org/pitch');
     }
+
+    public function test_speed_meetings_pair_founders_and_partners_round_by_round(): void
+    {
+        Notification::fake();
+        $organiser = $this->verifiedOrganiser();
+        $id = $this->pitchSession($organiser, ['format' => 'rencontres', 'pitch_slots' => 0, 'title' => 'Rencontres agro']);
+
+        $founders = User::factory()->count(2)->create();
+        $partners = User::factory()->count(3)->create();
+        foreach ($founders as $founder) {
+            Sanctum::actingAs($founder);
+            $this->postJson("/api/events/{$id}/registration")->assertUnprocessable()->assertJsonValidationErrors('side');
+            $this->postJson("/api/events/{$id}/registration", ['side' => 'porteur'])->assertCreated()->assertJsonPath('data.side', 'porteur');
+        }
+        foreach ($partners as $partner) {
+            Sanctum::actingAs($partner);
+            $this->postJson("/api/events/{$id}/registration", ['side' => 'partenaire'])->assertCreated();
+        }
+
+        Sanctum::actingAs($founders[0]);
+        $this->postJson("/api/events/{$id}/pairings")->assertForbidden();
+
+        Sanctum::actingAs($organiser);
+        // 3 tours (autant que de partenaires), 2 rencontres par tour.
+        $this->postJson("/api/events/{$id}/pairings")->assertOk()->assertJsonCount(6, 'data');
+        Notification::assertSentTo($partners[2], EventNotice::class);
+
+        Sanctum::actingAs($founders[0]);
+        $meetings = collect($this->getJson("/api/events/{$id}/my-meetings")->assertOk()->json('data'));
+        $this->assertCount(3, $meetings);
+        $this->assertCount(3, $meetings->pluck('with.id')->unique(), 'Un porteur ne revoit pas deux fois le même partenaire.');
+        $this->assertStringStartsWith('https://meet.jit.si/IDEE-', $meetings->first()['room_url']);
+        $this->assertSame([1, 2, 3], $meetings->pluck('round')->all());
+
+        $this->actingAs($founders[0])->get(route('events.show', $id))->assertSee('Mes rencontres')->assertSee('Rejoindre la visio');
+        $this->actingAs($organiser)->get(route('events.show', $id))->assertSee('Refaire les binômes')->assertDontSee('Candidatures');
+    }
 }

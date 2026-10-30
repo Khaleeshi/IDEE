@@ -28,6 +28,8 @@ class EventRequest extends FormRequest
         return [
             'organisation_id' => ['nullable', 'string', 'exists:organisations,id'],
             'title' => ['required', 'string', 'max:200'],
+            // EV-01 session de pitch, ou EV-02 rencontres ciblées par binômes.
+            'format' => ['nullable', Rule::in(['pitch', 'rencontres'])],
             'description' => ['required', 'string', 'min:30', 'max:3000'],
             'mode' => ['required', Rule::enum(MeetingMode::class)],
             'starts_at' => ['required', 'date', 'after:now'],
