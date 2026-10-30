@@ -45,6 +45,20 @@ return [
         'weights' => ['role' => 3, 'skill' => 3, 'sector' => 2, 'followed' => 2, 'region' => 1],
     ],
 
+    // RR-04 et OP-03 : alertes enregistrées par membre, et rappels avant la date
+    // limite d'une candidature en préparation (en jours).
+    'alerts' => [
+        'max_saved_searches' => (int) env('IDEE_MAX_SAVED_SEARCHES', 10),
+        'deadline_days' => [7, 1],
+    ],
+
+    // NO-04 : résumé hebdomadaire par e-mail, aux membres dont l'adresse est confirmée.
+    'weekly_digest' => [
+        'enabled' => (bool) env('IDEE_WEEKLY_DIGEST', true),
+        // Opportunités compatibles dont la date limite tombe dans ce délai (en jours).
+        'deadline_window_days' => 30,
+    ],
+
     // MR-04 : pièces jointes de la messagerie (taille maximale en Ko).
     'messages' => [
         'max_document_kb' => (int) env('IDEE_MESSAGE_DOCUMENT_KB', 10240),

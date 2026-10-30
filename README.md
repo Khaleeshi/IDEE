@@ -77,7 +77,10 @@ clients, matériel) et chaque demande de contact reçoit une réponse.
   responsable), tableau de tâches partagé du projet, rendez-vous en visio ou en
   présentiel avec rappel la veille, collaborations et réussites publiées seulement
   après confirmation des deux parties (CO-01 à CO-03, MR-07, FC-06)
-- 142 tests automatisés au total
+- Alertes : recherches enregistrées sur les nouveaux projets (RR-04), programmes
+  compatibles avec son projet (OP-02), rappels 7 jours puis 1 jour avant la date
+  limite d'une candidature (OP-03), résumé de la semaine par e-mail (NO-04)
+- 149 tests automatisés au total
 
 **Reste à faire** : saisie vocale par IA (la dictée du clavier est proposée en
 attendant), la suite de la V2 (groupes, alertes, pages d'organisation, experts,
@@ -127,6 +130,8 @@ de connexion ne sont pas envoyés par SMS : ils sont écrits dans
 | `/demandes` | Demandes de contact reçues et envoyées |
 | `/demandes/{id}` | Conversation : messages, prochaines étapes, rendez-vous, collaboration |
 | `/projets/{id}/taches` | Tableau de tâches partagé avec les partenaires du projet |
+| `/alertes` | Mes alertes sur les nouveaux projets |
+| `/opportunites?projet={id}` | Programmes compatibles avec l'un de mes projets |
 | `/profil` | Mon profil, mes rôles, mes préférences |
 | `/membres/{id}` | Profil public d'un membre et sa réactivité |
 | `/parcours` | Parcours guidés : choix de la situation, mes démarches, rappels |
@@ -189,6 +194,9 @@ l'en-tête `Authorization: Bearer <jeton>` reçu à la connexion.
 | POST | `/api/collaborations/{id}/respond` | partenaire | Confirmer ou non une collaboration |
 | GET | `/api/members/{id}/collaborations` | public | Collaborations confirmées d'un membre |
 | GET, POST | `/api/projects/{id}/tasks` | porteur, partenaires | Tableau de tâches du projet |
+| GET, POST | `/api/me/alerts` | connecté | Alertes enregistrées (mêmes filtres que la recherche de projets) |
+| DELETE | `/api/alerts/{id}` | auteur | Supprimer une alerte |
+| GET | `/api/projects/{id}/opportunities` | porteur | Opportunités compatibles avec le projet, et pourquoi |
 | PATCH, DELETE | `/api/tasks/{id}` | porteur, partenaires | Changer la colonne d'une tâche, la retirer |
 | GET, POST | `/api/projects/{id}/documents` | autorisé, porteur | Documents privés |
 | GET | `/api/documents/{id}` | autorisé | Télécharger un document (consultation journalisée) |
@@ -227,10 +235,13 @@ Les valeurs se règlent dans `backend/config/idee.php` ou dans le fichier `.env`
 | Modération | Durée d'une suspension, délai pour contester une décision | 30 jours, 14 jours |
 | Assistant IA | Business plans par projet et par mois, questions par jour | 3, 3 |
 | Rendez-vous | Rappel envoyé aux deux personnes avant un rendez-vous confirmé | 24 heures |
+| Alertes | Alertes enregistrées par membre ; rappels avant une date limite | 10 ; 7 jours puis 1 jour |
+| Résumé hebdomadaire | Envoyé le lundi aux adresses e-mail confirmées, s'il y a du nouveau | activé |
 | Collaboration | Étapes, rendez-vous et collaborations ne comptent qu'avec l'accord des deux | — |
 
-Les relances, expirations et rappels de rendez-vous tournent toutes les heures, la mise en sommeil
-chaque nuit, les rappels d'étapes chaque matin et le signalement des fiches à
+Les relances, expirations et rappels de rendez-vous tournent toutes les heures,
+la mise en sommeil chaque nuit, les rappels d'étapes et de dates limites puis
+les alertes chaque matin, le résumé par e-mail et le signalement des fiches à
 revoir chaque lundi, via le planificateur Laravel (`php artisan schedule:work`
 en local, une tâche cron en production).
 

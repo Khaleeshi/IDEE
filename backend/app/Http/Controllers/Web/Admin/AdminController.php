@@ -4,12 +4,14 @@ namespace App\Http\Controllers\Web\Admin;
 
 use App\Enums\ModerationDecision;
 use App\Enums\OpportunityKind;
+use App\Enums\ProjectStage;
 use App\Enums\ReportStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\OpportunityRequest;
 use App\Models\JourneyStep;
 use App\Models\Opportunity;
 use App\Models\Report;
+use App\Models\Sector;
 use App\Models\Verification;
 use App\Services\Admin\IndicatorService;
 use App\Services\Journeys\JourneyService;
@@ -113,7 +115,7 @@ class AdminController extends Controller
 
     public function createOpportunity(): View
     {
-        return view('admin.opportunity', ['opportunity' => new Opportunity(['is_published' => true]), 'kinds' => OpportunityKind::cases()]);
+        return view('admin.opportunity', ['opportunity' => new Opportunity(['is_published' => true]), ...$this->opportunityOptions()]);
     }
 
     public function storeOpportunity(OpportunityRequest $request): RedirectResponse
@@ -125,7 +127,7 @@ class AdminController extends Controller
 
     public function editOpportunity(Opportunity $opportunity): View
     {
-        return view('admin.opportunity', ['opportunity' => $opportunity, 'kinds' => OpportunityKind::cases()]);
+        return view('admin.opportunity', ['opportunity' => $opportunity, ...$this->opportunityOptions()]);
     }
 
     public function updateOpportunity(OpportunityRequest $request, Opportunity $opportunity): RedirectResponse
@@ -145,7 +147,14 @@ class AdminController extends Controller
      */
     private function saveOpportunity(OpportunityRequest $request, Opportunity $opportunity, string $status): RedirectResponse
     {
-        $opportunity->fill([...$request->validated(), 'is_published' => $request->boolean('is_published'), 'checked_on' => today()]);
+        $opportunity->fill([
+            ...$request->validated(),
+            // OP-02 : sans case cochée, l'opportunité reste ouverte à tous les stades et secteurs.
+            'stages' => $request->validated('stages') ?: null,
+            'sectors' => $request->validated('sectors') ?: null,
+            'is_published' => $request->boolean('is_published'),
+            'checked_on' => today(),
+        ]);
         $opportunity->edited_at = now();
         $opportunity->save();
 
@@ -197,5 +206,17 @@ class AdminController extends Controller
         $journeyStep->save();
 
         return redirect()->route('admin.guides')->with('status', 'Fiche mise à jour.');
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function opportunityOptions(): array
+    {
+        return [
+            'kinds' => OpportunityKind::cases(),
+            'stages' => ProjectStage::cases(),
+            'sectors' => Sector::options('slug'),
+        ];
     }
 }

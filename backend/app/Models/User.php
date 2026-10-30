@@ -121,6 +121,14 @@ class User extends Authenticatable
     }
 
     /**
+     * @return HasMany<SavedSearch, $this>
+     */
+    public function savedSearches(): HasMany
+    {
+        return $this->hasMany(SavedSearch::class)->latest();
+    }
+
+    /**
      * @return HasMany<Verification, $this>
      */
     public function verifications(): HasMany

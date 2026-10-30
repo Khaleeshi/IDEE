@@ -30,6 +30,21 @@
         <p class="mt-3 text-xs text-stone-500">Source : {{ $opportunity->source_label }}@if ($opportunity->checked_on), consultée le {{ $opportunity->checked_on->translatedFormat('d F Y') }}@endif. Vérifiez les conditions auprès de l'organisme avant de candidater.</p>
     </x-card>
 
+    @if ($eligibilities->isNotEmpty())
+        {{-- OP-02 : compatibilité avec les projets du membre. --}}
+        <x-card class="text-sm">
+            <h2 class="font-semibold">Pour mes projets</h2>
+            @foreach ($eligibilities as $item)
+                <div class="mt-2 border-t border-stone-100 pt-2">
+                    <p class="font-medium">{{ $item['project']->title }} :
+                        <span class="{{ $item['eligible'] ? 'text-brand-800' : 'text-stone-500' }}">{{ $item['eligible'] ? 'compatible' : 'non compatible' }}</span>
+                    </p>
+                    <p class="text-xs text-stone-500">{{ implode(' · ', $item['eligible'] ? $item['reasons'] : $item['blockers']) }}</p>
+                </div>
+            @endforeach
+        </x-card>
+    @endif
+
     @auth
         <x-card id="candidature">
             <h2 class="font-semibold">Suivre ma candidature</h2>

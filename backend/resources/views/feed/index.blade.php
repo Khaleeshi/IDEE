@@ -81,6 +81,18 @@
             @endauth
         @endif
 
+        @auth
+            @if ($filters !== [])
+                <form method="POST" action="{{ route('alerts.store') }}" class="mb-3">
+                    @csrf
+                    @foreach ($filters as $key => $value)
+                        <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                    @endforeach
+                    <x-button variant="secondary" class="w-full">🔔 M'alerter des nouveaux projets de cette recherche</x-button>
+                </form>
+            @endif
+        @endauth
+
         @forelse ($projects as $project)
             <x-project-card :project="$project" />
         @empty

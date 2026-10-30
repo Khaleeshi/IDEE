@@ -20,10 +20,19 @@
         @if ($kind)<input type="hidden" name="type" value="{{ $kind->value }}">@endif
     </form>
 
+    @if ($myProjects->isNotEmpty())
+        {{-- OP-02 : filtre d'éligibilité selon le projet. --}}
+        <form method="GET" action="{{ route('opportunities.index') }}" class="mt-3 rounded-2xl border border-stone-200 bg-white p-3">
+            @if ($kind)<input type="hidden" name="type" value="{{ $kind->value }}">@endif
+            <x-select name="projet" label="Compatibles avec mon projet" :options="$myProjects->pluck('title', 'id')->all()" :value="$project?->id" placeholder="Tous les programmes" />
+            <x-button variant="secondary" class="w-full">Voir les programmes compatibles</x-button>
+        </form>
+    @endif
+
     <nav aria-label="Types d'opportunités" class="mt-3 flex gap-2 overflow-x-auto pb-1 text-sm">
-        <a href="{{ route('opportunities.index') }}" class="shrink-0 rounded-full border px-3 py-1.5 {{ $kind ? 'border-stone-300 bg-white' : 'border-brand-700 bg-brand-700 text-white' }}">Tout</a>
+        <a href="{{ route('opportunities.index', ['projet' => $project?->id]) }}" class="shrink-0 rounded-full border px-3 py-1.5 {{ $kind ? 'border-stone-300 bg-white' : 'border-brand-700 bg-brand-700 text-white' }}">Tout</a>
         @foreach ($kinds as $item)
-            <a href="{{ route('opportunities.index', ['type' => $item->value]) }}" class="shrink-0 rounded-full border px-3 py-1.5 {{ $kind === $item ? 'border-brand-700 bg-brand-700 text-white' : 'border-stone-300 bg-white' }}">{{ $item->label() }}</a>
+            <a href="{{ route('opportunities.index', ['type' => $item->value, 'projet' => $project?->id]) }}" class="shrink-0 rounded-full border px-3 py-1.5 {{ $kind === $item ? 'border-brand-700 bg-brand-700 text-white' : 'border-stone-300 bg-white' }}">{{ $item->label() }}</a>
         @endforeach
     </nav>
 
@@ -34,11 +43,17 @@
                 <span class="mt-1 block font-semibold leading-snug">{{ $opportunity->title }}</span>
                 @if ($opportunity->amount)<span class="mt-1 block text-sm text-stone-700">{{ $opportunity->amount }}</span>@endif
                 <span class="mt-1 block text-xs text-stone-500">{{ $opportunity->deadline ? 'Date limite : '.$opportunity->deadline->translatedFormat('d F Y') : $opportunity->deadline_note }}</span>
+                @if ($project)
+                    <span class="mt-2 block text-xs text-brand-800">✓ {{ implode(' · ', $opportunity->eligibility['reasons']) }}</span>
+                @endif
             </a>
         @empty
-            <x-card class="text-center text-sm text-stone-600">Aucune opportunité ouverte ne correspond à cette recherche.</x-card>
+            <x-card class="text-center text-sm text-stone-600">Aucune opportunité ouverte ne correspond à cette recherche{{ $project ? ' et à ce projet' : '' }}.</x-card>
         @endforelse
     </div>
 
+    @if ($project)
+        <p class="mt-4 text-xs text-stone-500">La compatibilité se fonde sur le stade, le secteur et le montant de votre projet. Les autres critères (âge, ancienneté, pièces…) restent à vérifier auprès de l'organisme.</p>
+    @endif
     <p class="mt-4 text-xs text-stone-500">Les démarches auprès des organismes officiels sont gratuites. Méfiez-vous de toute personne qui demande de l'argent pour « faciliter » un dossier, et signalez-la.</p>
 </x-layout>

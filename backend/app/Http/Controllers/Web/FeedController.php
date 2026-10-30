@@ -15,15 +15,13 @@ use Illuminate\View\View;
 
 class FeedController extends Controller
 {
-    private const FILTERS = ['q', 'sector', 'region', 'stage', 'need_type', 'amount_min', 'amount_max'];
-
     /**
      * Accueil : le fil d'activité (FC-01), ou la liste des projets dès qu'une recherche est lancée (RR-01).
      */
     public function index(Request $request, ProjectSearch $search, FeedService $feed, FollowService $follows, RecommendationService $recommendations): View
     {
         $user = $request->user();
-        $filters = array_filter($request->only(self::FILTERS), fn ($value) => $value !== null && $value !== '');
+        $filters = array_filter($request->only(ProjectSearch::FILTERS), fn ($value) => $value !== null && $value !== '');
         $tab = match (true) {
             $filters !== [] || $request->query('vue') === 'projets' => 'projets',
             $user !== null && $request->query('vue') === 'suivis' => 'suivis',

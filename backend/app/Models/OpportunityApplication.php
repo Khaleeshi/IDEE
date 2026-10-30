@@ -24,6 +24,7 @@ class OpportunityApplication extends Model
             'status' => ApplicationStatus::class,
             'remind_on' => 'date',
             'reminded_at' => 'datetime',
+            'deadline_alert_days' => 'integer',
         ];
     }
 

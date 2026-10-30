@@ -10,11 +10,14 @@ use App\Http\Resources\EnumResource;
 use App\Http\Resources\OpportunityResource;
 use App\Models\Opportunity;
 use App\Models\OpportunityApplication;
+use App\Models\Project;
+use App\Services\Opportunities\EligibilityService;
 use App\Services\Opportunities\OpportunityService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Gate;
 
 class OpportunityController extends Controller
 {
@@ -27,6 +30,18 @@ class OpportunityController extends Controller
     {
         return OpportunityResource::collection(
             $this->opportunities->search(OpportunityKind::tryFrom((string) $request->query('type')), $request->query('q'))->paginate(30)
+        );
+    }
+
+    /**
+     * Opportunités ouvertes compatibles avec un projet du membre, avec leurs raisons (OP-02).
+     */
+    public function forProject(Request $request, Project $project, EligibilityService $eligibility): AnonymousResourceCollection
+    {
+        Gate::authorize('update', $project);
+
+        return OpportunityResource::collection(
+            $eligibility->eligibleFor($project, $this->opportunities->search(OpportunityKind::tryFrom((string) $request->query('type')))->get()->toBase())
         );
     }
 

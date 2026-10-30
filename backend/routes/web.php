@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Web\Admin\AdminController;
+use App\Http\Controllers\Web\AlertController;
 use App\Http\Controllers\Web\AssistantController;
 use App\Http\Controllers\Web\CollaborationController;
 use App\Http\Controllers\Web\ContactRequestController;
@@ -98,6 +99,10 @@ Route::middleware('auth')->group(function () {
     Route::delete('/opportunites/{opportunity}/candidature', [OpportunityController::class, 'forget'])->name('opportunities.forget');
 
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::get('/alertes', [AlertController::class, 'index'])->name('alerts.index');
+    Route::post('/alertes', [AlertController::class, 'store'])->name('alerts.store');
+    Route::get('/alertes/{savedSearch}', [AlertController::class, 'show'])->name('alerts.show');
+    Route::delete('/alertes/{savedSearch}', [AlertController::class, 'destroy'])->name('alerts.destroy');
     Route::post('/notifications/abonnement', [PushSubscriptionController::class, 'store'])->name('push.subscribe');
     Route::delete('/notifications/abonnement', [PushSubscriptionController::class, 'destroy'])->name('push.unsubscribe');
 

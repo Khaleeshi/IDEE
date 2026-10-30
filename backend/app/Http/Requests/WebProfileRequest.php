@@ -22,6 +22,7 @@ class WebProfileRequest extends UpdateProfileRequest
             'contact_preferences' => [
                 'accepts_requests' => $this->boolean('accepts_requests'),
                 'whatsapp_alerts' => $this->boolean('whatsapp_alerts'),
+                'weekly_digest' => $this->boolean('weekly_digest'),
             ],
         ]);
     }

@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
 
 #[Fillable([
-    'slug', 'title', 'organisation', 'kind', 'summary', 'criteria', 'amount', 'deadline',
+    'slug', 'title', 'organisation', 'kind', 'summary', 'criteria', 'stages', 'sectors', 'max_amount_fcfa', 'amount', 'deadline',
     'deadline_note', 'url', 'source_label', 'checked_on', 'is_published',
 ])]
 class Opportunity extends Model
@@ -26,6 +26,9 @@ class Opportunity extends Model
     {
         return [
             'kind' => OpportunityKind::class,
+            'stages' => 'array',
+            'sectors' => 'array',
+            'max_amount_fcfa' => 'integer',
             'deadline' => 'date',
             'checked_on' => 'date',
             'is_published' => 'boolean',

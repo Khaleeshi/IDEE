@@ -23,6 +23,13 @@ class OpportunityResource extends JsonResource
             'kind' => EnumResource::make($this->kind),
             'summary' => $this->summary,
             'criteria' => $this->criteria,
+            // OP-02 : critères structurés ; une liste vide signifie « ouvert à tous ».
+            'eligibility_criteria' => [
+                'stages' => $this->stages ?? [],
+                'sectors' => $this->sectors ?? [],
+                'max_amount_fcfa' => $this->max_amount_fcfa,
+            ],
+            'eligibility' => $this->when($this->resource->getAttribute('eligibility') !== null, fn () => $this->resource->getAttribute('eligibility')),
             'amount' => $this->amount,
             'deadline' => $this->deadline?->toDateString(),
             'deadline_note' => $this->deadline_note,

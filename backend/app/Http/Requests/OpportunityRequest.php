@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Enums\OpportunityKind;
+use App\Enums\ProjectStage;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -22,6 +23,11 @@ class OpportunityRequest extends FormRequest
             'kind' => ['required', Rule::enum(OpportunityKind::class)],
             'summary' => ['required', 'string', 'max:3000'],
             'criteria' => ['nullable', 'string', 'max:3000'],
+            'stages' => ['nullable', 'array'],
+            'stages.*' => [Rule::enum(ProjectStage::class)],
+            'sectors' => ['nullable', 'array'],
+            'sectors.*' => ['string', Rule::exists('sectors', 'slug')],
+            'max_amount_fcfa' => ['nullable', 'integer', 'min:0'],
             'amount' => ['nullable', 'string', 'max:255'],
             'deadline' => ['nullable', 'date'],
             'deadline_note' => ['nullable', 'string', 'max:255'],

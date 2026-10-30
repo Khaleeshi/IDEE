@@ -2,12 +2,15 @@
 
 namespace App\Services\Admin;
 
+use App\Enums\CollaborationStatus;
 use App\Enums\ContactRequestStatus;
 use App\Enums\NeedStatus;
 use App\Enums\NeedType;
 use App\Enums\StepStatus;
 use App\Enums\VerificationLevel;
 use App\Models\Activity;
+use App\Models\BusinessPlan;
+use App\Models\Collaboration;
 use App\Models\ContactRequest;
 use App\Models\HelpOffer;
 use App\Models\Message;
@@ -40,10 +43,12 @@ class IndicatorService
             $this->row('Projets actifs', 'Projets mis à jour depuis moins de '.config('idee.dormant_after_days').' jours', (string) Project::active()->where('last_activity_at', '>=', now()->subDays(config('idee.dormant_after_days')))->count(), (string) $targets['active_projects']),
             $this->row('Membres actifs', 'Membres ayant agi au moins une fois ces 30 derniers jours', (string) $this->activeMemberIds(now()->subDays(30))->count(), (string) $targets['active_members']),
             $this->row('Investisseurs et mentors actifs', 'Profils vérifiés ayant répondu à au moins une demande ces 30 derniers jours', (string) $this->activeVerifiedResponders(), (string) $targets['active_investors']),
-            $this->row('Financements déclarés', 'Besoins de financement clôturés comme comblés par les porteurs (la confirmation par les deux parties viendra en V2)', $financed->count().' · '.number_format((int) $financed->sum('amount_fcfa'), 0, ',', "\u{00A0}").' FCFA', null),
+            $this->row('Financements déclarés', 'Besoins de financement clôturés comme comblés par les porteurs', $financed->count().' · '.number_format((int) $financed->sum('amount_fcfa'), 0, ',', "\u{00A0}").' FCFA', null),
             $this->row('Démarches terminées', 'Étapes de parcours marquées terminées, en cumul', (string) StepProgress::where('status', StepStatus::Terminee)->count(), (string) $targets['finished_steps']),
             $this->row('Rétention à 30 jours', 'Part des inscrits depuis plus de 30 jours qui ont encore agi après leur trentième jour', $this->percent($this->retentionRate()), $targets['retention_rate'].' %'),
-            $this->row('Collaborations confirmées, business plans, satisfaction', 'Indicateurs liés à des fonctions à venir (collaborations, assistant IA, enquête de satisfaction)', 'à venir', null),
+            $this->row('Collaborations confirmées', 'Collaborations déclarées par un membre et confirmées par l\'autre (CO-03), en cumul', (string) Collaboration::where('status', CollaborationStatus::Confirmee)->count(), null),
+            $this->row('Business plans rédigés', 'Business plans produits par l\'assistant IA, en cumul', (string) BusinessPlan::count(), null),
+            $this->row('Satisfaction', 'Enquête de satisfaction auprès des membres', 'à venir', null),
         ];
     }
 

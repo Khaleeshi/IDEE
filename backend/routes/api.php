@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\AlertController;
 use App\Http\Controllers\Api\AssistantController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CollaborationController;
@@ -52,6 +53,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('me/notifications', [NotificationController::class, 'index']);
     Route::post('me/notifications/read', [NotificationController::class, 'markRead']);
     Route::get('me/applications', [OpportunityController::class, 'applications']);
+    Route::get('projects/{project}/opportunities', [OpportunityController::class, 'forProject']);
+    Route::get('me/alerts', [AlertController::class, 'index']);
+    Route::post('me/alerts', [AlertController::class, 'store']);
+    Route::delete('alerts/{savedSearch}', [AlertController::class, 'destroy']);
     Route::put('opportunities/{opportunity}/application', [OpportunityController::class, 'track']);
     Route::delete('opportunities/{opportunity}/application', [OpportunityController::class, 'forget']);
     Route::post('reports', [TrustController::class, 'report']);
