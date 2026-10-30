@@ -35,6 +35,7 @@ return [
         'kind' => 'garantie',
         'summary' => 'Le Fonds de garantie des investissements prioritaires garantit une partie du crédit accordé par votre banque, ce qui facilite son accord.',
         'criteria' => 'Au moins 1 an d\'activité. Fonds propres d\'au moins 15 % du coût du projet (20 % pour une grande entreprise). Quotité garantie jusqu\'à 80 % du crédit, sur 60 mois au plus ; commission de garantie de 1 à 2 % par an.',
+        'stages' => ['lancement', 'croissance', 'export'], // au moins 1 an d'activité
         'amount' => 'Jusqu\'à 500 millions FCFA par entreprise',
         'deadline_note' => 'Toute l\'année, en passant par votre banque',
         'url' => 'https://www.fongip.sn/pages/nos-solutions/produits/garantie-individuelle/',
@@ -48,6 +49,7 @@ return [
         'kind' => 'garantie',
         'summary' => 'Garantie accordée aux banques et institutions de microfinance partenaires pour les petits crédits des très petites entreprises.',
         'criteria' => 'Besoin de financement de 20 millions FCFA au plus ; quotité garantie de 50 % au maximum.',
+        'max_amount_fcfa' => 20000000,
         'amount' => 'Jusqu\'à 25 millions FCFA par bénéficiaire',
         'deadline_note' => 'Toute l\'année, auprès des établissements partenaires',
         'url' => 'https://www.fongip.sn/pages/nos-solutions/produits/garantie-portefeuille/',
@@ -61,6 +63,7 @@ return [
         'kind' => 'accompagnement',
         'summary' => 'Plateforme de l\'ADEPME, soutenue par la BCEAO, qui relie les PME aux banques et aux structures d\'appui : création de compte, diagnostic, modèles de documents, sur le portail Sénégal PME.',
         'criteria' => 'PME et entrepreneurs installés au Sénégal. Une tournée d\'enrôlement passe dans les 14 régions de septembre à novembre 2026.',
+        'stages' => ['lancement', 'croissance', 'export'], // PME et entrepreneurs installés
         'deadline_note' => 'Inscription ouverte toute l\'année',
         'url' => 'https://www.senegalpme.sn/2026/08/31/guf-pme-le-dispositif-national-dacces-au-financement-se-deploie-dans-les-territoires/',
         'source_label' => 'senegalpme.sn',
@@ -86,6 +89,7 @@ return [
         'kind' => 'pret',
         'summary' => 'Nouvelle ligne de crédit de 20 milliards FCFA signée en mai 2026 entre la Banque d\'investissement et de développement de la CEDEAO et la BNDE, réservée au financement des PME.',
         'criteria' => 'PME sénégalaises ; conditions d\'accès à demander à la BNDE.',
+        'stages' => ['lancement', 'croissance', 'export'], // PME en activité
         'deadline_note' => 'À confirmer auprès de la BNDE',
         'url' => 'https://www.financialafrik.com/2026/05/05/la-bidc-et-la-bnde-signent-une-nouvelle-ligne-de-credit-de-20-milliards-de-fcfa-pour-renforcer-le-financement-des-pme-au-senegal/',
         'source_label' => 'Financial Afrik (presse)',
@@ -110,6 +114,7 @@ return [
         'kind' => 'investissement',
         'summary' => 'Fonds d\'investissement en capital pour les PME, soutenu par le FONSIS depuis 2025, qui dit regarder au-delà de Dakar.',
         'criteria' => 'Entreprises déjà en activité, avec un potentiel de croissance (critères à confirmer auprès du fonds).',
+        'stages' => ['lancement', 'croissance', 'export'], // entreprises déjà en activité
         'deadline_note' => 'Candidature spontanée',
         'url' => 'https://launchbaseafrica.com/2025/05/06/backed-by-senegals-sovereign-wealth-fund-teranga-capitals-new-fund-looks-beyond-dakar/',
         'source_label' => 'Launch Base Africa (presse)',

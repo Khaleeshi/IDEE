@@ -31,7 +31,13 @@
                         @endif
                         <form method="POST" action="{{ route('document-access.request', $project) }}" class="mt-3">
                             @csrf
-                            <x-button variant="secondary" class="w-full">Demander l'accès aux documents</x-button>
+                            @include('projects.partials.nda')
+                            <label class="mt-2 flex items-start gap-3 rounded-xl border border-stone-200 p-3">
+                                <input type="checkbox" name="accept_nda" value="1" required class="mt-0.5 h-5 w-5 shrink-0 accent-brand-700">
+                                <span>J'accepte cet accord de confidentialité envers {{ $project->owner->name }}.</span>
+                            </label>
+                            @error('accept_nda')<p class="mt-1 text-sm text-red-700">{{ $message }}</p>@enderror
+                            <x-button variant="secondary" class="mt-3 w-full">Demander l'accès aux documents</x-button>
                         </form>
                     @endif
                 @else
@@ -60,6 +66,9 @@
                         <a href="{{ route('members.show', $access->user) }}" class="font-semibold underline">{{ $access->user->name }}</a>
                         <span class="text-xs text-stone-500">Accès {{ mb_strtolower($access->status->label()) }}</span>
                     </div>
+                    @if ($access->nda_accepted_at)
+                        <p class="mt-1 text-xs text-stone-500">Accord de confidentialité accepté le {{ $access->nda_accepted_at->translatedFormat('d F Y') }}</p>
+                    @endif
                     @if ($access->status->value === 'demandee')
                         <div class="mt-2 flex gap-2">
                             <form method="POST" action="{{ route('document-access.decide', $access) }}">

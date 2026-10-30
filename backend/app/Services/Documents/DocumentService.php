@@ -48,10 +48,15 @@ class DocumentService
     /**
      * @throws ValidationException
      */
-    public function requestAccess(Project $project, User $user): DocumentAccess
+    public function requestAccess(Project $project, User $user, bool $acceptsNda = false): DocumentAccess
     {
         if ($project->isOwnedBy($user)) {
             throw ValidationException::withMessages(['access' => 'Ce sont vos propres documents.']);
+        }
+
+        // CF-05 : pas d'accès sans accord de confidentialité accepté.
+        if (! $acceptsNda) {
+            throw ValidationException::withMessages(['accept_nda' => 'Acceptez l\'accord de confidentialité pour demander l\'accès aux documents.']);
         }
 
         $access = $this->accessOf($user, $project) ?? new DocumentAccess;
@@ -63,7 +68,12 @@ class DocumentService
                 : 'Votre demande attend la réponse du porteur.']);
         }
 
-        $access->forceFill(['status' => DocumentAccessStatus::Demandee, 'decided_at' => null])->save();
+        $access->forceFill([
+            'status' => DocumentAccessStatus::Demandee,
+            'decided_at' => null,
+            'nda_version' => config('idee.documents.nda_version'),
+            'nda_accepted_at' => now(),
+        ])->save();
         $this->log($project, $user, $user, DocumentLogAction::Demande);
         $project->owner->notify(new DocumentAccessRequested($access));
 
@@ -114,6 +124,7 @@ class DocumentService
         return $project->isOwnedBy($user) || $project->documentAccesses()
             ->where('user_id', $user->id)
             ->where('status', DocumentAccessStatus::Accordee)
+            ->whereNotNull('nda_accepted_at')
             ->exists();
     }
 

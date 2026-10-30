@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreProjectMemberRequest;
 use App\Http\Requests\StoreProjectRequest;
+use App\Http\Requests\UpdateProjectMemberRequest;
 use App\Http\Requests\UpdateProjectRequest;
 use App\Http\Resources\ProjectResource;
 use App\Models\Project;
@@ -56,7 +57,17 @@ class ProjectController extends Controller
 
         $member = $this->projects->addTeamMember($project, $request->validated());
 
-        return response()->json(['data' => ['id' => $member->id, 'name' => $member->name, 'role' => $member->role]], Response::HTTP_CREATED);
+        return response()->json(['data' => $this->teamMember($member)], Response::HTTP_CREATED);
+    }
+
+    /**
+     * Rôle et part envisagée d'une personne de l'équipe (PR-07).
+     */
+    public function updateTeamMember(UpdateProjectMemberRequest $request, ProjectMember $projectMember): JsonResponse
+    {
+        Gate::authorize('update', $projectMember->project);
+
+        return response()->json(['data' => $this->teamMember($this->projects->updateTeamMember($projectMember, $request->validated()))]);
     }
 
     public function removeTeamMember(ProjectMember $projectMember): Response
@@ -84,5 +95,13 @@ class ProjectController extends Controller
         $project->delete();
 
         return response()->noContent();
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function teamMember(ProjectMember $member): array
+    {
+        return ['id' => $member->id, 'name' => $member->name, 'role' => $member->role, 'share_percent' => $member->share_percent];
     }
 }

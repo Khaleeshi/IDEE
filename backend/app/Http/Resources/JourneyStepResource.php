@@ -21,6 +21,12 @@ class JourneyStepResource extends JsonResource
             'position' => $this->position,
             'title' => $this->title,
             'body' => $this->body,
+            // PG-07 : version wolof saisie par l'équipe, quand elle existe.
+            'wolof' => [
+                'title' => $this->title_wo,
+                'body' => $this->body_wo,
+                'audio_url' => $this->audioUrl(),
+            ],
             'documents' => $this->documents ?? [],
             'organisation' => $this->organisation,
             'cost' => $this->cost,

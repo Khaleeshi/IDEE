@@ -33,6 +33,7 @@ class Project extends Model
             'stage' => ProjectStage::class,
             'status' => ProjectStatus::class,
             'last_activity_at' => 'datetime',
+            'open_to_matching' => 'boolean',
         ];
     }
 
@@ -84,6 +85,22 @@ class Project extends Model
     public function team(): HasMany
     {
         return $this->hasMany(ProjectMember::class)->orderBy('position')->orderBy('created_at');
+    }
+
+    /**
+     * @return HasMany<ProjectTask, $this>
+     */
+    public function tasks(): HasMany
+    {
+        return $this->hasMany(ProjectTask::class);
+    }
+
+    /**
+     * @return HasMany<Collaboration, $this>
+     */
+    public function collaborations(): HasMany
+    {
+        return $this->hasMany(Collaboration::class);
     }
 
     /**

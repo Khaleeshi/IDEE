@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers\Web;
 
+use App\Enums\CollaborationStatus;
 use App\Enums\NeedType;
 use App\Enums\ProjectStage;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreProjectMemberRequest;
 use App\Http\Requests\StoreProjectRequest;
 use App\Http\Requests\StoreProjectUpdateRequest;
+use App\Http\Requests\UpdateProjectMemberRequest;
 use App\Http\Requests\UpdateProjectRequest;
 use App\Models\BusinessPlan;
 use App\Models\IdeaClarification;
@@ -16,6 +18,7 @@ use App\Models\Project;
 use App\Models\ProjectMember;
 use App\Models\Sector;
 use App\Services\Assistant\AssistantService;
+use App\Services\Collaboration\TaskService;
 use App\Services\ContactRequests\ReactivityIndicator;
 use App\Services\Documents\DocumentService;
 use App\Services\Journeys\JourneyService;
@@ -33,7 +36,7 @@ class ProjectController extends Controller
 {
     public function __construct(private readonly ProjectService $projects) {}
 
-    public function show(Request $request, Project $project, ReadinessScore $readiness, ReactivityIndicator $reactivity, JourneyService $journeys, FollowService $follows, DocumentService $documents, AssistantService $assistant): View
+    public function show(Request $request, Project $project, ReadinessScore $readiness, ReactivityIndicator $reactivity, JourneyService $journeys, FollowService $follows, DocumentService $documents, AssistantService $assistant, TaskService $tasks): View
     {
         abort_unless(Gate::allows('view', $project), Response::HTTP_NOT_FOUND);
 
@@ -52,9 +55,14 @@ class ProjectController extends Controller
             'reactivity' => $reactivity->for($project->owner),
             'updates' => $project->updates()->limit(10)->get(),
             'team' => $project->team,
+            // Réussites confirmées par les deux parties (FC-06) et tableau de tâches partagé (CO-02).
+            'collaborations' => $project->collaborations()->where('status', CollaborationStatus::Confirmee)->with(['declarer', 'partner'])->latest('confirmed_at')->limit(10)->get(),
+            'canManageTasks' => $tasks->canManage($project, $request->user()),
             'following' => $follows->isFollowing($request->user(), $project),
             // Documents privés : visibles seulement par le porteur et les membres autorisés (RG-05).
             'documents' => $documents->canRead($request->user(), $project) ? $project->documents : null,
+            // PR-07 : parts envisagées réservées au porteur et aux lecteurs liés par l'accord de confidentialité.
+            'showShares' => $documents->canRead($request->user(), $project),
             'documentsCount' => $project->documents()->count(),
             'documentAccess' => $documents->accessOf($request->user(), $project),
             'accesses' => $isOwner ? $project->documentAccesses()->with('user')->latest()->get() : collect(),
@@ -87,6 +95,15 @@ class ProjectController extends Controller
         $this->projects->addTeamMember($project, $request->validated());
 
         return redirect()->to(route('projects.show', $project).'#equipe')->with('status', 'Équipe mise à jour.');
+    }
+
+    public function updateTeamMember(UpdateProjectMemberRequest $request, ProjectMember $projectMember): RedirectResponse
+    {
+        Gate::authorize('update', $projectMember->project);
+
+        $this->projects->updateTeamMember($projectMember, $request->validated());
+
+        return redirect()->to(route('projects.show', $projectMember->project).'#equipe')->with('status', 'Équipe mise à jour.');
     }
 
     public function removeTeamMember(ProjectMember $projectMember): RedirectResponse

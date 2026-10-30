@@ -1,5 +1,8 @@
 <x-layout title="Notifications">
-    <h1 class="mb-3 text-2xl font-bold">Notifications</h1>
+    <div class="mb-3 flex items-center justify-between gap-2">
+        <h1 class="text-2xl font-bold">Notifications</h1>
+        <a href="{{ route('alerts.index') }}" class="py-2 text-sm font-medium text-brand-700 underline">Mes alertes</a>
+    </div>
 
     @if ($pushKey)
         {{-- Visible seulement si le navigateur sait recevoir des notifications push (NO-01). --}}

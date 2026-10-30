@@ -22,6 +22,7 @@ class DocumentAccessResource extends JsonResource
             'user' => new MemberResource($this->whenLoaded('user')),
             'status' => EnumResource::make($this->status),
             'decided_at' => $this->decided_at?->toIso8601String(),
+            'nda' => $this->nda_accepted_at ? ['version' => $this->nda_version, 'accepted_at' => $this->nda_accepted_at->toIso8601String()] : null,
         ];
     }
 }

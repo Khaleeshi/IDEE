@@ -12,6 +12,11 @@ use Illuminate\Database\Eloquent\Builder;
 class ProjectSearch
 {
     /**
+     * Filtres acceptés dans l'adresse de recherche et dans les alertes enregistrées.
+     */
+    public const FILTERS = ['q', 'sector', 'region', 'stage', 'need_type', 'amount_min', 'amount_max'];
+
+    /**
      * @param  array{q?: string|null, sector?: string|null, region?: string|null, stage?: string|null, need_type?: string|null, amount_min?: string|int|null, amount_max?: string|int|null}  $filters
      * @return Builder<Project>
      */

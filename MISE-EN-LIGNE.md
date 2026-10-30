@@ -167,19 +167,22 @@ dans `WEBPUSH_SUBJECT` (forme `mailto:contact@votre-domaine.com`), puis lancez
 la page « Notifications » de son téléphone. Ne changez plus ces clés : les
 abonnements existants cesseraient de fonctionner.
 
-## 8. Activer l'assistant IA (business plan)
+## 8. Activer l'assistant IA (business plan, présentation, rendez-vous)
 
 L'assistant utilise Claude Opus 5.5 d'Anthropic, payé à l'usage : 4 $ par million
 de jetons (morceaux de mots) lus et 20 $ par million écrits, soit de l'ordre de 100 à
-200 FCFA par business plan. Des plafonds par projet limitent la dépense
-(`IDEE_AI_PLANS_PER_MONTH`, 3 par défaut).
+200 FCFA par business plan ou par présentation, et quelques dizaines de FCFA par
+préparation de rendez-vous. Des plafonds limitent la dépense : business plans et
+présentations par projet et par mois (`IDEE_AI_PLANS_PER_MONTH` et
+`IDEE_AI_DECKS_PER_MONTH`, 3 par défaut), préparations par membre et par jour
+(`IDEE_AI_PREPARATIONS_PER_DAY`, 3 par défaut).
 
 1. Créez un compte sur platform.claude.com, ajoutez un moyen de paiement et
    fixez une limite de dépense mensuelle.
 2. Créez une clé d'API et collez-la dans `.env` : `ANTHROPIC_API_KEY=…`
 3. Mettez `IDEE_AI_ENABLED=true`, puis lancez `php artisan optimize`.
 
-Les business plans sont rédigés en arrière-plan : la tâche planifiée de
+Les business plans, présentations et préparations sont rédigés en arrière-plan : la tâche planifiée de
 l'étape 5 les traite chaque minute (`QUEUE_CONNECTION=database`). En cas de
 refus pour raison de sécurité, la demande est rejouée automatiquement sur le
 modèle de secours d'Anthropic.

@@ -71,9 +71,44 @@ clients, matériel) et chaque demande de contact reçoit une réponse.
 - Notifications push du navigateur et SMS de secours pour les alertes critiques
 - 136 tests automatisés au total
 
+**Étape 6 — version 2** : en cours.
+
+- Collaboration : prochaines étapes convenues à deux (objectif, échéance,
+  responsable), tableau de tâches partagé du projet, rendez-vous en visio ou en
+  présentiel avec rappel la veille, collaborations et réussites publiées seulement
+  après confirmation des deux parties (CO-01 à CO-03, MR-07, FC-06)
+- Alertes : recherches enregistrées sur les nouveaux projets (RR-04), programmes
+  compatibles avec son projet (OP-02), rappels 7 jours puis 1 jour avant la date
+  limite d'une candidature (OP-03), résumé de la semaine par e-mail (NO-04)
+- Projets : parts envisagées dans l'équipe, privées et plafonnées à 100 % (PR-07) ;
+  rapprochement de projets proches entre porteurs volontaires, conversation ouverte
+  seulement avec l'accord des deux (PR-08, RG-12) ; accord de confidentialité accepté
+  avant toute demande d'accès aux documents (CF-05)
+- Organisations : pages gérées à plusieurs (CP-05), vérification par RCCM et NINEA
+  avec justificatif effacé après examen (CF-03), programmes publiés par les
+  organisations vérifiées dans le répertoire (OR-01)
+- Annuaire des experts à l'identité vérifiée, avec services et tarif indicatif, et
+  demande de contact à propos de son projet (SE-01)
+- Groupes par secteur et par région : projets du groupe et discussion signalable,
+  avec une limite de messages par jour (FC-05)
+- Sessions de pitch en ligne ou en présentiel, organisées par l'équipe ou une
+  organisation vérifiée : inscription, candidature avec un projet, sélection dans
+  la limite des places, lien de visio réservé aux inscrits, rappel la veille (EV-01)
+- Assistant IA : préparation d'un rendez-vous (questions, points à présenter,
+  prochaines étapes), sans livrer les détails privés d'un projet à qui n'en est pas
+  le porteur (IA-05) ; présentation du projet en neuf diapositives, modifiable et
+  imprimable (IA-06)
+- Fiches pratiques en wolof : texte et enregistrement audio saisis par l'équipe dans
+  l'administration, bouton Français / Wolof sur les parcours (PG-07, contenu à
+  produire avec des locuteurs natifs)
+- 173 tests automatisés au total
+
 **Reste à faire** : saisie vocale par IA (la dictée du clavier est proposée en
-attendant), puis les fonctions prévues en V2 (collaborations confirmées, groupes,
-rendez-vous, paiements, fiches en wolof) et l'application Flutter.
+attendant) ; traduction et enregistrement des fiches en wolof ; paiements
+(abonnements Wave, Orange Money ou carte, mise en avant « Sponsorisé », factures),
+qui demandent des comptes marchands et une grille de prix ; fonctions prévues en
+V3 (rencontres ciblées, devis d'experts, candidatures structurées, suivi de
+cohortes) ; application Flutter.
 
 ## Structure du dépôt
 
@@ -117,6 +152,16 @@ de connexion ne sont pas envoyés par SMS : ils sont écrits dans
 | `/projets/nouveau` | Publier un projet |
 | `/mes-projets` | Mes projets et leur score de préparation |
 | `/demandes` | Demandes de contact reçues et envoyées |
+| `/demandes/{id}` | Conversation : messages, prochaines étapes, rendez-vous, collaboration |
+| `/projets/{id}/taches` | Tableau de tâches partagé avec les partenaires du projet |
+| `/alertes` | Mes alertes sur les nouveaux projets |
+| `/projets/{id}/rapprochements` | Projets proches du mien et propositions de rapprochement |
+| `/organisations` | Annuaire des organisations ; `/organisations/{id}` leur page, `/gestion` pour la gérer |
+| `/experts` | Experts vérifiés et leurs tarifs ; `/membres/{id}/contacter` pour écrire à propos de son projet |
+| `/groupes` | Groupes par secteur et par région ; `/groupes/{secteur ou region}/{id}` |
+| `/evenements` | Sessions de pitch ; `/evenements/{id}` pour s'inscrire ou candidater |
+| `/projets/{id}/presentation` | Présentation du projet rédigée par l'assistant, à corriger et projeter |
+| `/opportunites?projet={id}` | Programmes compatibles avec l'un de mes projets |
 | `/profil` | Mon profil, mes rôles, mes préférences |
 | `/membres/{id}` | Profil public d'un membre et sa réactivité |
 | `/parcours` | Parcours guidés : choix de la situation, mes démarches, rappels |
@@ -172,6 +217,34 @@ l'en-tête `Authorization: Bearer <jeton>` reçu à la connexion.
 | GET, POST | `/api/projects/{id}/updates` | public, porteur | Journal de progression |
 | GET, POST | `/api/contact-requests/{id}/messages` | concerné | Messagerie (texte, vocal, document) |
 | GET | `/api/messages/{id}/attachment` | concerné | Pièce jointe d'un message |
+| GET | `/api/contact-requests/{id}/collaboration` | concerné | Étapes convenues, rendez-vous et collaborations de la conversation |
+| POST | `/api/contact-requests/{id}/agreements` · `meetings` · `collaborations` | concerné | Proposer une étape, un rendez-vous ; déclarer une collaboration |
+| POST | `/api/agreements/{id}/respond` · `complete` | l'autre personne, concerné | Accepter ou refuser une étape ; la marquer réalisée |
+| POST | `/api/meetings/{id}/respond` · `cancel` | l'autre personne, concerné | Confirmer, décliner ou annuler un rendez-vous |
+| POST | `/api/collaborations/{id}/respond` | partenaire | Confirmer ou non une collaboration |
+| GET | `/api/members/{id}/collaborations` | public | Collaborations confirmées d'un membre |
+| GET, POST | `/api/projects/{id}/tasks` | porteur, partenaires | Tableau de tâches du projet |
+| GET, POST | `/api/me/alerts` | connecté | Alertes enregistrées (mêmes filtres que la recherche de projets) |
+| DELETE | `/api/alerts/{id}` | auteur | Supprimer une alerte |
+| GET | `/api/projects/{id}/opportunities` | porteur | Opportunités compatibles avec le projet, et pourquoi |
+| PATCH | `/api/team-members/{id}` | porteur | Rôle et part envisagée d'une personne de l'équipe |
+| GET, PUT | `/api/projects/{id}/matches` · `matching` | porteur | Projets proches, propositions ; activer les rapprochements |
+| POST | `/api/projects/{id}/matches` · `/api/project-matches/{id}/respond` | porteurs | Proposer un rapprochement, y répondre |
+| GET | `/api/organisations` · `/api/organisations/{id}` | public | Annuaire et page d'une organisation, avec ses programmes |
+| POST, PATCH | `/api/organisations` · `/api/organisations/{id}` | connecté, gestionnaire | Créer ou modifier une page d'organisation |
+| POST, DELETE | `/api/organisations/{id}/members` · `/api/organisation-members/{id}` | gestionnaire | Ajouter ou retirer un membre |
+| POST | `/api/organisations/{id}/verification` | gestionnaire | Demander la vérification (RCCM, NINEA, justificatif) |
+| POST, PUT, DELETE | `/api/organisations/{id}/programmes` · `/api/programmes/{id}` | gestionnaire d'une organisation vérifiée | Publier, modifier ou retirer un programme |
+| GET | `/api/experts` | public | Experts vérifiés (`q`, `sector`, `region`) |
+| GET | `/api/groups` · `/api/groups/{secteur ou region}/{id}` | public | Groupes, leurs projets et leurs messages |
+| POST, DELETE | `/api/groups/{type}/{id}/posts` · `/api/group-posts/{id}` | connecté, auteur | Écrire au groupe, supprimer son message |
+| GET, POST | `/api/projects/{id}/pitch-deck` | porteur | Présentation du projet (IA-06) ; `PUT /api/pitch-decks/{id}` pour la corriger |
+| POST | `/api/meetings/{id}/preparation` | concerné | Préparer un rendez-vous (IA-05) ; `GET /api/assistant-documents/{id}` pour la lire |
+| GET | `/api/events` · `/api/events/{id}` | public | Sessions de pitch à venir (le lien de visio seulement pour les inscrits) |
+| POST | `/api/events` | équipe, organisation vérifiée | Organiser une session |
+| POST, DELETE | `/api/events/{id}/registration` | connecté | S'inscrire, ou candidater avec `project_id` ; se désinscrire |
+| GET, POST | `/api/events/{id}/registrations` · `/api/event-registrations/{id}/decide` | organisateur | Candidatures et sélection |
+| PATCH, DELETE | `/api/tasks/{id}` | porteur, partenaires | Changer la colonne d'une tâche, la retirer |
 | GET, POST | `/api/projects/{id}/documents` | autorisé, porteur | Documents privés |
 | GET | `/api/documents/{id}` | autorisé | Télécharger un document (consultation journalisée) |
 | GET, POST | `/api/projects/{id}/document-accesses` | porteur, connecté | Demandes d'accès aux documents |
@@ -207,10 +280,19 @@ Les valeurs se règlent dans `backend/config/idee.php` ou dans le fichier `.env`
 | RG-05 | Documents privés visibles après accord du porteur ; accès journalisés et révocables | — |
 | RG-11 | Rôle d'investisseur ou d'expert affiché seulement après vérification d'identité | — |
 | Modération | Durée d'une suspension, délai pour contester une décision | 30 jours, 14 jours |
-| Assistant IA | Business plans par projet et par mois, questions par jour | 3, 3 |
+| Assistant IA | Business plans et présentations par projet et par mois ; questions par jour ; préparations de rendez-vous par membre et par jour | 3 ; 3 ; 3 |
+| Rendez-vous | Rappel envoyé aux deux personnes avant un rendez-vous confirmé | 24 heures |
+| RG-12 | Rapprochement proposé seulement entre porteurs volontaires, sans rien révéler de privé | désactivé par défaut |
+| CF-03 | Badge « Vérifiée » après contrôle du RCCM et du NINEA ; justificatif effacé après la décision | — |
+| CF-05 | Accord de confidentialité accepté avant toute demande d'accès aux documents | version 2026-10 |
+| Groupes | Messages par membre et par jour dans les groupes | 10 |
+| Alertes | Alertes enregistrées par membre ; rappels avant une date limite | 10 ; 7 jours puis 1 jour |
+| Résumé hebdomadaire | Envoyé le lundi aux adresses e-mail confirmées, s'il y a du nouveau | activé |
+| Collaboration | Étapes, rendez-vous et collaborations ne comptent qu'avec l'accord des deux | — |
 
-Les relances et expirations tournent toutes les heures, la mise en sommeil
-chaque nuit, les rappels d'étapes chaque matin et le signalement des fiches à
+Les relances, expirations et rappels de rendez-vous tournent toutes les heures,
+la mise en sommeil chaque nuit, les rappels d'étapes et de dates limites puis
+les alertes chaque matin, le résumé par e-mail et le signalement des fiches à
 revoir chaque lundi, via le planificateur Laravel (`php artisan schedule:work`
 en local, une tâche cron en production).
 

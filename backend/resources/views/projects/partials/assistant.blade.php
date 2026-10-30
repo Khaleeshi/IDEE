@@ -3,7 +3,7 @@
     <h2 id="titre-assistant" class="mb-1 text-lg font-bold">Assistant IA</h2>
 
     @unless ($assistantEnabled)
-        <x-card class="text-sm text-stone-600">L'assistant IA (questions pour clarifier votre idée, business plan rédigé pour vous) arrive bientôt sur IDEE.</x-card>
+        <x-card class="text-sm text-stone-600">L'assistant IA (questions pour clarifier votre idée, business plan et présentation rédigés pour vous) arrive bientôt sur IDEE.</x-card>
     @else
         <x-card>
             @if ($clarification?->status->value === 'en_cours')
@@ -41,6 +41,12 @@
                 <h3 class="font-semibold">Business plan</h3>
                 <p class="mt-1 text-sm text-stone-600">L'assistant rédige un premier business plan à partir de votre fiche et de vos réponses. Vous le corrigez ensuite : c'est votre document.</p>
                 <x-button :href="route('business-plans.show', $project)" class="mt-3 w-full">{{ $latestPlan ? 'Voir mon business plan' : 'Créer mon business plan' }}</x-button>
+            </div>
+
+            <div class="mt-4 border-t border-stone-100 pt-4">
+                <h3 class="font-semibold">Présentation du projet</h3>
+                <p class="mt-1 text-sm text-stone-600">Neuf diapositives à projeter ou à imprimer pour vos rendez-vous et vos sessions de pitch.</p>
+                <x-button :href="route('pitch-decks.show', $project)" variant="secondary" class="mt-3 w-full">Ma présentation</x-button>
             </div>
         </x-card>
     @endunless

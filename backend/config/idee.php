@@ -45,15 +45,47 @@ return [
         'weights' => ['role' => 3, 'skill' => 3, 'sector' => 2, 'followed' => 2, 'region' => 1],
     ],
 
+    // RR-04 et OP-03 : alertes enregistrées par membre, et rappels avant la date
+    // limite d'une candidature en préparation (en jours).
+    'alerts' => [
+        'max_saved_searches' => (int) env('IDEE_MAX_SAVED_SEARCHES', 10),
+        'deadline_days' => [7, 1],
+    ],
+
+    // NO-04 : résumé hebdomadaire par e-mail, aux membres dont l'adresse est confirmée.
+    'weekly_digest' => [
+        'enabled' => (bool) env('IDEE_WEEKLY_DIGEST', true),
+        // Opportunités compatibles dont la date limite tombe dans ce délai (en jours).
+        'deadline_window_days' => 30,
+    ],
+
     // MR-04 : pièces jointes de la messagerie (taille maximale en Ko).
     'messages' => [
         'max_document_kb' => (int) env('IDEE_MESSAGE_DOCUMENT_KB', 10240),
         'max_voice_kb' => (int) env('IDEE_MESSAGE_VOICE_KB', 5120),
     ],
 
+    // MR-07 : rappel des rendez-vous confirmés, ce nombre d'heures avant (en heures).
+    'collaboration' => [
+        'meeting_reminder_hours' => (int) env('IDEE_MEETING_REMINDER_HOURS', 24),
+    ],
+
     // PR-05 : documents privés d'un projet (taille maximale en Ko).
+    // CF-05 : version de l'accord de confidentialité à accepter avant d'y accéder ;
+    // la changer quand le texte change, pour garder la trace de ce qui a été accepté.
     'documents' => [
         'max_kb' => (int) env('IDEE_DOCUMENT_KB', 10240),
+        'nda_version' => '2026-10',
+    ],
+
+    // FC-05 : messages par membre et par jour dans les groupes, contre les envois en masse.
+    'groups' => [
+        'posts_per_day' => (int) env('IDEE_GROUP_POSTS_PER_DAY', 10),
+    ],
+
+    // PR-08 : nombre de projets proches proposés au porteur.
+    'matching' => [
+        'suggestions' => (int) env('IDEE_MATCHING_SUGGESTIONS', 5),
     ],
 
     // Modération (section 8) : durée d'une suspension et délai pour contester une décision (en jours).
@@ -91,10 +123,16 @@ return [
         'enabled' => (bool) env('IDEE_AI_ENABLED', false),
         'business_plans_per_month' => (int) env('IDEE_AI_PLANS_PER_MONTH', 3),
         'clarifications_per_day' => (int) env('IDEE_AI_CLARIFICATIONS_PER_DAY', 3),
+        // IA-05 et IA-06 : préparations de rendez-vous par membre et par jour, présentations par projet et par mois.
+        'meeting_preparations_per_day' => (int) env('IDEE_AI_PREPARATIONS_PER_DAY', 3),
+        'pitch_decks_per_month' => (int) env('IDEE_AI_DECKS_PER_MONTH', 3),
     ],
 
     // RG-10 : une fiche pratique non revue depuis ce délai (en mois) est signalée à l'équipe.
     'guide_review_after_months' => (int) env('IDEE_GUIDE_REVIEW_MONTHS', 6),
+
+    // PG-07 : taille maximale de l'enregistrement audio en wolof d'une fiche (en Ko).
+    'guide_audio_max_kb' => (int) env('IDEE_GUIDE_AUDIO_KB', 10240),
 
     // Code de connexion à usage unique (section 10).
     'otp' => [

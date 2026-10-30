@@ -45,8 +45,13 @@ class DocumentTest extends TestCase
         Sanctum::actingAs($investor);
         $this->getJson("/api/projects/{$project->id}/documents")->assertForbidden();
         $this->getJson("/api/documents/{$documentId}")->assertForbidden();
-        $accessId = $this->postJson("/api/projects/{$project->id}/document-accesses")->assertCreated()->json('data.id');
-        $this->postJson("/api/projects/{$project->id}/document-accesses")->assertUnprocessable();
+        // CF-05 : l'accord de confidentialité est accepté avant toute demande.
+        $this->postJson("/api/projects/{$project->id}/document-accesses")->assertUnprocessable()->assertJsonValidationErrors('accept_nda');
+        $accessId = $this->postJson("/api/projects/{$project->id}/document-accesses", ['accept_nda' => true])
+            ->assertCreated()
+            ->assertJsonPath('data.nda.version', config('idee.documents.nda_version'))
+            ->json('data.id');
+        $this->postJson("/api/projects/{$project->id}/document-accesses", ['accept_nda' => true])->assertUnprocessable();
         $this->postJson("/api/document-accesses/{$accessId}/decide", ['granted' => true])->assertForbidden();
         Notification::assertSentTo($project->owner, DocumentAccessRequested::class);
 
@@ -97,9 +102,10 @@ class DocumentTest extends TestCase
             ->assertSee('Documents privés')
             ->assertSee('1 document privé')
             ->assertDontSee('Business plan 2026')
-            ->assertSee("Demander l'accès aux documents", false);
+            ->assertSee("Demander l'accès aux documents", false)
+            ->assertSee("Lire l'accord de confidentialité", false);
 
-        $this->post(route('document-access.request', $project))->assertRedirect(route('projects.show', $project).'#documents');
+        $this->post(route('document-access.request', $project), ['accept_nda' => 1])->assertRedirect(route('projects.show', $project).'#documents');
 
         $access = DocumentAccess::firstOrFail();
         $this->actingAs($project->owner)->get(route('projects.show', $project))->assertSee('Accorder')->assertSee("Journal d'accès", false);

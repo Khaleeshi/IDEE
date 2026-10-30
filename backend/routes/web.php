@@ -1,21 +1,29 @@
 <?php
 
 use App\Http\Controllers\Web\Admin\AdminController;
+use App\Http\Controllers\Web\AlertController;
 use App\Http\Controllers\Web\AssistantController;
+use App\Http\Controllers\Web\CollaborationController;
 use App\Http\Controllers\Web\ContactRequestController;
 use App\Http\Controllers\Web\DocumentController;
+use App\Http\Controllers\Web\EventController;
+use App\Http\Controllers\Web\ExpertController;
 use App\Http\Controllers\Web\FeedController;
 use App\Http\Controllers\Web\FollowController;
+use App\Http\Controllers\Web\GroupController;
 use App\Http\Controllers\Web\JourneyController;
 use App\Http\Controllers\Web\LoginController;
+use App\Http\Controllers\Web\MatchingController;
 use App\Http\Controllers\Web\MemberController;
 use App\Http\Controllers\Web\MessageController;
 use App\Http\Controllers\Web\NeedController;
 use App\Http\Controllers\Web\NotificationController;
 use App\Http\Controllers\Web\OpportunityController;
+use App\Http\Controllers\Web\OrganisationController;
 use App\Http\Controllers\Web\ProfileController;
 use App\Http\Controllers\Web\ProjectController;
 use App\Http\Controllers\Web\PushSubscriptionController;
+use App\Http\Controllers\Web\TaskController;
 use App\Http\Controllers\Web\TrustController;
 use Illuminate\Support\Facades\Route;
 
@@ -41,6 +49,7 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/projets/{project}/mises-a-jour', [ProjectController::class, 'publishUpdate'])->name('projects.updates.store');
     Route::post('/projets/{project}/equipe', [ProjectController::class, 'addTeamMember'])->name('projects.team.store');
+    Route::patch('/equipe/{projectMember}', [ProjectController::class, 'updateTeamMember'])->name('projects.team.update');
     Route::delete('/equipe/{projectMember}', [ProjectController::class, 'removeTeamMember'])->name('projects.team.destroy');
     Route::post('/projets/{project}/besoins', [NeedController::class, 'store'])->name('needs.store');
     Route::post('/projets/{project}/assistant/questions', [AssistantController::class, 'clarify'])->name('assistant.clarify');
@@ -49,6 +58,12 @@ Route::middleware('auth')->group(function () {
     Route::post('/projets/{project}/business-plan', [AssistantController::class, 'generate'])->name('business-plans.generate');
     Route::get('/projets/{project}/business-plan/impression', [AssistantController::class, 'print'])->name('business-plans.print');
     Route::put('/business-plans/{businessPlan}', [AssistantController::class, 'update'])->name('business-plans.update');
+    Route::get('/projets/{project}/presentation', [AssistantController::class, 'pitchDeck'])->name('pitch-decks.show');
+    Route::post('/projets/{project}/presentation', [AssistantController::class, 'generatePitchDeck'])->name('pitch-decks.generate');
+    Route::get('/projets/{project}/presentation/impression', [AssistantController::class, 'printPitchDeck'])->name('pitch-decks.print');
+    Route::put('/presentations/{assistantDocument}', [AssistantController::class, 'updatePitchDeck'])->name('pitch-decks.update');
+    Route::post('/rendez-vous/{meeting}/preparation', [AssistantController::class, 'prepareMeeting'])->name('meetings.prepare');
+    Route::get('/assistant/{assistantDocument}', [AssistantController::class, 'document'])->name('assistant.document');
     Route::post('/projets/{project}/documents', [DocumentController::class, 'store'])->name('documents.store');
     Route::get('/documents/{projectDocument}', [DocumentController::class, 'show'])->name('documents.show');
     Route::delete('/documents/{projectDocument}', [DocumentController::class, 'destroy'])->name('documents.destroy');
@@ -70,6 +85,22 @@ Route::middleware('auth')->group(function () {
     Route::post('/demandes/{contactRequest}/reponse', [ContactRequestController::class, 'respond'])->name('contact-requests.respond');
     Route::post('/demandes/{contactRequest}/messages', [MessageController::class, 'store'])->name('messages.store');
     Route::get('/messages/{message}/piece-jointe', [MessageController::class, 'attachment'])->name('messages.attachment');
+    Route::post('/demandes/{contactRequest}/etapes', [CollaborationController::class, 'proposeAgreement'])->name('agreements.store');
+    Route::post('/etapes-convenues/{agreement}/reponse', [CollaborationController::class, 'respondAgreement'])->name('agreements.respond');
+    Route::post('/etapes-convenues/{agreement}/realisee', [CollaborationController::class, 'completeAgreement'])->name('agreements.complete');
+    Route::post('/demandes/{contactRequest}/rendez-vous', [CollaborationController::class, 'proposeMeeting'])->name('meetings.store');
+    Route::post('/rendez-vous/{meeting}/reponse', [CollaborationController::class, 'respondMeeting'])->name('meetings.respond');
+    Route::post('/rendez-vous/{meeting}/annulation', [CollaborationController::class, 'cancelMeeting'])->name('meetings.cancel');
+    Route::post('/demandes/{contactRequest}/collaborations', [CollaborationController::class, 'declare'])->name('collaborations.store');
+    Route::post('/collaborations/{collaboration}/reponse', [CollaborationController::class, 'respondCollaboration'])->name('collaborations.respond');
+    Route::get('/projets/{project}/rapprochements', [MatchingController::class, 'index'])->name('matches.index');
+    Route::post('/projets/{project}/rapprochements/ouverture', [MatchingController::class, 'toggle'])->name('matches.toggle');
+    Route::post('/projets/{project}/rapprochements', [MatchingController::class, 'store'])->name('matches.store');
+    Route::post('/rapprochements/{projectMatch}/reponse', [MatchingController::class, 'respond'])->name('matches.respond');
+    Route::get('/projets/{project}/taches', [TaskController::class, 'index'])->name('tasks.index');
+    Route::post('/projets/{project}/taches', [TaskController::class, 'store'])->name('tasks.store');
+    Route::post('/taches/{projectTask}/colonne', [TaskController::class, 'move'])->name('tasks.move');
+    Route::delete('/taches/{projectTask}', [TaskController::class, 'destroy'])->name('tasks.destroy');
 
     Route::post('/parcours/{journey}/commencer', [JourneyController::class, 'start'])->name('journeys.start');
     Route::delete('/parcours/{journey}/suivi', [JourneyController::class, 'leave'])->name('journeys.leave');
@@ -84,6 +115,31 @@ Route::middleware('auth')->group(function () {
     Route::delete('/opportunites/{opportunity}/candidature', [OpportunityController::class, 'forget'])->name('opportunities.forget');
 
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::get('/organisations/nouvelle', [OrganisationController::class, 'create'])->name('organisations.create');
+    Route::post('/organisations', [OrganisationController::class, 'store'])->name('organisations.store');
+    Route::get('/organisations/{organisation}/gestion', [OrganisationController::class, 'manage'])->name('organisations.manage');
+    Route::patch('/organisations/{organisation}', [OrganisationController::class, 'update'])->name('organisations.update');
+    Route::post('/organisations/{organisation}/membres', [OrganisationController::class, 'addMember'])->name('organisations.members.store');
+    Route::delete('/membres-organisation/{organisationMember}', [OrganisationController::class, 'removeMember'])->name('organisations.members.destroy');
+    Route::post('/organisations/{organisation}/verification', [OrganisationController::class, 'requestVerification'])->name('organisations.verification');
+    Route::get('/organisations/{organisation}/programmes/nouveau', [OrganisationController::class, 'createProgramme'])->name('programmes.create');
+    Route::post('/organisations/{organisation}/programmes', [OrganisationController::class, 'storeProgramme'])->name('programmes.store');
+    Route::get('/programmes/{opportunity}/modifier', [OrganisationController::class, 'editProgramme'])->name('programmes.edit');
+    Route::put('/programmes/{opportunity}', [OrganisationController::class, 'updateProgramme'])->name('programmes.update');
+    Route::delete('/programmes/{opportunity}', [OrganisationController::class, 'destroyProgramme'])->name('programmes.destroy');
+    Route::get('/membres/{user}/contacter', [MemberController::class, 'contact'])->name('members.contact');
+    Route::post('/groupes/{type}/{key}', [GroupController::class, 'store'])->name('groups.posts.store');
+    Route::delete('/messages-groupe/{groupPost}', [GroupController::class, 'destroy'])->name('groups.posts.destroy');
+    Route::get('/evenements/nouveau', [EventController::class, 'create'])->name('events.create');
+    Route::post('/evenements', [EventController::class, 'store'])->name('events.store');
+    Route::post('/evenements/{event}/inscription', [EventController::class, 'register'])->name('events.register');
+    Route::delete('/evenements/{event}/inscription', [EventController::class, 'unregister'])->name('events.unregister');
+    Route::post('/evenements/{event}/annulation', [EventController::class, 'cancel'])->name('events.cancel');
+    Route::post('/inscriptions/{eventRegistration}/decision', [EventController::class, 'decide'])->name('events.decide');
+    Route::get('/alertes', [AlertController::class, 'index'])->name('alerts.index');
+    Route::post('/alertes', [AlertController::class, 'store'])->name('alerts.store');
+    Route::get('/alertes/{savedSearch}', [AlertController::class, 'show'])->name('alerts.show');
+    Route::delete('/alertes/{savedSearch}', [AlertController::class, 'destroy'])->name('alerts.destroy');
     Route::post('/notifications/abonnement', [PushSubscriptionController::class, 'store'])->name('push.subscribe');
     Route::delete('/notifications/abonnement', [PushSubscriptionController::class, 'destroy'])->name('push.unsubscribe');
 
@@ -101,6 +157,9 @@ Route::middleware(['auth', 'can:administrer'])->prefix('administration')->name('
     Route::get('/verifications', [AdminController::class, 'verifications'])->name('verifications');
     Route::get('/verifications/{verification}/piece', [AdminController::class, 'verificationDocument'])->name('verifications.document');
     Route::post('/verifications/{verification}/decision', [AdminController::class, 'decideVerification'])->name('verifications.decide');
+    Route::get('/organisations', [AdminController::class, 'organisations'])->name('organisations');
+    Route::get('/organisations/{organisation}/piece', [AdminController::class, 'organisationDocument'])->name('organisations.document');
+    Route::post('/organisations/{organisation}/decision', [AdminController::class, 'decideOrganisation'])->name('organisations.decide');
     Route::get('/opportunites', [AdminController::class, 'opportunities'])->name('opportunities');
     Route::get('/opportunites/nouvelle', [AdminController::class, 'createOpportunity'])->name('opportunities.create');
     Route::post('/opportunites', [AdminController::class, 'storeOpportunity'])->name('opportunities.store');
@@ -125,5 +184,12 @@ Route::get('/parcours/forme-juridique', [JourneyController::class, 'legalForm'])
 Route::get('/parcours/{journey}', [JourneyController::class, 'show'])->name('journeys.show');
 
 // Répertoire des programmes, concours et financements (OP-01).
+Route::get('/experts', [ExpertController::class, 'index'])->name('experts.index');
+Route::get('/evenements', [EventController::class, 'index'])->name('events.index');
+Route::get('/evenements/{event}', [EventController::class, 'show'])->name('events.show');
+Route::get('/groupes', [GroupController::class, 'index'])->name('groups.index');
+Route::get('/groupes/{type}/{key}', [GroupController::class, 'show'])->name('groups.show');
+Route::get('/organisations', [OrganisationController::class, 'index'])->name('organisations.index');
+Route::get('/organisations/{organisation}', [OrganisationController::class, 'show'])->name('organisations.show');
 Route::get('/opportunites', [OpportunityController::class, 'index'])->name('opportunities.index');
 Route::get('/opportunites/{opportunity}', [OpportunityController::class, 'show'])->name('opportunities.show');

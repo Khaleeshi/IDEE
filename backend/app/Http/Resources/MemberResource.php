@@ -25,6 +25,8 @@ class MemberResource extends JsonResource
             'photo_url' => $this->photoUrl(),
             'availability' => EnumResource::make($this->availability),
             'bio' => $this->bio,
+            'expertise' => $this->expertise,
+            'rate' => $this->rate,
             'languages' => $this->languages ?? [],
             'skills' => $this->skills ?? [],
             'sectors' => $this->sectors ?? [],

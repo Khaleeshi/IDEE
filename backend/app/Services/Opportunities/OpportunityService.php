@@ -7,6 +7,7 @@ use App\Enums\OpportunityKind;
 use App\Models\Opportunity;
 use App\Models\OpportunityApplication;
 use App\Models\User;
+use App\Notifications\ApplicationDeadline;
 use App\Notifications\ApplicationReminder;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -92,6 +93,39 @@ class OpportunityService
             ->each(function (OpportunityApplication $application) use (&$sent) {
                 $application->user->notify(new ApplicationReminder($application));
                 $application->forceFill(['reminded_at' => now()])->save();
+                $sent++;
+            });
+
+        return $sent;
+    }
+
+    /**
+     * Prévient les membres dont une candidature est en préparation quand la
+     * date limite approche (OP-03), une fois par palier.
+     */
+    public function sendDeadlineAlerts(): int
+    {
+        $thresholds = collect(config('idee.alerts.deadline_days'))->map(fn ($days) => (int) $days)->sort()->values();
+        $sent = 0;
+
+        OpportunityApplication::query()
+            ->where('status', ApplicationStatus::EnPreparation)
+            ->whereHas('user')
+            ->whereHas('opportunity', fn (Builder $query) => $query
+                ->whereNotNull('deadline')
+                ->whereDate('deadline', '>=', today())
+                ->whereDate('deadline', '<=', today()->addDays($thresholds->max() ?? 0)))
+            ->with(['user', 'opportunity'])
+            ->each(function (OpportunityApplication $application) use ($thresholds, &$sent) {
+                $daysLeft = (int) today()->diffInDays($application->opportunity->deadline);
+                $threshold = $thresholds->first(fn (int $days) => $daysLeft <= $days);
+
+                if ($threshold === null || ($application->deadline_alert_days !== null && $application->deadline_alert_days <= $threshold)) {
+                    return;
+                }
+
+                $application->user->notify(new ApplicationDeadline($application, $daysLeft));
+                $application->forceFill(['deadline_alert_days' => $threshold])->save();
                 $sent++;
             });
 

@@ -4,16 +4,21 @@ namespace App\Http\Controllers\Web\Admin;
 
 use App\Enums\ModerationDecision;
 use App\Enums\OpportunityKind;
+use App\Enums\OrganisationVerification;
+use App\Enums\ProjectStage;
 use App\Enums\ReportStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\OpportunityRequest;
 use App\Models\JourneyStep;
 use App\Models\Opportunity;
+use App\Models\Organisation;
 use App\Models\Report;
+use App\Models\Sector;
 use App\Models\Verification;
 use App\Services\Admin\IndicatorService;
 use App\Services\Journeys\JourneyService;
 use App\Services\Moderation\ModerationService;
+use App\Services\Organisations\OrganisationService;
 use App\Services\Trust\VerificationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -106,6 +111,35 @@ class AdminController extends Controller
         return redirect()->route('admin.verifications')->with('status', 'Vérification traitée.');
     }
 
+    /**
+     * CF-03 : organisations en attente de vérification de leur RCCM et NINEA.
+     */
+    public function organisations(): View
+    {
+        return view('admin.organisations', [
+            'pending' => Organisation::where('verification_status', OrganisationVerification::EnAttente)->oldest('verification_requested_at')->get(),
+        ]);
+    }
+
+    public function organisationDocument(Organisation $organisation): StreamedResponse
+    {
+        abort_if($organisation->verification_document_path === null, 404);
+
+        return Storage::disk('local')->response($organisation->verification_document_path, null, [
+            'X-Content-Type-Options' => 'nosniff',
+            'Cache-Control' => 'no-store',
+        ]);
+    }
+
+    public function decideOrganisation(Request $request, Organisation $organisation, OrganisationService $organisations): RedirectResponse
+    {
+        $request->validate(['approved' => ['required', 'boolean'], 'note' => ['nullable', 'string', 'max:500']]);
+
+        $organisations->decideVerification($organisation, $request->boolean('approved'), $request->input('note'));
+
+        return redirect()->route('admin.organisations')->with('status', 'Vérification traitée.');
+    }
+
     public function opportunities(): View
     {
         return view('admin.opportunities', ['opportunities' => Opportunity::orderByDesc('is_published')->orderBy('title')->get()]);
@@ -113,7 +147,7 @@ class AdminController extends Controller
 
     public function createOpportunity(): View
     {
-        return view('admin.opportunity', ['opportunity' => new Opportunity(['is_published' => true]), 'kinds' => OpportunityKind::cases()]);
+        return view('admin.opportunity', ['opportunity' => new Opportunity(['is_published' => true]), ...$this->opportunityOptions()]);
     }
 
     public function storeOpportunity(OpportunityRequest $request): RedirectResponse
@@ -125,7 +159,7 @@ class AdminController extends Controller
 
     public function editOpportunity(Opportunity $opportunity): View
     {
-        return view('admin.opportunity', ['opportunity' => $opportunity, 'kinds' => OpportunityKind::cases()]);
+        return view('admin.opportunity', ['opportunity' => $opportunity, ...$this->opportunityOptions()]);
     }
 
     public function updateOpportunity(OpportunityRequest $request, Opportunity $opportunity): RedirectResponse
@@ -145,7 +179,14 @@ class AdminController extends Controller
      */
     private function saveOpportunity(OpportunityRequest $request, Opportunity $opportunity, string $status): RedirectResponse
     {
-        $opportunity->fill([...$request->validated(), 'is_published' => $request->boolean('is_published'), 'checked_on' => today()]);
+        $opportunity->fill([
+            ...$request->validated(),
+            // OP-02 : sans case cochée, l'opportunité reste ouverte à tous les stades et secteurs.
+            'stages' => $request->validated('stages') ?: null,
+            'sectors' => $request->validated('sectors') ?: null,
+            'is_published' => $request->boolean('is_published'),
+            'checked_on' => today(),
+        ]);
         $opportunity->edited_at = now();
         $opportunity->save();
 
@@ -167,11 +208,15 @@ class AdminController extends Controller
         return view('admin.guide', ['step' => $journeyStep->load('journey')]);
     }
 
-    public function updateGuide(Request $request, JourneyStep $journeyStep): RedirectResponse
+    public function updateGuide(Request $request, JourneyStep $journeyStep, JourneyService $journeys): RedirectResponse
     {
         $data = $request->validate([
             'title' => ['required', 'string', 'max:255'],
             'body' => ['required', 'string', 'max:3000'],
+            'title_wo' => ['nullable', 'string', 'max:255'],
+            'body_wo' => ['nullable', 'string', 'max:3000'],
+            'audio' => ['nullable', 'file', 'mimes:mp3,m4a,aac,ogg,oga,opus,wav', 'max:'.config('idee.guide_audio_max_kb')],
+            'remove_audio' => ['boolean'],
             'documents' => ['nullable', 'string', 'max:3000'],
             'organisation' => ['nullable', 'string', 'max:255'],
             'cost' => ['nullable', 'string', 'max:255'],
@@ -183,7 +228,7 @@ class AdminController extends Controller
         ]);
 
         $journeyStep->fill([
-            ...collect($data)->except(['documents', 'checked'])->all(),
+            ...collect($data)->except(['documents', 'checked', 'audio', 'remove_audio'])->all(),
             'documents' => array_values(array_filter(array_map('trim', explode("\n", $data['documents'] ?? '')))) ?: null,
             'needs_expert' => $request->boolean('needs_expert'),
         ]);
@@ -194,8 +239,20 @@ class AdminController extends Controller
         }
 
         $journeyStep->edited_at = now();
-        $journeyStep->save();
+        $journeys->setWolofAudio($journeyStep, $request->file('audio'), $request->boolean('remove_audio'));
 
         return redirect()->route('admin.guides')->with('status', 'Fiche mise à jour.');
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function opportunityOptions(): array
+    {
+        return [
+            'kinds' => OpportunityKind::cases(),
+            'stages' => ProjectStage::cases(),
+            'sectors' => Sector::options('slug'),
+        ];
     }
 }

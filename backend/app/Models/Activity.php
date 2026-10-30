@@ -52,4 +52,12 @@ class Activity extends Model
     {
         return $this->belongsTo(ProjectUpdate::class);
     }
+
+    /**
+     * @return BelongsTo<Collaboration, $this>
+     */
+    public function collaboration(): BelongsTo
+    {
+        return $this->belongsTo(Collaboration::class);
+    }
 }

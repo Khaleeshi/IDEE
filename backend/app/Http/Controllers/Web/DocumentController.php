@@ -52,7 +52,7 @@ class DocumentController extends Controller
 
     public function requestAccess(Request $request, Project $project): RedirectResponse
     {
-        $this->documents->requestAccess($project, $request->user());
+        $this->documents->requestAccess($project, $request->user(), $request->boolean('accept_nda'));
 
         return $this->backToDocuments($project, 'Demande envoyée au porteur du projet.');
     }

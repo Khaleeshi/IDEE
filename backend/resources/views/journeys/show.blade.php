@@ -5,6 +5,13 @@
     <h1 class="mt-1 text-2xl font-bold leading-tight">{{ $journey->title }}</h1>
     <p class="mt-2 text-stone-700">{{ $journey->summary }}</p>
 
+    @if ($hasWolof)
+        <nav aria-label="Langue des fiches" class="mt-3 inline-flex rounded-xl bg-stone-100 p-1 text-sm font-medium">
+            <a href="{{ route('journeys.show', $journey) }}" @if (! $wolof) aria-current="true" @endif class="rounded-lg px-3 py-1.5 {{ $wolof ? 'text-stone-600' : 'bg-white text-brand-800 shadow-sm' }}">Français</a>
+            <a href="{{ route('journeys.show', [$journey, 'langue' => 'wo']) }}" lang="wo" @if ($wolof) aria-current="true" @endif class="rounded-lg px-3 py-1.5 {{ $wolof ? 'bg-white text-brand-800 shadow-sm' : 'text-stone-600' }}">Wolof</a>
+        </nav>
+    @endif
+
     @auth
         @if ($following)
             <div class="mt-4">
@@ -35,7 +42,7 @@
                             {{ $item?->status->isDone() ? '✓' : $loop->iteration }}
                         </span>
                         <span class="flex-1">
-                            <span class="block font-semibold leading-snug">{{ $step->title }}</span>
+                            <span class="block font-semibold leading-snug" @if ($wolof && $step->title_wo) lang="wo" @endif>{{ $wolof && $step->title_wo ? $step->title_wo : $step->title }}</span>
                             <span class="mt-1 flex flex-wrap gap-1">
                                 @if ($item)<x-status :status="$item->status" />@endif
                                 @if ($step->needs_expert)
@@ -46,7 +53,16 @@
                     </summary>
 
                     <div class="border-t border-stone-100 px-4 pb-4 pt-3 text-sm">
-                        <p class="text-stone-700">{{ $step->body }}</p>
+                        @if ($wolof && $step->hasWolof())
+                            <p class="text-stone-700" lang="wo">{{ $step->body_wo }}</p>
+                        @else
+                            @if ($wolof)<p class="mb-2 text-xs text-stone-500">Cette fiche n'est pas encore traduite en wolof.</p>@endif
+                            <p class="text-stone-700">{{ $step->body }}</p>
+                        @endif
+                        @if ($step->audioUrl())
+                            <p class="mt-3 text-xs font-medium text-stone-600">Écouter en wolof</p>
+                            <audio controls preload="none" src="{{ $step->audioUrl() }}" class="mt-1 w-full"></audio>
+                        @endif
 
                         @if ($step->documents)
                             <h3 class="mt-3 font-semibold">Pièces à réunir</h3>

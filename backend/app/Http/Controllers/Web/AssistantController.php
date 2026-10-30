@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers\Web;
 
+use App\Enums\AssistantDocumentKind;
 use App\Http\Controllers\Controller;
+use App\Models\AssistantDocument;
 use App\Models\BusinessPlan;
 use App\Models\IdeaClarification;
+use App\Models\Meeting;
 use App\Models\Project;
 use App\Services\Assistant\AssistantService;
 use Illuminate\Http\RedirectResponse;
@@ -13,7 +16,8 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 
 /**
- * Assistant IA du porteur : questions pour clarifier l'idée (IA-01) et business plan (IA-02).
+ * Assistant IA : questions pour clarifier l'idée (IA-01), business plan (IA-02),
+ * préparation des rendez-vous (IA-05) et présentation du projet (IA-06).
  */
 class AssistantController extends Controller
 {
@@ -83,6 +87,87 @@ class AssistantController extends Controller
         return view('business-plans.print', [
             'project' => $project,
             'plan' => BusinessPlan::where('project_id', $project->id)->where('status', 'pret')->orderByDesc('version')->firstOrFail(),
+        ]);
+    }
+
+    /**
+     * IA-05 : préparation d'un rendez-vous pour la personne qui la demande.
+     */
+    public function prepareMeeting(Request $request, Meeting $meeting): RedirectResponse
+    {
+        Gate::authorize('cancel', $meeting);
+
+        $document = $this->assistant->requestMeetingPreparation($meeting, $request->user());
+
+        return redirect()->route('assistant.document', $document);
+    }
+
+    /**
+     * Préparation de rendez-vous, visible seulement de la personne qui l'a demandée.
+     */
+    public function document(Request $request, AssistantDocument $assistantDocument): View|RedirectResponse
+    {
+        abort_unless($assistantDocument->user_id === $request->user()->id, 404);
+
+        if ($assistantDocument->kind === AssistantDocumentKind::Presentation) {
+            return redirect()->route('pitch-decks.show', $assistantDocument->project);
+        }
+
+        return view('assistant.preparation', ['document' => $assistantDocument->load('meeting.contactRequest')]);
+    }
+
+    /**
+     * IA-06 : présentation du projet, dernière version et historique.
+     */
+    public function pitchDeck(Project $project): View
+    {
+        Gate::authorize('update', $project);
+
+        $decks = AssistantDocument::where('kind', AssistantDocumentKind::Presentation)->where('project_id', $project->id)->orderByDesc('version')->get();
+
+        return view('pitch-decks.show', [
+            'project' => $project,
+            'deck' => $decks->first(),
+            'enabled' => $this->assistant->isEnabled(),
+        ]);
+    }
+
+    public function generatePitchDeck(Request $request, Project $project): RedirectResponse
+    {
+        Gate::authorize('update', $project);
+
+        $this->assistant->requestPitchDeck($project, $request->user());
+
+        return redirect()->route('pitch-decks.show', $project);
+    }
+
+    public function updatePitchDeck(Request $request, AssistantDocument $assistantDocument): RedirectResponse
+    {
+        abort_unless($assistantDocument->kind === AssistantDocumentKind::Presentation, 404);
+        Gate::authorize('update', $assistantDocument->project);
+        $slides = $request->validate([
+            'slides' => ['array'],
+            'slides.*.title' => ['nullable', 'string', 'max:200'],
+            'slides.*.bullets' => ['nullable', 'string', 'max:2000'],
+            'slides.*.notes' => ['nullable', 'string', 'max:3000'],
+        ])['slides'] ?? [];
+
+        $this->assistant->editPitchDeck($assistantDocument, $slides);
+
+        return redirect()->route('pitch-decks.show', $assistantDocument->project)->with('status', 'Présentation enregistrée.');
+    }
+
+    public function printPitchDeck(Project $project): View
+    {
+        Gate::authorize('update', $project);
+
+        return view('pitch-decks.print', [
+            'project' => $project,
+            'deck' => AssistantDocument::where('kind', AssistantDocumentKind::Presentation)
+                ->where('project_id', $project->id)
+                ->where('status', 'pret')
+                ->orderByDesc('version')
+                ->firstOrFail(),
         ]);
     }
 }

@@ -24,7 +24,12 @@
                 <p class="mt-1 line-clamp-4 whitespace-pre-line text-sm text-stone-700">{{ $activity->projectUpdate?->body }}</p>
                 @break
             @case('reussite')
-                <p class="mt-1 text-sm text-stone-700">Besoin comblé : {{ $activity->need?->title }}@if ($activity->need?->outcome) — {{ $activity->need->outcome }}@endif</p>
+                @if ($activity->collaboration)
+                    <p class="mt-1 text-sm text-stone-700">{{ $activity->collaboration->summary }}</p>
+                    <p class="mt-1 text-xs font-medium text-brand-700">Confirmée par {{ $activity->collaboration->partner?->name }}</p>
+                @else
+                    <p class="mt-1 text-sm text-stone-700">Besoin comblé : {{ $activity->need?->title }}@if ($activity->need?->outcome) — {{ $activity->need->outcome }}@endif</p>
+                @endif
                 @break
         @endswitch
     </a>

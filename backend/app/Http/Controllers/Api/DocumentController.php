@@ -73,7 +73,7 @@ class DocumentController extends Controller
 
     public function requestAccess(Request $request, Project $project): JsonResponse
     {
-        $access = $this->documents->requestAccess($project, $request->user());
+        $access = $this->documents->requestAccess($project, $request->user(), $request->boolean('accept_nda'));
 
         return (new DocumentAccessResource($access))->response()->setStatusCode(Response::HTTP_CREATED);
     }

@@ -1,7 +1,13 @@
 <x-layout :title="$opportunity->title" :description="\Illuminate\Support\Str::limit($opportunity->summary, 180)">
     <a href="{{ route('opportunities.index') }}" class="mb-3 inline-block py-1 text-sm text-stone-500">← Programmes et financements</a>
 
-    <p class="text-sm font-medium text-brand-700">{{ $opportunity->kind->label() }} · {{ $opportunity->organisation }}</p>
+    <p class="text-sm font-medium text-brand-700">{{ $opportunity->kind->label() }} ·
+        @if ($opportunity->organisationPage)
+            <a href="{{ route('organisations.show', $opportunity->organisationPage) }}" class="underline">{{ $opportunity->organisation }}</a>
+        @else
+            {{ $opportunity->organisation }}
+        @endif
+    </p>
     <h1 class="mt-1 text-2xl font-bold leading-tight">{{ $opportunity->title }}</h1>
     <p class="mt-3 text-stone-700">{{ $opportunity->summary }}</p>
 
@@ -29,6 +35,21 @@
         @endif
         <p class="mt-3 text-xs text-stone-500">Source : {{ $opportunity->source_label }}@if ($opportunity->checked_on), consultée le {{ $opportunity->checked_on->translatedFormat('d F Y') }}@endif. Vérifiez les conditions auprès de l'organisme avant de candidater.</p>
     </x-card>
+
+    @if ($eligibilities->isNotEmpty())
+        {{-- OP-02 : compatibilité avec les projets du membre. --}}
+        <x-card class="text-sm">
+            <h2 class="font-semibold">Pour mes projets</h2>
+            @foreach ($eligibilities as $item)
+                <div class="mt-2 border-t border-stone-100 pt-2">
+                    <p class="font-medium">{{ $item['project']->title }} :
+                        <span class="{{ $item['eligible'] ? 'text-brand-800' : 'text-stone-500' }}">{{ $item['eligible'] ? 'compatible' : 'non compatible' }}</span>
+                    </p>
+                    <p class="text-xs text-stone-500">{{ implode(' · ', $item['eligible'] ? $item['reasons'] : $item['blockers']) }}</p>
+                </div>
+            @endforeach
+        </x-card>
+    @endif
 
     @auth
         <x-card id="candidature">

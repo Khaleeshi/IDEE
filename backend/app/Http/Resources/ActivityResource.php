@@ -34,6 +34,7 @@ class ActivityResource extends JsonResource
                 'outcome' => $this->need->outcome,
             ] : null,
             'update' => $this->projectUpdate ? new ProjectUpdateResource($this->projectUpdate) : null,
+            'collaboration' => $this->collaboration ? new CollaborationResource($this->collaboration) : null,
             'created_at' => $this->created_at?->toIso8601String(),
         ];
     }
