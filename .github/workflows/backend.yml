@@ -1,4 +1,4 @@
-name: Serveur (tests)
+name: Serveur et site web (tests)
 
 on:
   push:
@@ -21,8 +21,19 @@ jobs:
           extensions: mbstring, pdo_sqlite, intl
           coverage: none
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
       - name: Installer les dépendances
-        run: composer install --no-interaction --prefer-dist --no-progress
+        run: |
+          composer install --no-interaction --prefer-dist --no-progress
+          npm ci --no-audit --no-fund
+
+      - name: Compiler le CSS et le JavaScript
+        run: npm run build
 
       - name: Préparer l'environnement
         run: |

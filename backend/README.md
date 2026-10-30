@@ -1,7 +1,7 @@
 # IDEE — serveur et API
 
-Application Laravel 13 qui porte l'API du réseau IDEE : comptes, projets,
-appels à action, propositions d'aide et demandes de contact.
+Application Laravel 13 qui porte le site web et l'API du réseau IDEE :
+comptes, projets, appels à action, propositions d'aide et demandes de contact.
 
 La présentation du projet, l'installation et la liste des routes se
 trouvent dans le [README à la racine du dépôt](../README.md).
@@ -10,6 +10,7 @@ trouvent dans le [README à la racine du dépôt](../README.md).
 
 ```bash
 php artisan test                    # lancer les tests
+npm run dev                         # recompiler le CSS et le JS à chaque modification
 vendor/bin/pint                     # remettre le code au bon format
 php artisan migrate:fresh --seed    # recréer la base avec les données de démonstration
 php artisan idee:contact-requests   # relances et expirations des demandes (RG-03)

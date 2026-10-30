@@ -1,0 +1,110 @@
+<?php
+
+namespace App\Http\Controllers\Web;
+
+use App\Enums\NeedType;
+use App\Enums\ProjectStage;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreProjectRequest;
+use App\Http\Requests\UpdateProjectRequest;
+use App\Models\Project;
+use App\Models\Sector;
+use App\Services\ContactRequests\ReactivityIndicator;
+use App\Services\Projects\ProjectService;
+use App\Services\Projects\ReadinessScore;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\View\View;
+
+class ProjectController extends Controller
+{
+    public function __construct(private readonly ProjectService $projects) {}
+
+    public function show(Request $request, Project $project, ReadinessScore $readiness, ReactivityIndicator $reactivity): View
+    {
+        abort_unless(Gate::allows('view', $project), Response::HTTP_NOT_FOUND);
+
+        $isOwner = $project->isOwnedBy($request->user());
+
+        $project->load(['owner.roleAssignments', 'sector']);
+        $needs = $isOwner
+            ? $project->needs()->with('helpOffers.user')->latest()->get()
+            : $project->openNeeds()->latest()->get();
+
+        return view('projects.show', [
+            'project' => $project,
+            'needs' => $needs,
+            'isOwner' => $isOwner,
+            'readiness' => $isOwner ? $readiness->evaluate($project) : null,
+            'reactivity' => $reactivity->for($project->owner),
+            'needTypes' => $this->needTypes(),
+        ]);
+    }
+
+    public function mine(Request $request): View
+    {
+        return view('projects.mine', [
+            'projects' => $request->user()->projects()->with(['sector', 'openNeeds'])->latest('last_activity_at')->get(),
+        ]);
+    }
+
+    public function create(): View
+    {
+        return view('projects.form', ['project' => new Project, ...$this->formOptions()]);
+    }
+
+    public function store(StoreProjectRequest $request): RedirectResponse
+    {
+        $project = $this->projects->create($request->user(), $request->validated());
+
+        return redirect()->route('projects.show', $project)
+            ->with('status', 'Votre projet est publié. Ajoutez maintenant ce qui lui manque : ses appels à action.');
+    }
+
+    public function edit(Project $project): View
+    {
+        Gate::authorize('update', $project);
+
+        return view('projects.form', ['project' => $project, ...$this->formOptions()]);
+    }
+
+    public function update(UpdateProjectRequest $request, Project $project): RedirectResponse
+    {
+        Gate::authorize('update', $project);
+
+        $this->projects->update($project, $request->validated());
+
+        return redirect()->route('projects.show', $project)->with('status', 'Projet mis à jour.');
+    }
+
+    public function destroy(Project $project): RedirectResponse
+    {
+        Gate::authorize('delete', $project);
+
+        $project->delete();
+
+        return redirect()->route('projects.mine')->with('status', 'Projet supprimé.');
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function formOptions(): array
+    {
+        return [
+            'sectors' => Sector::options(),
+            'stages' => collect(ProjectStage::cases())->mapWithKeys(fn (ProjectStage $stage) => [$stage->value => $stage->label()]),
+        ];
+    }
+
+    /**
+     * @return Collection<string, string>
+     */
+    private function needTypes()
+    {
+        return collect(NeedType::cases())->mapWithKeys(fn (NeedType $type) => [$type->value => $type->label()]);
+    }
+}

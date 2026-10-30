@@ -7,8 +7,8 @@ use App\Http\Requests\StoreProjectRequest;
 use App\Http\Requests\UpdateProjectRequest;
 use App\Http\Resources\ProjectResource;
 use App\Models\Project;
+use App\Services\Projects\ProjectSearch;
 use App\Services\Projects\ProjectService;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -19,28 +19,10 @@ class ProjectController extends Controller
 {
     public function __construct(private readonly ProjectService $projects) {}
 
-    /**
-     * Recherche de projets actifs (RR-01) : mot-clé, secteur, région, stade, type de besoin.
-     */
-    public function index(Request $request): AnonymousResourceCollection
+    public function index(Request $request, ProjectSearch $search): AnonymousResourceCollection
     {
-        $projects = Project::query()
-            ->active()
-            ->with(['owner.roleAssignments', 'sector', 'openNeeds'])
-            ->when($request->string('q')->trim()->value(), function (Builder $query, string $search) {
-                $query->where(fn (Builder $query) => $query
-                    ->where('title', 'like', "%{$search}%")
-                    ->orWhere('summary', 'like', "%{$search}%"));
-            })
-            ->when($request->query('sector'), fn (Builder $query, $sector) => $query->whereHas(
-                'sector', fn (Builder $query) => $query->where('slug', $sector)
-            ))
-            ->when($request->query('region'), fn (Builder $query, $region) => $query->where('region', $region))
-            ->when($request->query('stage'), fn (Builder $query, $stage) => $query->where('stage', $stage))
-            ->when($request->query('need_type'), fn (Builder $query, $type) => $query->whereHas(
-                'openNeeds', fn (Builder $query) => $query->where('type', $type)
-            ))
-            ->latest('last_activity_at')
+        $projects = $search
+            ->query($request->only(['q', 'sector', 'region', 'stage', 'need_type']))
             ->paginate(20)
             ->withQueryString();
 
