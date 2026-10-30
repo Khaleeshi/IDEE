@@ -31,6 +31,8 @@ class ProgrammeRequest extends FormRequest
             'deadline' => ['nullable', 'date', 'after_or_equal:today'],
             'deadline_note' => ['nullable', 'string', 'max:255'],
             'url' => ['nullable', 'url', 'max:500'],
+            'accepts_applications' => ['boolean'],
+            'application_questions' => ['nullable', 'string', 'max:1500'],
         ];
     }
 

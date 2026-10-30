@@ -31,6 +31,13 @@
         <x-field name="deadline" type="date" label="Date limite (facultatif)" :value="$programme->deadline?->toDateString()" />
         <x-field name="deadline_note" label="Calendrier, sans date limite" :value="$programme->deadline_note" placeholder="Ex. : candidatures toute l'année" maxlength="255" />
         <x-field name="url" type="url" label="Lien pour candidater (facultatif)" :value="$programme->url" placeholder="https://" maxlength="500" />
+        {{-- OR-02 : candidatures envoyées depuis un dossier IDEE. --}}
+        <fieldset class="mb-4 rounded-xl border border-stone-200 p-3">
+            <legend class="px-1 text-sm font-semibold">Candidatures sur IDEE</legend>
+            <label class="flex min-h-11 items-center gap-2 text-sm"><input type="hidden" name="accepts_applications" value="0"><input type="checkbox" name="accepts_applications" value="1" @checked(old('accepts_applications', $programme->accepts_applications)) class="h-5 w-5 accent-brand-700"> Recevoir les candidatures depuis IDEE</label>
+            <p class="mb-2 text-xs text-stone-500">Chaque candidat répond à trois questions communes (avancement, besoins, attentes) et peut joindre son business plan.</p>
+            <x-field name="application_questions" type="textarea" rows="3" label="Vos questions en plus (trois au plus, une par ligne)" :value="implode("\n", $programme->application_questions ?? [])" />
+        </fieldset>
         <x-button class="w-full">{{ $programme->exists ? 'Enregistrer' : 'Publier' }}</x-button>
     </form>
 

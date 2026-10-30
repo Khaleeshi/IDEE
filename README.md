@@ -108,7 +108,10 @@ clients, matériel) et chaque demande de contact reçoit une réponse.
   statistiques de visibilité pour l'offre Pro (PA-01 à PA-03)
 - Saisie vocale en français : bouton « Dicter » sur les champs de texte, avec la
   reconnaissance vocale du navigateur, sans frais (IA-03)
-- 181 tests automatisés au total
+- Candidatures structurées aux programmes des organisations vérifiées, envoyées
+  depuis le dossier IDEE avec, si le porteur le veut, son business plan (OR-02) ;
+  suivi des cohortes : score, besoins, activité et points de suivi (OR-03)
+- 184 tests automatisés au total
 
 **Reste à faire** : saisie vocale en wolof (IA-04, après des tests de qualité) ; traduction et enregistrement des fiches en wolof ; paiement par carte
 (avec un agrégateur comme PayDunya ou PayTech) ; fonctions prévues en
@@ -166,6 +169,8 @@ de connexion ne sont pas envoyés par SMS : ils sont écrits dans
 | `/groupes` | Groupes par secteur et par région ; `/groupes/{secteur ou region}/{id}` |
 | `/evenements` | Sessions de pitch ; `/evenements/{id}` pour s'inscrire ou candidater |
 | `/projets/{id}/presentation` | Présentation du projet rédigée par l'assistant, à corriger et projeter |
+| `/candidatures/{id}` | Candidature à un programme : réponses, business plan joint, décision |
+| `/organisations/{id}/cohortes` | Cohortes suivies par une organisation ; `/cohortes/{id}` leur tableau de suivi |
 | `/offres` | Offres payantes, mes offres en cours et mes paiements ; `/paiements/{id}/recu` pour le reçu |
 | `/opportunites?projet={id}` | Programmes compatibles avec l'un de mes projets |
 | `/profil` | Mon profil, mes rôles, mes préférences |
@@ -246,6 +251,10 @@ l'en-tête `Authorization: Bearer <jeton>` reçu à la connexion.
 | POST, DELETE | `/api/groups/{type}/{id}/posts` · `/api/group-posts/{id}` | connecté, auteur | Écrire au groupe, supprimer son message |
 | GET, POST | `/api/projects/{id}/pitch-deck` | porteur | Présentation du projet (IA-06) ; `PUT /api/pitch-decks/{id}` pour la corriger |
 | POST | `/api/meetings/{id}/preparation` | concerné | Préparer un rendez-vous (IA-05) ; `GET /api/assistant-documents/{id}` pour la lire |
+| GET, POST | `/api/opportunities/{id}/questions` · `/api/opportunities/{id}/applications` | public, porteur | Questions d'un programme ; candidater depuis IDEE |
+| GET | `/api/me/programme-applications` | connecté | Mes candidatures et leurs décisions |
+| GET, POST | `/api/programmes/{id}/applications` · `/api/programme-applications/{id}/decide` | gestionnaire | Candidatures reçues, décision |
+| GET | `/api/organisations/{id}/cohorts` · `/api/cohorts/{id}` | gestionnaire | Cohortes et tableau de suivi |
 | GET | `/api/offers` | public | Offres, prix et moyens de paiement disponibles |
 | POST, GET | `/api/payments` · `/api/me/payments` · `/api/payments/{id}` | connecté | Acheter une offre (lien Wave en retour), suivre ses paiements |
 | POST | `/api/payments/{id}/reference` | acheteur | Identifiant du transfert Orange Money |

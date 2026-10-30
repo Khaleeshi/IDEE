@@ -16,6 +16,7 @@ final class NotificationLink
             isset($data['contact_request_id']) => route('contact-requests.show', $data['contact_request_id']),
             isset($data['journey_step_id']) => route('journeys.index'),
             isset($data['matching_project_id']) => route('matches.index', $data['matching_project_id']),
+            isset($data['programme_application_id']) => route('applications.show', $data['programme_application_id']),
             isset($data['payment_id']) => route('payments.show', $data['payment_id']),
             isset($data['event_id']) => route('events.show', $data['event_id']),
             isset($data['organisation_id']) => route('organisations.show', $data['organisation_id']),

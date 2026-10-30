@@ -22,6 +22,7 @@ use App\Http\Controllers\Api\OpportunityController;
 use App\Http\Controllers\Api\OrganisationController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\ProfileController;
+use App\Http\Controllers\Api\ProgrammeController;
 use App\Http\Controllers\Api\ProjectController;
 use App\Http\Controllers\Api\ProjectUpdateController;
 use App\Http\Controllers\Api\SectorController;
@@ -50,6 +51,7 @@ Route::get('journeys/{journey}', [JourneyController::class, 'show']);
 Route::get('legal-form', [JourneyController::class, 'legalForm']);
 Route::get('experts', [ExpertController::class, 'index']);
 Route::get('offers', [PaymentController::class, 'offers']);
+Route::get('opportunities/{opportunity}/questions', [ProgrammeController::class, 'questions']);
 // Avis de paiement de Wave : il ne fait que déclencher une relecture auprès de Wave.
 Route::post('webhooks/wave', [PaymentController::class, 'waveWebhook'])->middleware('throttle:120,1');
 Route::get('events', [EventController::class, 'index']);
@@ -90,6 +92,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('payments/{payment}', [PaymentController::class, 'show']);
     Route::post('payments/{payment}/reference', [PaymentController::class, 'reference']);
     Route::get('projects/{project}/stats', [PaymentController::class, 'stats']);
+    Route::post('opportunities/{opportunity}/applications', [ProgrammeController::class, 'apply']);
+    Route::get('me/programme-applications', [ProgrammeController::class, 'mine']);
+    Route::get('programmes/{opportunity}/applications', [ProgrammeController::class, 'received']);
+    Route::post('programme-applications/{programmeApplication}/decide', [ProgrammeController::class, 'decide']);
+    Route::get('organisations/{organisation}/cohorts', [ProgrammeController::class, 'cohorts']);
+    Route::get('cohorts/{cohort}', [ProgrammeController::class, 'cohort']);
     Route::get('me/alerts', [AlertController::class, 'index']);
     Route::post('me/alerts', [AlertController::class, 'store']);
     Route::delete('alerts/{savedSearch}', [AlertController::class, 'destroy']);

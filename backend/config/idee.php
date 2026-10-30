@@ -83,6 +83,11 @@ return [
         'posts_per_day' => (int) env('IDEE_GROUP_POSTS_PER_DAY', 10),
     ],
 
+    // OR-02 : questions propres à un programme, en plus des trois questions communes.
+    'programmes' => [
+        'max_questions' => 3,
+    ],
+
     // PR-08 : nombre de projets proches proposés au porteur.
     'matching' => [
         'suggestions' => (int) env('IDEE_MATCHING_SUGGESTIONS', 5),

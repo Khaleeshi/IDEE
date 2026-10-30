@@ -51,6 +51,28 @@
         </x-card>
     @endif
 
+    @if ($programmeApplication)
+        <x-card class="text-sm">
+            <p>Votre projet « {{ $programmeApplication->project->title }} » a candidaté sur IDEE : <span class="font-semibold">{{ mb_strtolower($programmeApplication->status->label()) }}</span>.</p>
+            <a href="{{ route('applications.show', $programmeApplication) }}" class="mt-1 inline-block font-medium text-brand-700 underline">Voir ma candidature</a>
+        </x-card>
+    @elseif ($opportunity->takesApplications() && $myProjects->isNotEmpty())
+        {{-- OR-02 : candidature structurée depuis le dossier IDEE. --}}
+        <x-card id="dossier">
+            <h2 class="font-semibold">Candidater avec mon dossier IDEE</h2>
+            <form method="POST" action="{{ route('programmes.apply', $opportunity) }}" class="mt-3">
+                @csrf
+                <x-select name="project_id" label="Projet" :options="$myProjects->pluck('title', 'id')->all()" :value="$myProjects->first()->id" />
+                @foreach ($questions as $key => $question)
+                    <x-field :name="'answers['.$key.']'" type="textarea" rows="3" :label="$question" maxlength="3000" />
+                    @error('answers.'.$key)<p class="-mt-3 mb-3 text-sm text-red-700">{{ $message }}</p>@enderror
+                @endforeach
+                <label class="mb-4 flex items-start gap-3 text-sm"><input type="checkbox" name="share_business_plan" value="1" checked class="mt-0.5 h-5 w-5 accent-brand-700"> <span>Joindre mon dernier business plan, s'il existe. Il n'est partagé qu'avec {{ $opportunity->organisation }}.</span></label>
+                <x-button class="w-full">Envoyer ma candidature</x-button>
+            </form>
+        </x-card>
+    @endif
+
     @auth
         <x-card id="candidature">
             <h2 class="font-semibold">Suivre ma candidature</h2>

@@ -59,6 +59,14 @@ class Organisation extends Model
     }
 
     /**
+     * @return HasMany<Cohort, $this>
+     */
+    public function cohorts(): HasMany
+    {
+        return $this->hasMany(Cohort::class)->latest();
+    }
+
+    /**
      * @return HasMany<Invoice, $this>
      */
     public function invoices(): HasMany
