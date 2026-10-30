@@ -66,12 +66,14 @@ clients, matériel) et chaque demande de contact reçoit une réponse.
 - Publication d'un projet en cinq questions, photo de profil et disponibilité
 - Assistant IA (Claude Opus 5.5) : questions pour clarifier l'idée, business plan
   modifiable et imprimable (à activer avec une clé d'API)
-- 126 tests automatisés au total
+- Connexion par e-mail et confirmation des adresses ; équipe du projet sur sa fiche ;
+  score de préparation aligné sur RG-06 (business plan et équipe compris)
+- Notifications push du navigateur et SMS de secours pour les alertes critiques
+- 136 tests automatisés au total
 
-**Reste à faire** : connexion par e-mail, notifications push du navigateur, SMS de
-secours pour les alertes, saisie vocale par IA, équipe du projet sur la fiche, puis
-les fonctions prévues en V2 (collaborations confirmées, groupes, rendez-vous,
-paiements, wolof) et l'application Flutter.
+**Reste à faire** : saisie vocale par IA (la dictée du clavier est proposée en
+attendant), puis les fonctions prévues en V2 (collaborations confirmées, groupes,
+rendez-vous, paiements, fiches en wolof) et l'application Flutter.
 
 ## Structure du dépôt
 

@@ -54,4 +54,29 @@ class NotificationTest extends TestCase
         $this->postJson('/api/me/notifications/read')->assertNoContent();
         $this->getJson('/api/me/notifications')->assertJsonPath('unread', 0);
     }
+
+    public function test_a_critical_alert_falls_back_to_sms_when_whatsapp_fails(): void
+    {
+        config([
+            'idee.notifications.whatsapp' => true,
+            'idee.notifications.sms_fallback' => true,
+            'services.whatsapp.token' => 'jeton',
+            'services.whatsapp.phone_number_id' => '123',
+            'services.orange_sms.client_id' => 'id',
+            'services.orange_sms.client_secret' => 'secret',
+            'services.orange_sms.sender' => 'tel:+2210000',
+        ]);
+        Http::fake([
+            'graph.facebook.com/*' => Http::response(['error' => ['message' => 'indisponible']], 500),
+            'api.orange.com/oauth/*' => Http::response(['access_token' => 'jeton-orange', 'expires_in' => 3600]),
+            'api.orange.com/smsmessaging/*' => Http::response([], 201),
+        ]);
+        $project = Project::factory()->for(User::factory()->state(['phone' => '+221771112233']), 'owner')->create();
+
+        app(ContactRequestService::class)->send(User::factory()->create(), $project->owner, self::MESSAGE, $project);
+
+        Http::assertSent(fn ($request) => str_contains($request->url(), 'smsmessaging')
+            && str_starts_with($request['outboundSMSMessageRequest']['outboundSMSTextMessage']['message'], 'IDEE : ')
+            && $request['outboundSMSMessageRequest']['address'] === 'tel:+221771112233');
+    }
 }

@@ -19,6 +19,16 @@ class OrangeSmsCodeSender implements CodeSender
 
     public function send(string $phone, string $code): void
     {
+        $this->sendText($phone, self::message($code));
+    }
+
+    /**
+     * Envoie un SMS libre : sert aussi de secours pour les alertes critiques (NO-03).
+     *
+     * @throws CodeDeliveryFailed
+     */
+    public function sendText(string $phone, string $text): void
+    {
         if (! str_starts_with($phone, PhoneNumber::SENEGAL_PREFIX)) {
             throw new CodeDeliveryFailed('Le SMS Orange ne dessert que les numéros sénégalais.');
         }
@@ -32,7 +42,7 @@ class OrangeSmsCodeSender implements CodeSender
         $request = [
             'address' => 'tel:'.$phone,
             'senderAddress' => $config['sender'],
-            'outboundSMSTextMessage' => ['message' => self::message($code)],
+            'outboundSMSTextMessage' => ['message' => $text],
         ];
 
         if (filled($config['sender_name'])) {

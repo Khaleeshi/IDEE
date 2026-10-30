@@ -81,6 +81,8 @@ return [
     // le modèle « idee_alerte » approuvé par Meta.
     'notifications' => [
         'whatsapp' => (bool) env('IDEE_WHATSAPP_ALERTS', false),
+        // NO-03 : SMS Orange de secours quand une alerte critique n'a pas pu partir sur WhatsApp.
+        'sms_fallback' => (bool) env('IDEE_SMS_FALLBACK', false),
     ],
 
     // Assistant IA (section 7) : désactivé tant qu'aucune clé n'est fournie.

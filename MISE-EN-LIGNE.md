@@ -143,6 +143,10 @@ français, dont le texte contient une seule variable, par exemple :
 « IDEE : {{1}} ». Une fois approuvé, mettez `IDEE_WHATSAPP_ALERTS=true` dans
 `.env`. Chaque membre peut refuser ces alertes dans son profil.
 
+**SMS de secours** — si l'API SMS d'Orange est configurée, mettez aussi
+`IDEE_SMS_FALLBACK=true` : une demande de contact ou une relance qui n'a pas pu
+partir sur WhatsApp est alors envoyée par SMS (numéros du Sénégal).
+
 Ces branchements ont été vérifiés avec des réponses simulées, pas encore
 avec les vrais services : faites un essai avec votre propre numéro avant
 d'ouvrir le site au public. En cas d'échec, le motif est écrit dans

@@ -10,7 +10,7 @@ use Illuminate\Notifications\Notification;
  * Relance du destinataire d'une demande restée sans réponse (RG-03).
  * Elle est affichée dans IDEE et envoyée sur WhatsApp quand le canal est activé (NO-02).
  */
-class ContactRequestReminder extends Notification
+class ContactRequestReminder extends Notification implements CriticalAlert
 {
     use Queueable;
 

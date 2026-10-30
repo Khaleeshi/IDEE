@@ -9,7 +9,7 @@ use Illuminate\Notifications\Notification;
 /**
  * Nouvelle demande de contact reçue (MR-01).
  */
-class ContactRequestReceived extends Notification
+class ContactRequestReceived extends Notification implements CriticalAlert
 {
     use Queueable;
 
