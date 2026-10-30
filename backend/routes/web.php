@@ -30,6 +30,7 @@ Route::middleware('auth')->group(function () {
     Route::put('/projets/{project}', [ProjectController::class, 'update'])->name('projects.update');
     Route::delete('/projets/{project}', [ProjectController::class, 'destroy'])->name('projects.destroy');
 
+    Route::post('/projets/{project}/mises-a-jour', [ProjectController::class, 'publishUpdate'])->name('projects.updates.store');
     Route::post('/projets/{project}/besoins', [NeedController::class, 'store'])->name('needs.store');
     Route::post('/besoins/{need}/cloture', [NeedController::class, 'close'])->name('needs.close');
     Route::post('/besoins/{need}/aide', [NeedController::class, 'offerHelp'])->name('help-offers.store');

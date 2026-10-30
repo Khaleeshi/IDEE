@@ -6,6 +6,7 @@ use App\Enums\NeedType;
 use App\Enums\ProjectStage;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreProjectRequest;
+use App\Http\Requests\StoreProjectUpdateRequest;
 use App\Http\Requests\UpdateProjectRequest;
 use App\Models\JourneyStep;
 use App\Models\Project;
@@ -42,12 +43,22 @@ class ProjectController extends Controller
             'isOwner' => $isOwner,
             'readiness' => $isOwner ? $readiness->evaluate($project) : null,
             'reactivity' => $reactivity->for($project->owner),
+            'updates' => $project->updates()->limit(10)->get(),
             'needTypes' => $this->needTypes(),
             // Demande d'aide lancée depuis une étape de parcours guidé.
             'needDraft' => $isOwner && ($step = JourneyStep::find($request->string('etape')->toString()))
                 ? $journeys->needDraft($step)
                 : null,
         ]);
+    }
+
+    public function publishUpdate(StoreProjectUpdateRequest $request, Project $project): RedirectResponse
+    {
+        Gate::authorize('update', $project);
+
+        $this->projects->publishUpdate($project, $request->user(), $request->validated('body'));
+
+        return redirect()->to(route('projects.show', $project).'#journal')->with('status', 'Mise à jour publiée dans le fil.');
     }
 
     public function mine(Request $request): View

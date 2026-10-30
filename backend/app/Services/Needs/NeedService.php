@@ -2,18 +2,23 @@
 
 namespace App\Services\Needs;
 
+use App\Enums\ActivityType;
 use App\Enums\HelpOfferStatus;
 use App\Enums\NeedStatus;
 use App\Models\HelpOffer;
 use App\Models\Need;
 use App\Models\Project;
 use App\Models\User;
+use App\Services\Feed\FeedService;
 use App\Services\Projects\ReadinessScore;
 use Illuminate\Validation\ValidationException;
 
 class NeedService
 {
-    public function __construct(private readonly ReadinessScore $readiness) {}
+    public function __construct(
+        private readonly ReadinessScore $readiness,
+        private readonly FeedService $feed,
+    ) {}
 
     /**
      * Publie un appel à action, dans la limite de besoins ouverts (RG-01).
@@ -39,6 +44,7 @@ class NeedService
         $project->unsetRelation('openNeeds');
         $project->recordActivity();
         $this->readiness->refresh($project);
+        $this->feed->record(ActivityType::BesoinPublie, $project, $project->owner, $need);
 
         return $need;
     }
@@ -62,6 +68,11 @@ class NeedService
 
         $need->project->recordActivity();
         $this->readiness->refresh($need->project);
+
+        // Un besoin comblé est une réussite partagée avec le réseau.
+        if ($status === NeedStatus::Comble) {
+            $this->feed->record(ActivityType::Reussite, $need->project, $need->project->owner, $need);
+        }
 
         return $need;
     }

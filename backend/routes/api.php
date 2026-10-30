@@ -2,12 +2,14 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ContactRequestController;
+use App\Http\Controllers\Api\FeedController;
 use App\Http\Controllers\Api\HelpOfferController;
 use App\Http\Controllers\Api\JourneyController;
 use App\Http\Controllers\Api\MemberController;
 use App\Http\Controllers\Api\NeedController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\ProjectController;
+use App\Http\Controllers\Api\ProjectUpdateController;
 use App\Http\Controllers\Api\SectorController;
 use Illuminate\Support\Facades\Route;
 
@@ -23,6 +25,8 @@ Route::get('sectors', [SectorController::class, 'index']);
 Route::get('projects', [ProjectController::class, 'index']);
 Route::get('projects/{project}', [ProjectController::class, 'show']);
 Route::get('projects/{project}/needs', [NeedController::class, 'index']);
+Route::get('projects/{project}/updates', [ProjectUpdateController::class, 'index']);
+Route::get('feed', [FeedController::class, 'index']);
 Route::get('members/{user}', [MemberController::class, 'show']);
 Route::get('journeys', [JourneyController::class, 'index']);
 Route::get('journeys/{journey}', [JourneyController::class, 'show']);
@@ -42,6 +46,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('projects/{project}', [ProjectController::class, 'update']);
     Route::delete('projects/{project}', [ProjectController::class, 'destroy']);
 
+    Route::post('projects/{project}/updates', [ProjectUpdateController::class, 'store']);
     Route::post('projects/{project}/needs', [NeedController::class, 'store']);
     Route::post('needs/{need}/close', [NeedController::class, 'close']);
 

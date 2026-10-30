@@ -1,4 +1,4 @@
-<x-layout :title="$project->title">
+<x-layout :title="$project->title" :description="\Illuminate\Support\Str::limit($project->summary, 180)">
     <a href="{{ url()->previous() !== url()->current() ? url()->previous() : route('home') }}" class="mb-3 inline-block py-1 text-sm text-stone-500">← Retour</a>
 
     <div class="flex flex-wrap items-center gap-2 text-xs text-stone-500">
@@ -9,6 +9,11 @@
     </div>
     <h1 class="mt-1 text-2xl font-bold leading-tight">{{ $project->title }}</h1>
     <p class="mt-3 whitespace-pre-line text-stone-700">{{ $project->summary }}</p>
+
+    <a href="https://wa.me/?text={{ rawurlencode($project->title.' · découvrez ce projet sur IDEE : '.route('projects.show', $project)) }}"
+       target="_blank" rel="noopener" class="mt-3 inline-flex min-h-11 items-center gap-2 rounded-xl border border-stone-300 bg-white px-4 text-sm font-semibold text-stone-800">
+        Partager sur WhatsApp
+    </a>
 
     @if ($isOwner)
         <div class="mt-4 flex gap-2">
@@ -56,6 +61,25 @@
             <x-button :href="route('login')" variant="secondary" class="mt-3 w-full">Se connecter pour contacter</x-button>
         @endauth
     </x-card>
+
+    <section id="journal" class="mt-6">
+        <h2 class="mb-3 text-lg font-bold">Journal de progression</h2>
+        @if ($isOwner)
+            <form method="POST" action="{{ route('projects.updates.store', $project) }}" class="mb-3">
+                @csrf
+                <x-field name="body" type="textarea" rows="2" label="Quoi de neuf ?" placeholder="Ex. : premier lot de 200 pots vendu en deux semaines" />
+                <x-button variant="secondary" class="w-full">Publier la mise à jour</x-button>
+            </form>
+        @endif
+        @forelse ($updates as $update)
+            <article class="mb-2 border-l-2 border-brand-100 pl-3">
+                <time datetime="{{ $update->created_at->toIso8601String() }}" class="text-xs text-stone-500">{{ $update->created_at->translatedFormat('d F Y') }}</time>
+                <p class="whitespace-pre-line text-sm text-stone-800">{{ $update->body }}</p>
+            </article>
+        @empty
+            <p class="text-sm text-stone-500">{{ $isOwner ? 'Racontez où en est le projet : chaque mise à jour apparaît dans le fil.' : 'Pas encore de mise à jour.' }}</p>
+        @endforelse
+    </section>
 
     <h2 class="mb-3 mt-6 text-lg font-bold">Ce que le projet cherche</h2>
 

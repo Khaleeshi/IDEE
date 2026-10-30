@@ -1,4 +1,4 @@
-@props(['title' => null])
+@props(['title' => null, 'description' => null])
 
 <!DOCTYPE html>
 <html lang="fr">
@@ -6,8 +6,16 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="theme-color" content="#077a3f">
-    <meta name="description" content="IDEE, le réseau où les projets trouvent les personnes qui les font avancer.">
+    @php($description ??= 'IDEE, le réseau où les projets trouvent les personnes qui les font avancer.')
+    <meta name="description" content="{{ $description }}">
     <title>{{ $title ? $title.' · IDEE' : 'IDEE · Projets et actions' }}</title>
+    {{-- Aperçu affiché quand un lien est partagé sur WhatsApp (FC-04). --}}
+    <meta property="og:site_name" content="IDEE">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{{ $title ?? 'IDEE · Projets et actions' }}">
+    <meta property="og:description" content="{{ $description }}">
+    <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:image" content="{{ url('/icons/icon-512.png') }}">
     <link rel="manifest" href="/manifest.webmanifest">
     <link rel="icon" href="/favicon.ico" sizes="any">
     <link rel="apple-touch-icon" href="/icons/icon-192.png">

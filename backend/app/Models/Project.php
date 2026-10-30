@@ -77,6 +77,16 @@ class Project extends Model
     }
 
     /**
+     * Journal de progression, du plus récent au plus ancien (PR-04).
+     *
+     * @return HasMany<ProjectUpdate, $this>
+     */
+    public function updates(): HasMany
+    {
+        return $this->hasMany(ProjectUpdate::class)->latest()->latest('id');
+    }
+
+    /**
      * Projets visibles dans le fil et les recommandations (RG-07).
      */
     #[Scope]

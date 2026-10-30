@@ -2,10 +2,13 @@
 
 namespace App\Services\Projects;
 
+use App\Enums\ActivityType;
 use App\Enums\ProjectStatus;
 use App\Enums\UserRole;
 use App\Models\Project;
+use App\Models\ProjectUpdate;
 use App\Models\User;
+use App\Services\Feed\FeedService;
 use Illuminate\Support\Facades\DB;
 
 class ProjectService
@@ -15,7 +18,10 @@ class ProjectService
      */
     private const VERSIONED_FIELDS = ['title', 'summary', 'details', 'stage', 'region', 'sector_id'];
 
-    public function __construct(private readonly ReadinessScore $readiness) {}
+    public function __construct(
+        private readonly ReadinessScore $readiness,
+        private readonly FeedService $feed,
+    ) {}
 
     /**
      * @param  array<string, mixed>  $attributes
@@ -35,6 +41,7 @@ class ProjectService
 
             $this->recordVersion($project);
             $this->readiness->refresh($project);
+            $this->feed->record(ActivityType::ProjetPublie, $project, $owner);
 
             return $project;
         });
@@ -59,6 +66,22 @@ class ProjectService
 
             return $project;
         });
+    }
+
+    /**
+     * Publie une mise à jour datée dans le journal de progression (PR-04).
+     */
+    public function publishUpdate(Project $project, User $author, string $body): ProjectUpdate
+    {
+        $update = new ProjectUpdate(['body' => $body]);
+        $update->project()->associate($project);
+        $update->author()->associate($author);
+        $update->save();
+
+        $project->recordActivity();
+        $this->feed->record(ActivityType::MiseAJour, $project, $author, update: $update);
+
+        return $update;
     }
 
     /**

@@ -22,7 +22,7 @@ class ProjectController extends Controller
     public function index(Request $request, ProjectSearch $search): AnonymousResourceCollection
     {
         $projects = $search
-            ->query($request->only(['q', 'sector', 'region', 'stage', 'need_type']))
+            ->query($request->only(['q', 'sector', 'region', 'stage', 'need_type', 'amount_min', 'amount_max']))
             ->paginate(20)
             ->withQueryString();
 
