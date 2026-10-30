@@ -4,7 +4,10 @@ namespace App\Providers;
 
 use App\Contracts\CodeSender;
 use App\Enums\ContactRequestStatus;
+use App\Services\Messaging\FallbackCodeSender;
 use App\Services\Messaging\LogCodeSender;
+use App\Services\Messaging\OrangeSmsCodeSender;
+use App\Services\Messaging\WhatsAppCodeSender;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
@@ -19,9 +22,13 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        // Seul l'envoi dans le journal existe pour l'instant ; WhatsApp et
-        // SMS Orange seront choisis ici selon config('idee.otp.driver').
-        $this->app->bind(CodeSender::class, LogCodeSender::class);
+        // Canal d'envoi des codes de connexion, choisi par IDEE_OTP_DRIVER.
+        $this->app->bind(CodeSender::class, fn () => match (config('idee.otp.driver')) {
+            'sms' => new OrangeSmsCodeSender,
+            'whatsapp' => new WhatsAppCodeSender,
+            'whatsapp_sms' => new FallbackCodeSender([new WhatsAppCodeSender, new OrangeSmsCodeSender]),
+            default => new LogCodeSender,
+        });
     }
 
     /**

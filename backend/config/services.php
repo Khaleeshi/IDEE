@@ -28,6 +28,27 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    // API SMS d'Orange Sénégal (developer.orange.com) : envoi des codes de connexion.
+    'orange_sms' => [
+        'client_id' => env('ORANGE_SMS_CLIENT_ID'),
+        'client_secret' => env('ORANGE_SMS_CLIENT_SECRET'),
+        // Numéro d'expéditeur attribué par Orange, au format tel:+221…
+        'sender' => env('ORANGE_SMS_SENDER'),
+        // Nom affiché à la place du numéro, s'il a été validé par Orange.
+        'sender_name' => env('ORANGE_SMS_SENDER_NAME'),
+        'base_url' => env('ORANGE_SMS_BASE_URL', 'https://api.orange.com'),
+    ],
+
+    // WhatsApp Business Platform (Cloud API de Meta) : codes envoyés par un
+    // modèle de message « authentification » validé par Meta.
+    'whatsapp' => [
+        'token' => env('WHATSAPP_TOKEN'),
+        'phone_number_id' => env('WHATSAPP_PHONE_NUMBER_ID'),
+        'template' => env('WHATSAPP_CODE_TEMPLATE', 'idee_code_connexion'),
+        'language' => env('WHATSAPP_CODE_LANGUAGE', 'fr'),
+        'graph_version' => env('WHATSAPP_GRAPH_VERSION', 'v23.0'),
+    ],
+
     'slack' => [
         'notifications' => [
             'bot_user_oauth_token' => env('SLACK_BOT_USER_OAUTH_TOKEN'),
