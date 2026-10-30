@@ -8,3 +8,4 @@
 - Les identifiants exposés dans les adresses web sont des ULID.
 - Ne jamais exposer le téléphone ni l'e-mail d'un membre dans une ressource publique (`MemberResource`).
 - Trois lignes rouges juridiques : aucun argent de tiers ne transite par la plateforme, aucune offre de titres au public, aucune rémunération au succès d'une levée de fonds.
+- Mise en ligne : chaque fusion dans `main` est déployée par `.github/workflows/deploy.yml` (voir `MISE-EN-LIGNE.md`). Une migration doit donc pouvoir tourner sur la base de production sans perte de données.

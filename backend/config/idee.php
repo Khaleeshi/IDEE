@@ -40,8 +40,8 @@ return [
         'length' => 6,
         'ttl_minutes' => (int) env('IDEE_OTP_TTL', 10),
         'max_attempts' => (int) env('IDEE_OTP_MAX_ATTEMPTS', 5),
-        // Canal d'envoi : « log » en développement ; WhatsApp puis SMS Orange
-        // seront branchés ensuite (section 11).
+        // Canal d'envoi : log (développement), sms (Orange), whatsapp, ou
+        // whatsapp_sms (WhatsApp d'abord, SMS Orange en secours).
         'driver' => env('IDEE_OTP_DRIVER', 'log'),
     ],
 

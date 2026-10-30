@@ -1,0 +1,11 @@
+# Fichiers jamais envoyés ni effacés sur le serveur lors d'une mise en ligne.
+/.env
+/.env.backup
+/storage/
+/bootstrap/cache/*.php
+/node_modules/
+/tests/
+/database/*.sqlite*
+/public/hot
+/public/storage
+/.phpunit.cache

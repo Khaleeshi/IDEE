@@ -29,9 +29,16 @@ clients, matériel) et chaque demande de contact reçoit une réponse.
 - Pages très légères : environ 10 Ko de HTML, 6 Ko de CSS et moins de 1 Ko de JavaScript compressés
 - 63 tests automatisés au total
 
-**Prochaines étapes** : envoi des codes par WhatsApp et SMS Orange, assistant IA
-pour le business plan, parcours guidés de création d'entreprise et d'export,
-messagerie intégrée, application Flutter.
+**Étape 3 — mise en ligne** : prête, à activer sur le serveur.
+
+- Envoi des codes de connexion par WhatsApp, par SMS Orange, ou WhatsApp avec SMS en secours
+- Mise en ligne automatique par GitHub à chaque fusion dans `main`, après les tests
+- Scripts d'installation et de mise à jour du serveur, modèle de configuration de production
+- Marche à suivre : [MISE-EN-LIGNE.md](MISE-EN-LIGNE.md)
+- 69 tests automatisés au total
+
+**Prochaines étapes** : assistant IA pour le business plan, parcours guidés de
+création d'entreprise et d'export, messagerie intégrée, application Flutter.
 
 ## Structure du dépôt
 
@@ -39,7 +46,8 @@ messagerie intégrée, application Flutter.
 | --- | --- |
 | `backend/` | Serveur Laravel 13 (PHP 8.3+) : API, site web, base de données, règles de gestion, tests |
 | `backend/resources/views/` | Pages du site web (Blade et Tailwind CSS) |
-| `.github/workflows/` | Tests lancés automatiquement par GitHub à chaque envoi de code |
+| `backend/deploy/` | Scripts d'installation et de mise à jour du serveur |
+| `.github/workflows/` | Tests à chaque envoi de code, mise en ligne à chaque fusion dans `main` |
 
 ## Installer et lancer le serveur en local
 

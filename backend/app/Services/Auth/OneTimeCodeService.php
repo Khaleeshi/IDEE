@@ -4,10 +4,12 @@ namespace App\Services\Auth;
 
 use App\Contracts\CodeSender;
 use App\Enums\VerificationLevel;
+use App\Exceptions\CodeDeliveryFailed;
 use App\Models\OneTimeCode;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -18,6 +20,9 @@ class OneTimeCodeService
 {
     public function __construct(private readonly CodeSender $sender) {}
 
+    /**
+     * @throws ValidationException si aucun canal n'a pu remettre le code
+     */
     public function issue(string $phone): void
     {
         OneTimeCode::query()
@@ -34,7 +39,15 @@ class OneTimeCodeService
             'expires_at' => now()->addMinutes(config('idee.otp.ttl_minutes')),
         ]);
 
-        $this->sender->send($phone, $code);
+        try {
+            $this->sender->send($phone, $code);
+        } catch (CodeDeliveryFailed $exception) {
+            Log::error('Code de connexion non envoyé', ['raison' => $exception->getMessage()]);
+
+            throw ValidationException::withMessages([
+                'phone' => 'Impossible d\'envoyer le code pour le moment. Réessayez dans quelques minutes.',
+            ]);
+        }
     }
 
     /**
