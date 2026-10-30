@@ -7,14 +7,17 @@ use App\Enums\VerificationLevel;
 use App\Exceptions\CodeDeliveryFailed;
 use App\Models\OneTimeCode;
 use App\Models\User;
+use App\Notifications\LoginCode;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Validation\ValidationException;
 
 /**
- * Connexion par code à usage unique (CP-01, section 10) : le code est
- * valable 10 minutes et accepte 5 essais au plus.
+ * Connexion par code à usage unique (CP-01, section 10), envoyé au numéro de
+ * téléphone ou à l'adresse e-mail : le code est valable 10 minutes et
+ * accepte 5 essais au plus.
  */
 class OneTimeCodeService
 {
@@ -23,10 +26,10 @@ class OneTimeCodeService
     /**
      * @throws ValidationException si aucun canal n'a pu remettre le code
      */
-    public function issue(string $phone): void
+    public function issue(string $identifier): void
     {
         OneTimeCode::query()
-            ->where('phone', $phone)
+            ->where('identifier', $identifier)
             ->whereNull('consumed_at')
             ->update(['consumed_at' => now()]);
 
@@ -34,13 +37,19 @@ class OneTimeCodeService
         $code = str_pad((string) random_int(0, 10 ** $length - 1), $length, '0', STR_PAD_LEFT);
 
         OneTimeCode::create([
-            'phone' => $phone,
+            'identifier' => $identifier,
             'code_hash' => Hash::make($code),
             'expires_at' => now()->addMinutes(config('idee.otp.ttl_minutes')),
         ]);
 
+        if (self::isEmail($identifier)) {
+            Notification::route('mail', $identifier)->notify(new LoginCode($code));
+
+            return;
+        }
+
         try {
-            $this->sender->send($phone, $code);
+            $this->sender->send($identifier, $code);
         } catch (CodeDeliveryFailed $exception) {
             Log::error('Code de connexion non envoyé', ['raison' => $exception->getMessage()]);
 
@@ -55,10 +64,10 @@ class OneTimeCodeService
      *
      * @throws ValidationException
      */
-    public function verify(string $phone, string $code, ?string $name = null): User
+    public function verify(string $identifier, string $code, ?string $name = null): User
     {
         $oneTimeCode = OneTimeCode::query()
-            ->where('phone', $phone)
+            ->where('identifier', $identifier)
             ->whereNull('consumed_at')
             ->latest('id')
             ->first();
@@ -81,10 +90,18 @@ class OneTimeCodeService
             ]);
         }
 
-        return DB::transaction(function () use ($oneTimeCode, $phone, $name) {
+        return DB::transaction(function () use ($oneTimeCode, $identifier, $name) {
             $oneTimeCode->update(['consumed_at' => now()]);
 
-            $user = User::withTrashed()->firstOrNew(['phone' => $phone]);
+            $byEmail = self::isEmail($identifier);
+            $user = User::withTrashed()->firstOrNew([$byEmail ? 'email' : 'phone' => $identifier]);
+
+            // Une adresse ajoutée au profil mais jamais confirmée ne permet pas d'entrer dans le compte.
+            if ($byEmail && $user->exists && $user->email_verified_at === null) {
+                throw ValidationException::withMessages([
+                    'code' => 'Cette adresse n\'est pas encore confirmée. Connectez-vous avec votre téléphone, puis confirmez-la depuis votre profil.',
+                ]);
+            }
 
             if (! $user->exists) {
                 $user->name = $name ?: 'Membre IDEE';
@@ -98,15 +115,25 @@ class OneTimeCodeService
                 $user->restore();
             }
 
-            $user->phone_verified_at ??= now();
+            if ($byEmail) {
+                $user->email_verified_at ??= now();
+                $user->verification_level ??= VerificationLevel::None;
+            } else {
+                $user->phone_verified_at ??= now();
 
-            if (! $user->verification_level?->isAtLeast(VerificationLevel::Phone)) {
-                $user->verification_level = VerificationLevel::Phone;
+                if (! $user->verification_level?->isAtLeast(VerificationLevel::Phone)) {
+                    $user->verification_level = VerificationLevel::Phone;
+                }
             }
 
             $user->save();
 
             return $user;
         });
+    }
+
+    public static function isEmail(string $identifier): bool
+    {
+        return str_contains($identifier, '@');
     }
 }

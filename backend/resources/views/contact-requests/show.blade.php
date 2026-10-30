@@ -49,8 +49,12 @@
         <x-card class="border-brand-100 bg-brand-50">
             <h2 class="font-semibold text-brand-800">Vous êtes tous les deux intéressés</h2>
             <p class="mt-1 text-sm text-brand-800">Prenez contact avec {{ $other->name }} pour convenir d'un premier échange.</p>
-            <p class="mt-2 text-lg font-semibold">{{ \App\Support\PhoneNumber::format($other->phone) }}</p>
-            <x-button :href="'https://wa.me/'.ltrim($other->phone, '+')" class="mt-3 w-full" target="_blank" rel="noopener">Écrire sur WhatsApp</x-button>
+            @if ($other->phone)
+                <p class="mt-2 text-lg font-semibold">{{ \App\Support\PhoneNumber::format($other->phone) }}</p>
+                <x-button :href="'https://wa.me/'.ltrim($other->phone, '+')" class="mt-3 w-full" target="_blank" rel="noopener">Écrire sur WhatsApp</x-button>
+            @elseif ($other->email)
+                <p class="mt-2 text-lg font-semibold">{{ $other->email }}</p>
+            @endif
         </x-card>
 
         <section id="messages" aria-labelledby="titre-messages">

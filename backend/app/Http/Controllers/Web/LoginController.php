@@ -22,8 +22,8 @@ class LoginController extends Controller
 
     public function sendCode(RequestCodeRequest $request): RedirectResponse
     {
-        $this->codes->issue($request->validated('phone'));
-        $request->session()->put('login_phone', $request->validated('phone'));
+        $this->codes->issue($request->identifier());
+        $request->session()->put('login_phone', $request->identifier());
 
         return redirect()->route('login.code')
             ->with('status', 'Un code vous a été envoyé. Il est valable '.config('idee.otp.ttl_minutes').' minutes.');
@@ -43,7 +43,7 @@ class LoginController extends Controller
     public function verify(VerifyCodeRequest $request): RedirectResponse
     {
         $user = $this->codes->verify(
-            $request->validated('phone'),
+            $request->identifier(),
             $request->validated('code'),
             $request->validated('name'),
         );

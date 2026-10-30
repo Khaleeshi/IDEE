@@ -10,7 +10,8 @@ class RequestCodeRequest extends PhoneRequest
     public function rules(): array
     {
         return [
-            'phone' => ['required', 'string', 'regex:/^\+[1-9]\d{7,14}$/'],
+            'phone' => ['required_without:email', 'nullable', 'string', 'regex:/^\+[1-9]\d{7,14}$/'],
+            'email' => ['required_without:phone', 'nullable', 'email', 'max:255'],
         ];
     }
 }

@@ -85,7 +85,9 @@ puis choisissez le dossier `php83` (ou plus récent).
 
    Le script crée le fichier `.env` et s'arrête.
 3. Ouvrez `.env` (Webuzo → File Manager, ou `nano .env`) et remplacez chaque
-   `CHANGEZ_MOI` : adresse du site et informations de la base MySQL.
+   `CHANGEZ_MOI` : adresse du site, informations de la base MySQL et serveur
+   d'e-mails (une boîte créée chez l'hébergeur suffit, par exemple
+   `contact@votre-domaine.com` : son serveur SMTP, son identifiant et son mot de passe).
 4. Relancez la même commande. Elle crée la clé de chiffrement, les tables et la
    liste des secteurs, puis affiche une ligne de tâche planifiée.
 5. Ajoutez cette ligne dans **Webuzo → Cron Jobs**, à exécuter chaque minute.

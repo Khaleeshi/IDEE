@@ -7,6 +7,7 @@ use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\WebProfileRequest;
 use App\Models\Sector;
+use App\Models\User;
 use App\Services\Members\ProfileService;
 use App\Services\Moderation\ModerationService;
 use App\Services\Trust\VerificationService;
@@ -33,5 +34,17 @@ class ProfileController extends Controller
         $profiles->update($request->user(), $request->validated());
 
         return back()->with('status', 'Profil enregistré.');
+    }
+
+    /**
+     * Lien de confirmation d'adresse e-mail (lien signé, valable 24 heures).
+     */
+    public function confirmEmail(User $user, string $hash, ProfileService $profiles): RedirectResponse
+    {
+        $confirmed = $profiles->confirmEmail($user, $hash);
+
+        return redirect()->route(auth()->check() ? 'profile.edit' : 'login')->with('status', $confirmed
+            ? 'Adresse e-mail confirmée : vous pouvez vous connecter avec elle.'
+            : 'Ce lien ne correspond plus à votre adresse. Demandez-en un nouveau depuis votre profil.');
     }
 }

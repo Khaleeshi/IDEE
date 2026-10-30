@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Model;
 
-#[Fillable(['phone', 'code_hash', 'expires_at'])]
+#[Fillable(['identifier', 'code_hash', 'expires_at'])]
 #[Hidden(['code_hash'])]
 class OneTimeCode extends Model
 {

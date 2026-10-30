@@ -13,6 +13,8 @@
                     <input id="photo-profil" name="photo" type="file" accept="image/*" class="mt-1 block w-full text-sm">
                 </div>
             </div>
+            <x-field name="email" type="email" label="Adresse e-mail (facultatif)" :value="$user->email" autocomplete="email"
+                     hint="Pour vous connecter aussi par e-mail. Elle n'est jamais affichée sur votre profil public." />
             <x-select name="availability" label="Disponibilité" :options="$availabilities" :value="$user->availability?->value" placeholder="Ne pas préciser" />
 
             <x-field name="name" label="Nom" :value="$user->name" required autocomplete="name" />
@@ -65,7 +67,12 @@
     </x-card>
 
     <x-card class="text-sm">
-        <p><span class="text-stone-500">Téléphone :</span> {{ \App\Support\PhoneNumber::format($user->phone) }}</p>
+        @if ($user->phone)
+            <p><span class="text-stone-500">Téléphone :</span> {{ \App\Support\PhoneNumber::format($user->phone) }}</p>
+        @endif
+        @if ($user->email)
+            <p class="mt-1"><span class="text-stone-500">E-mail :</span> {{ $user->email }} · {{ $user->email_verified_at ? 'confirmée' : 'en attente de confirmation : ouvrez le lien reçu' }}</p>
+        @endif
         <p class="mt-1"><span class="text-stone-500">Vérification :</span> {{ $user->verification_level->label() }}</p>
         <p class="mt-1"><span class="text-stone-500">Demandes de contact par semaine :</span> {{ $user->weeklyContactQuota() }}</p>
         <a href="{{ route('members.show', $user) }}" class="mt-3 inline-block font-medium text-brand-700 underline">Voir mon profil public</a>

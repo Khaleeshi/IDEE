@@ -10,7 +10,8 @@ class VerifyCodeRequest extends PhoneRequest
     public function rules(): array
     {
         return [
-            'phone' => ['required', 'string', 'regex:/^\+[1-9]\d{7,14}$/'],
+            'phone' => ['required_without:email', 'nullable', 'string', 'regex:/^\+[1-9]\d{7,14}$/'],
+            'email' => ['required_without:phone', 'nullable', 'email', 'max:255'],
             'code' => ['required', 'string', 'digits:'.config('idee.otp.length')],
             'name' => ['nullable', 'string', 'max:120'],
             'device_name' => ['nullable', 'string', 'max:120'],

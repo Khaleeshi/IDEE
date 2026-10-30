@@ -6,7 +6,7 @@
     @forelse ($pending as $verification)
         <x-card>
             <p class="font-semibold">{{ $verification->user->name }}</p>
-            <p class="text-sm text-stone-500">{{ \App\Support\PhoneNumber::format($verification->user->phone) }} · envoyée {{ $verification->created_at->diffForHumans() }}</p>
+            <p class="text-sm text-stone-500">{{ $verification->user->phone ? \App\Support\PhoneNumber::format($verification->user->phone) : $verification->user->email }} · envoyée {{ $verification->created_at->diffForHumans() }}</p>
             <a href="{{ route('admin.verifications.document', $verification) }}" target="_blank" rel="noopener" class="mt-2 inline-block font-medium text-brand-700 underline">Voir la pièce</a>
             <form method="POST" action="{{ route('admin.verifications.decide', $verification) }}" class="mt-3">
                 @csrf

@@ -49,7 +49,7 @@ class AppServiceProvider extends ServiceProvider
 
         // Limite les envois de codes pour éviter les abus et les coûts de SMS.
         RateLimiter::for('otp', fn (Request $request) => [
-            Limit::perMinute(1)->by('phone:'.$request->input('phone')),
+            Limit::perMinute(1)->by('code:'.($request->input('phone') ?: $request->input('email'))),
             Limit::perHour(10)->by('ip:'.$request->ip()),
         ]);
 

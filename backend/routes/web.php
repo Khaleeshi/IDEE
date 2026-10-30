@@ -111,6 +111,9 @@ Route::middleware(['auth', 'can:administrer'])->prefix('administration')->name('
 Route::get('/projets/{project}', [ProjectController::class, 'show'])->name('projects.show');
 Route::get('/membres/{user}', [MemberController::class, 'show'])->name('members.show');
 
+// Confirmation d'une adresse e-mail ajoutée au profil (CF-01).
+Route::get('/email/confirmation/{user}/{hash}', [ProfileController::class, 'confirmEmail'])->middleware('signed')->name('email.verify');
+
 // Parcours guidés, consultables sans compte (PG-01 à PG-06).
 Route::get('/parcours', [JourneyController::class, 'index'])->name('journeys.index');
 Route::get('/parcours/forme-juridique', [JourneyController::class, 'legalForm'])->name('journeys.legal-form');

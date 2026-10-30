@@ -4,6 +4,7 @@ namespace App\Services\Members;
 
 use App\Enums\UserRole;
 use App\Models\User;
+use App\Notifications\VerifyEmailAddress;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Storage;
@@ -28,7 +29,17 @@ class ProfileService
             $this->replacePhoto($user, $attributes['photo']);
         }
 
+        // Une nouvelle adresse e-mail doit être confirmée avant de servir à se connecter (CF-01).
+        $emailChanged = $user->isDirty('email');
+        if ($emailChanged) {
+            $user->email_verified_at = null;
+        }
+
         $user->save();
+
+        if ($emailChanged && $user->email) {
+            $user->notify(new VerifyEmailAddress);
+        }
 
         if (array_key_exists('roles', $attributes)) {
             $user->syncRoles(array_map(UserRole::from(...), $attributes['roles']));
@@ -68,5 +79,19 @@ class ProfileService
         }
 
         $user->photo_path = $path;
+    }
+
+    /**
+     * Confirme l'adresse e-mail depuis le lien reçu, si elle n'a pas changé entre-temps.
+     */
+    public function confirmEmail(User $user, string $hash): bool
+    {
+        if ($user->email === null || ! hash_equals(sha1($user->email), $hash)) {
+            return false;
+        }
+
+        $user->forceFill(['email_verified_at' => $user->email_verified_at ?? now()])->save();
+
+        return true;
     }
 }
