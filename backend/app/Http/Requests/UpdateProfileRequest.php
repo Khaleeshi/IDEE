@@ -28,6 +28,7 @@ class UpdateProfileRequest extends FormRequest
             'roles.*' => [Rule::enum(UserRole::class)],
             'contact_preferences' => ['sometimes', 'array'],
             'contact_preferences.accepts_requests' => ['boolean'],
+            'contact_preferences.whatsapp_alerts' => ['boolean'],
         ];
     }
 }

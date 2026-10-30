@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\MemberController;
 use App\Http\Controllers\Api\MessageController;
 use App\Http\Controllers\Api\NeedController;
 use App\Http\Controllers\Api\NetworkController;
+use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\OpportunityController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\ProjectController;
@@ -44,6 +45,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('me', [ProfileController::class, 'update']);
     Route::get('me/projects', [ProfileController::class, 'projects']);
     Route::get('me/journeys', [JourneyController::class, 'mine']);
+    Route::get('me/notifications', [NotificationController::class, 'index']);
+    Route::post('me/notifications/read', [NotificationController::class, 'markRead']);
     Route::get('me/applications', [OpportunityController::class, 'applications']);
     Route::put('opportunities/{opportunity}/application', [OpportunityController::class, 'track']);
     Route::delete('opportunities/{opportunity}/application', [OpportunityController::class, 'forget']);

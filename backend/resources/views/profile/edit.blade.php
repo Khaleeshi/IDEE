@@ -41,9 +41,14 @@
                 </div>
             </fieldset>
 
-            <label class="mb-6 flex min-h-12 items-center gap-3 rounded-xl border border-stone-200 px-3">
+            <label class="mb-3 flex min-h-12 items-center gap-3 rounded-xl border border-stone-200 px-3">
                 <input type="checkbox" name="accepts_requests" value="1" @checked($user->contact_preferences['accepts_requests'] ?? true) class="h-5 w-5 accent-brand-700">
                 <span>J'accepte de recevoir des demandes de contact</span>
+            </label>
+
+            <label class="mb-6 flex min-h-12 items-center gap-3 rounded-xl border border-stone-200 px-3">
+                <input type="checkbox" name="whatsapp_alerts" value="1" @checked($user->contact_preferences['whatsapp_alerts'] ?? true) class="h-5 w-5 accent-brand-700">
+                <span>Recevoir les alertes importantes sur WhatsApp</span>
             </label>
 
             <x-button class="w-full">Enregistrer</x-button>

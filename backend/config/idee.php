@@ -74,6 +74,12 @@ return [
         'retention_rate' => 30,
     ],
 
+    // NO-02 : alertes WhatsApp (demandes, rappels, décisions), à activer une fois
+    // le modèle « idee_alerte » approuvé par Meta.
+    'notifications' => [
+        'whatsapp' => (bool) env('IDEE_WHATSAPP_ALERTS', false),
+    ],
+
     // RG-10 : une fiche pratique non revue depuis ce délai (en mois) est signalée à l'équipe.
     'guide_review_after_months' => (int) env('IDEE_GUIDE_REVIEW_MONTHS', 6),
 

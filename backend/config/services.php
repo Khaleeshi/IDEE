@@ -47,6 +47,8 @@ return [
         'template' => env('WHATSAPP_CODE_TEMPLATE', 'idee_code_connexion'),
         'language' => env('WHATSAPP_CODE_LANGUAGE', 'fr'),
         'graph_version' => env('WHATSAPP_GRAPH_VERSION', 'v23.0'),
+        // Modèle « utilitaire » des alertes, avec une variable : le texte de l'alerte.
+        'notification_template' => env('WHATSAPP_NOTIFICATION_TEMPLATE', 'idee_alerte'),
     ],
 
     'slack' => [

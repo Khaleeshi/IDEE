@@ -135,7 +135,13 @@ le modèle approuvé, reportez dans `.env` un jeton d'accès permanent (utilisat
 système) dans `WHATSAPP_TOKEN` et l'identifiant du numéro dans
 `WHATSAPP_PHONE_NUMBER_ID`.
 
-Ces deux branchements ont été vérifiés avec des réponses simulées, pas encore
+**Alertes WhatsApp** (demandes de contact, rappels, décisions de modération) —
+créez un second modèle, de catégorie **Utilitaire**, nommé `idee_alerte`, en
+français, dont le texte contient une seule variable, par exemple :
+« IDEE : {{1}} ». Une fois approuvé, mettez `IDEE_WHATSAPP_ALERTS=true` dans
+`.env`. Chaque membre peut refuser ces alertes dans son profil.
+
+Ces branchements ont été vérifiés avec des réponses simulées, pas encore
 avec les vrais services : faites un essai avec votre propre numéro avant
 d'ouvrir le site au public. En cas d'échec, le motif est écrit dans
 `storage/logs`.

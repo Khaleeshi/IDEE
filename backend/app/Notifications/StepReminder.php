@@ -8,8 +8,7 @@ use Illuminate\Notifications\Notification;
 
 /**
  * Rappel fixé par un membre sur une étape de parcours (PG-05).
- * Il est enregistré en base et affiché dans « Parcours » ; les canaux
- * push et WhatsApp viendront s'ajouter.
+ * Il est affiché dans IDEE et envoyé sur WhatsApp quand le canal est activé (NO-02).
  */
 class StepReminder extends Notification
 {
@@ -22,7 +21,7 @@ class StepReminder extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['database'];
+        return AlertChannels::for($notifiable);
     }
 
     /**

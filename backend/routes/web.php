@@ -10,6 +10,7 @@ use App\Http\Controllers\Web\LoginController;
 use App\Http\Controllers\Web\MemberController;
 use App\Http\Controllers\Web\MessageController;
 use App\Http\Controllers\Web\NeedController;
+use App\Http\Controllers\Web\NotificationController;
 use App\Http\Controllers\Web\OpportunityController;
 use App\Http\Controllers\Web\ProfileController;
 use App\Http\Controllers\Web\ProjectController;
@@ -71,6 +72,8 @@ Route::middleware('auth')->group(function () {
 
     Route::put('/opportunites/{opportunity}/candidature', [OpportunityController::class, 'track'])->name('opportunities.track');
     Route::delete('/opportunites/{opportunity}/candidature', [OpportunityController::class, 'forget'])->name('opportunities.forget');
+
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
 
     Route::get('/profil', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profil', [ProfileController::class, 'update'])->name('profile.update');

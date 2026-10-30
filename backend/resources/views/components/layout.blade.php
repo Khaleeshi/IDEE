@@ -31,7 +31,16 @@
             @guest
                 <a href="{{ route('login') }}" class="rounded-full bg-brand-700 px-4 py-2 text-sm font-semibold text-white">Se connecter</a>
             @else
-                <a href="{{ route('projects.create') }}" class="rounded-full bg-brand-700 px-4 py-2 text-sm font-semibold text-white">+ Publier</a>
+                <div class="flex items-center gap-2">
+                    <a href="{{ route('notifications.index') }}" class="relative flex h-10 w-10 items-center justify-center rounded-full text-stone-600"
+                       aria-label="Notifications{{ ($unreadNotificationsCount ?? 0) > 0 ? ', '.$unreadNotificationsCount.' non lues' : '' }}">
+                        <svg aria-hidden="true" viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10 21h4"/></svg>
+                        @if (($unreadNotificationsCount ?? 0) > 0)
+                            <span class="absolute right-0 top-0 rounded-full bg-amber-500 px-1.5 text-[10px] font-bold text-white">{{ $unreadNotificationsCount }}</span>
+                        @endif
+                    </a>
+                    <a href="{{ route('projects.create') }}" class="rounded-full bg-brand-700 px-4 py-2 text-sm font-semibold text-white">+ Publier</a>
+                </div>
             @endguest
         </div>
     </header>

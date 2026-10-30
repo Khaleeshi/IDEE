@@ -60,6 +60,7 @@ class AppServiceProvider extends ServiceProvider
                     + app(MessageService::class)->unreadCount($user)
                 : 0);
             $view->with('dueRemindersCount', $user ? app(JourneyService::class)->dueRemindersCount($user) : 0);
+            $view->with('unreadNotificationsCount', $user ? $user->unreadNotifications()->count() : 0);
         });
     }
 }
