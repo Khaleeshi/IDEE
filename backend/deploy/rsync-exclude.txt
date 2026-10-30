@@ -9,3 +9,7 @@
 /public/hot
 /public/storage
 /.phpunit.cache
+# Fichiers que l'hébergeur peut créer à la racine du site (certificat, réglages PHP).
+/public/.well-known/
+/public/.user.ini
+/public/php.ini
