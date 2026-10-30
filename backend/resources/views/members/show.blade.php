@@ -46,6 +46,14 @@
         </div>
     </x-card>
 
+    @if ($organisations->isNotEmpty())
+        <p class="mt-3 text-sm text-stone-600">Membre de
+            @foreach ($organisations as $organisation)
+                <a href="{{ route('organisations.show', $organisation) }}" class="font-medium underline">{{ $organisation->name }}</a>@if ($organisation->isVerified()) ✓@endif{{ $loop->last ? '' : ',' }}
+            @endforeach
+        </p>
+    @endif
+
     <h2 class="mb-3 mt-6 text-lg font-bold">Projets</h2>
     @forelse ($projects as $project)
         <x-project-card :project="$project" />

@@ -16,6 +16,9 @@
             <p class="mt-1 whitespace-pre-line text-sm">{{ $target->summary }}</p>
         @elseif ($target instanceof \App\Models\Message)
             <p class="mt-1 whitespace-pre-line text-sm">{{ $target->body ?? ($target->attachment_name ? 'Pièce jointe : '.$target->attachment_name : '') }}</p>
+        @elseif ($target instanceof \App\Models\Organisation)
+            <p class="mt-1 font-semibold">{{ $target->name }}</p>
+            <p class="mt-1 whitespace-pre-line text-sm">{{ $report->removed_content ?? $target->description }}</p>
         @elseif ($target instanceof \App\Models\User)
             <p class="mt-1 font-semibold">{{ $target->name }}</p>
             <p class="mt-1 whitespace-pre-line text-sm">{{ $target->bio ?? $report->removed_content }}</p>

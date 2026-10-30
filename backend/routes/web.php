@@ -16,6 +16,7 @@ use App\Http\Controllers\Web\MessageController;
 use App\Http\Controllers\Web\NeedController;
 use App\Http\Controllers\Web\NotificationController;
 use App\Http\Controllers\Web\OpportunityController;
+use App\Http\Controllers\Web\OrganisationController;
 use App\Http\Controllers\Web\ProfileController;
 use App\Http\Controllers\Web\ProjectController;
 use App\Http\Controllers\Web\PushSubscriptionController;
@@ -105,6 +106,18 @@ Route::middleware('auth')->group(function () {
     Route::delete('/opportunites/{opportunity}/candidature', [OpportunityController::class, 'forget'])->name('opportunities.forget');
 
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::get('/organisations/nouvelle', [OrganisationController::class, 'create'])->name('organisations.create');
+    Route::post('/organisations', [OrganisationController::class, 'store'])->name('organisations.store');
+    Route::get('/organisations/{organisation}/gestion', [OrganisationController::class, 'manage'])->name('organisations.manage');
+    Route::patch('/organisations/{organisation}', [OrganisationController::class, 'update'])->name('organisations.update');
+    Route::post('/organisations/{organisation}/membres', [OrganisationController::class, 'addMember'])->name('organisations.members.store');
+    Route::delete('/membres-organisation/{organisationMember}', [OrganisationController::class, 'removeMember'])->name('organisations.members.destroy');
+    Route::post('/organisations/{organisation}/verification', [OrganisationController::class, 'requestVerification'])->name('organisations.verification');
+    Route::get('/organisations/{organisation}/programmes/nouveau', [OrganisationController::class, 'createProgramme'])->name('programmes.create');
+    Route::post('/organisations/{organisation}/programmes', [OrganisationController::class, 'storeProgramme'])->name('programmes.store');
+    Route::get('/programmes/{opportunity}/modifier', [OrganisationController::class, 'editProgramme'])->name('programmes.edit');
+    Route::put('/programmes/{opportunity}', [OrganisationController::class, 'updateProgramme'])->name('programmes.update');
+    Route::delete('/programmes/{opportunity}', [OrganisationController::class, 'destroyProgramme'])->name('programmes.destroy');
     Route::get('/alertes', [AlertController::class, 'index'])->name('alerts.index');
     Route::post('/alertes', [AlertController::class, 'store'])->name('alerts.store');
     Route::get('/alertes/{savedSearch}', [AlertController::class, 'show'])->name('alerts.show');
@@ -126,6 +139,9 @@ Route::middleware(['auth', 'can:administrer'])->prefix('administration')->name('
     Route::get('/verifications', [AdminController::class, 'verifications'])->name('verifications');
     Route::get('/verifications/{verification}/piece', [AdminController::class, 'verificationDocument'])->name('verifications.document');
     Route::post('/verifications/{verification}/decision', [AdminController::class, 'decideVerification'])->name('verifications.decide');
+    Route::get('/organisations', [AdminController::class, 'organisations'])->name('organisations');
+    Route::get('/organisations/{organisation}/piece', [AdminController::class, 'organisationDocument'])->name('organisations.document');
+    Route::post('/organisations/{organisation}/decision', [AdminController::class, 'decideOrganisation'])->name('organisations.decide');
     Route::get('/opportunites', [AdminController::class, 'opportunities'])->name('opportunities');
     Route::get('/opportunites/nouvelle', [AdminController::class, 'createOpportunity'])->name('opportunities.create');
     Route::post('/opportunites', [AdminController::class, 'storeOpportunity'])->name('opportunities.store');
@@ -150,5 +166,7 @@ Route::get('/parcours/forme-juridique', [JourneyController::class, 'legalForm'])
 Route::get('/parcours/{journey}', [JourneyController::class, 'show'])->name('journeys.show');
 
 // Répertoire des programmes, concours et financements (OP-01).
+Route::get('/organisations', [OrganisationController::class, 'index'])->name('organisations.index');
+Route::get('/organisations/{organisation}', [OrganisationController::class, 'show'])->name('organisations.show');
 Route::get('/opportunites', [OpportunityController::class, 'index'])->name('opportunities.index');
 Route::get('/opportunites/{opportunity}', [OpportunityController::class, 'show'])->name('opportunities.show');

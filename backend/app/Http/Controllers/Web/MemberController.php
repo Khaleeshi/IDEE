@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
+use App\Models\Organisation;
 use App\Models\User;
 use App\Services\Collaboration\CollaborationService;
 use App\Services\ContactRequests\ReactivityIndicator;
@@ -21,6 +22,8 @@ class MemberController extends Controller
             'projects' => $user->projects()->active()->with(['sector', 'openNeeds'])->latest('last_activity_at')->get(),
             // CO-03 : historique des collaborations confirmées par les deux parties.
             'collaborations' => $collaborations->confirmedFor($user),
+            // CP-05 : pages d'organisation dont le membre fait partie.
+            'organisations' => Organisation::whereHas('members', fn ($query) => $query->where('user_id', $user->id))->orderBy('name')->get(),
         ]);
     }
 }

@@ -20,6 +20,8 @@ class OpportunityResource extends JsonResource
             'id' => $this->id,
             'title' => $this->title,
             'organisation' => $this->organisation,
+            // OR-01 : page de l'organisation vérifiée qui a publié le programme.
+            'organisation_id' => $this->organisation_id,
             'kind' => EnumResource::make($this->kind),
             'summary' => $this->summary,
             'criteria' => $this->criteria,

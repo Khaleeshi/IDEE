@@ -117,6 +117,11 @@
         </x-card>
     @endif
 
+    <nav aria-label="Autres réglages" class="mb-4 grid grid-cols-2 gap-2 text-sm">
+        <a href="{{ route('alerts.index') }}" class="rounded-xl border border-stone-200 bg-white p-3 text-center font-medium text-stone-800">Mes alertes</a>
+        <a href="{{ route('organisations.index') }}" class="rounded-xl border border-stone-200 bg-white p-3 text-center font-medium text-stone-800">Organisations</a>
+    </nav>
+
     <form method="POST" action="{{ route('logout') }}" class="text-center">
         @csrf
         <button type="submit" class="py-3 text-sm font-medium text-red-700 underline">Se déconnecter</button>

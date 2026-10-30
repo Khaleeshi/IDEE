@@ -16,6 +16,7 @@ use App\Http\Controllers\Api\NeedController;
 use App\Http\Controllers\Api\NetworkController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\OpportunityController;
+use App\Http\Controllers\Api\OrganisationController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\ProjectController;
 use App\Http\Controllers\Api\ProjectUpdateController;
@@ -43,6 +44,8 @@ Route::get('members/{user}/collaborations', [CollaborationController::class, 'fo
 Route::get('journeys', [JourneyController::class, 'index']);
 Route::get('journeys/{journey}', [JourneyController::class, 'show']);
 Route::get('legal-form', [JourneyController::class, 'legalForm']);
+Route::get('organisations', [OrganisationController::class, 'index']);
+Route::get('organisations/{organisation}', [OrganisationController::class, 'show']);
 Route::get('opportunities', [OpportunityController::class, 'index']);
 Route::get('opportunities/{opportunity}', [OpportunityController::class, 'show']);
 
@@ -55,6 +58,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('me/notifications/read', [NotificationController::class, 'markRead']);
     Route::get('me/applications', [OpportunityController::class, 'applications']);
     Route::get('projects/{project}/opportunities', [OpportunityController::class, 'forProject']);
+    Route::post('organisations', [OrganisationController::class, 'store']);
+    Route::patch('organisations/{organisation}', [OrganisationController::class, 'update']);
+    Route::post('organisations/{organisation}/members', [OrganisationController::class, 'addMember']);
+    Route::delete('organisation-members/{organisationMember}', [OrganisationController::class, 'removeMember']);
+    Route::post('organisations/{organisation}/verification', [OrganisationController::class, 'requestVerification']);
+    Route::post('organisations/{organisation}/programmes', [OrganisationController::class, 'storeProgramme']);
+    Route::put('programmes/{opportunity}', [OrganisationController::class, 'updateProgramme']);
+    Route::delete('programmes/{opportunity}', [OrganisationController::class, 'destroyProgramme']);
     Route::get('me/alerts', [AlertController::class, 'index']);
     Route::post('me/alerts', [AlertController::class, 'store']);
     Route::delete('alerts/{savedSearch}', [AlertController::class, 'destroy']);

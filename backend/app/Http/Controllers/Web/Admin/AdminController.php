@@ -4,18 +4,21 @@ namespace App\Http\Controllers\Web\Admin;
 
 use App\Enums\ModerationDecision;
 use App\Enums\OpportunityKind;
+use App\Enums\OrganisationVerification;
 use App\Enums\ProjectStage;
 use App\Enums\ReportStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\OpportunityRequest;
 use App\Models\JourneyStep;
 use App\Models\Opportunity;
+use App\Models\Organisation;
 use App\Models\Report;
 use App\Models\Sector;
 use App\Models\Verification;
 use App\Services\Admin\IndicatorService;
 use App\Services\Journeys\JourneyService;
 use App\Services\Moderation\ModerationService;
+use App\Services\Organisations\OrganisationService;
 use App\Services\Trust\VerificationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -106,6 +109,35 @@ class AdminController extends Controller
             : $verifications->refuse($verification, $request->user(), $data['reason']);
 
         return redirect()->route('admin.verifications')->with('status', 'Vérification traitée.');
+    }
+
+    /**
+     * CF-03 : organisations en attente de vérification de leur RCCM et NINEA.
+     */
+    public function organisations(): View
+    {
+        return view('admin.organisations', [
+            'pending' => Organisation::where('verification_status', OrganisationVerification::EnAttente)->oldest('verification_requested_at')->get(),
+        ]);
+    }
+
+    public function organisationDocument(Organisation $organisation): StreamedResponse
+    {
+        abort_if($organisation->verification_document_path === null, 404);
+
+        return Storage::disk('local')->response($organisation->verification_document_path, null, [
+            'X-Content-Type-Options' => 'nosniff',
+            'Cache-Control' => 'no-store',
+        ]);
+    }
+
+    public function decideOrganisation(Request $request, Organisation $organisation, OrganisationService $organisations): RedirectResponse
+    {
+        $request->validate(['approved' => ['required', 'boolean'], 'note' => ['nullable', 'string', 'max:500']]);
+
+        $organisations->decideVerification($organisation, $request->boolean('approved'), $request->input('note'));
+
+        return redirect()->route('admin.organisations')->with('status', 'Vérification traitée.');
     }
 
     public function opportunities(): View

@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 #[Fillable([
     'slug', 'title', 'organisation', 'kind', 'summary', 'criteria', 'stages', 'sectors', 'max_amount_fcfa', 'amount', 'deadline',
@@ -46,6 +47,16 @@ class Opportunity extends Model
     {
         $query->where('is_published', true)
             ->where(fn (Builder $query) => $query->whereNull('deadline')->orWhereDate('deadline', '>=', today()));
+    }
+
+    /**
+     * Organisation vérifiée qui a publié le programme (OR-01), sinon l'équipe IDEE.
+     *
+     * @return BelongsTo<Organisation, $this>
+     */
+    public function organisationPage(): BelongsTo
+    {
+        return $this->belongsTo(Organisation::class, 'organisation_id');
     }
 
     public function isClosed(): bool

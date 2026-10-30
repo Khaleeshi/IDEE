@@ -121,6 +121,14 @@ class User extends Authenticatable
     }
 
     /**
+     * @return HasMany<OrganisationMember, $this>
+     */
+    public function organisationMemberships(): HasMany
+    {
+        return $this->hasMany(OrganisationMember::class);
+    }
+
+    /**
      * @return HasMany<SavedSearch, $this>
      */
     public function savedSearches(): HasMany
