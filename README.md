@@ -118,7 +118,12 @@ clients, matériel) et chaque demande de contact reçoit une réponse.
 - 188 tests automatisés au total
 
 **Reste à faire** : saisie vocale en wolof (IA-04, après des tests de qualité) ; traduction et enregistrement des fiches en wolof ; paiement par carte
-(avec un agrégateur comme PayDunya ou PayTech) ; application Flutter.
+(avec un agrégateur comme PayDunya ou PayTech) ; compléter l'application mobile
+(organisations, paiements, assistant) et la publier sur les boutiques.
+
+**Application mobile** (`mobile/`, Flutter) : connexion par code, projets et
+recherche, fiche projet et demande de contact, demandes et messagerie, parcours
+guidés, notifications et profil, branchée sur l'API. Voir `mobile/README.md`.
 
 ## Structure du dépôt
 
@@ -128,6 +133,7 @@ clients, matériel) et chaque demande de contact reçoit une réponse.
 | `backend/resources/views/` | Pages du site web (Blade et Tailwind CSS) |
 | `backend/database/data/` | Contenu des parcours guidés : étapes, pièces, coûts, sources |
 | `backend/deploy/` | Scripts d'installation et de mise à jour du serveur |
+| `mobile/` | Application Flutter pour Android et iOS, branchée sur l'API |
 | `.github/workflows/` | Tests à chaque envoi de code, mise en ligne à chaque fusion dans `main` |
 
 ## Installer et lancer le serveur en local
