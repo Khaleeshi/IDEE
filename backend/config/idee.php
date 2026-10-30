@@ -101,6 +101,21 @@ return [
     ],
 
     // Modération (section 8) : durée d'une suspension et délai pour contester une décision (en jours).
+    // Section 8 : expressions qui déclenchent l'alerte anti-arnaque dans la messagerie.
+    // Écrites en minuscules et sans accents ; le message est comparé sous la même forme.
+    'scam_alert' => [
+        // Demande d'argent ou de transfert.
+        'frais de dossier', 'frais d\'etude', 'frais de traitement', 'frais d\'enregistrement', 'frais de deblocage',
+        'western union', 'moneygram', 'ria money', 'envoie moi de l\'argent', 'envoyez moi de l\'argent', 'envoyer de l\'argent', 'envoyez de l\'argent',
+        'faire un transfert', 'faites un transfert', 'transferez', 'faire un depot', 'faites un depot', 'virement',
+        'numero wave', 'mon wave', 'par wave', 'numero orange money', 'mon orange money', 'par orange money', 'yonnee ma xaalis',
+        // Demande d'un code reçu par SMS ou d'un mot de passe.
+        'code recu', 'code de confirmation', 'code de verification', 'code secret', 'code pin', 'mot de passe',
+        'donne moi le code', 'donnez moi le code', 'envoie moi le code', 'envoyez moi le code',
+        // Coordonnées bancaires.
+        'rib', 'iban', 'numero de compte', 'numero de carte', 'carte bancaire', 'coordonnees bancaires', 'cvv', 'date d\'expiration',
+    ],
+
     'moderation' => [
         'suspension_days' => (int) env('IDEE_SUSPENSION_DAYS', 30),
         'appeal_days' => (int) env('IDEE_APPEAL_DAYS', 14),

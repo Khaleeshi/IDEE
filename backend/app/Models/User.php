@@ -46,7 +46,16 @@ class User extends Authenticatable
             'suspended_until' => 'datetime',
             'banned_at' => 'datetime',
             'terms_accepted_at' => 'datetime',
+            'precautionary_suspension_at' => 'datetime',
         ];
+    }
+
+    /**
+     * Le membre peut refuser les recommandations calculées d'après son profil (section 7, règle 8).
+     */
+    public function wantsPersonalizedRecommendations(): bool
+    {
+        return (bool) ($this->contact_preferences['personalized_recommendations'] ?? true);
     }
 
     /**
@@ -68,18 +77,21 @@ class User extends Authenticatable
     }
 
     /**
-     * Compte exclu, ou suspendu à la suite d'une décision de modération.
+     * Compte exclu, suspendu à la suite d'une décision de modération, ou suspendu
+     * par précaution après plusieurs signalements.
      */
     public function isRestricted(): bool
     {
-        return $this->banned_at !== null || $this->suspended_until?->isFuture();
+        return $this->banned_at !== null || $this->precautionary_suspension_at !== null || $this->suspended_until?->isFuture();
     }
 
     public function restrictionMessage(): string
     {
-        return $this->banned_at !== null
-            ? 'Ce compte a été exclu d\'IDEE à la suite d\'une décision de modération.'
-            : 'Ce compte est suspendu jusqu\'au '.$this->suspended_until->translatedFormat('d F Y').' à la suite d\'une décision de modération.';
+        return match (true) {
+            $this->banned_at !== null => 'Ce compte a été exclu d\'IDEE à la suite d\'une décision de modération.',
+            $this->precautionary_suspension_at !== null => 'Ce compte est suspendu par précaution après plusieurs signalements, en attendant l\'examen d\'un modérateur.',
+            default => 'Ce compte est suspendu jusqu\'au '.$this->suspended_until->translatedFormat('d F Y').' à la suite d\'une décision de modération.',
+        };
     }
 
     /**

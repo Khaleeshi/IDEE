@@ -16,6 +16,9 @@
             <p class="text-sm">Besoin : {{ $contactRequest->need->title }}</p>
         @endif
         <p class="mt-3 whitespace-pre-line text-stone-800">{{ $contactRequest->message }}</p>
+        @if ($contactRequest->recipient_id === auth()->id() && $contactRequest->raisesScamAlert())
+            @include('contact-requests.partials.scam-alert')
+        @endif
         <p class="mt-3 text-xs text-stone-400">Envoyée {{ $contactRequest->created_at->diffForHumans() }}
             @if ($contactRequest->status->isPending()) · expire le {{ $contactRequest->expires_at->translatedFormat('d F') }}@endif
         </p>
@@ -80,6 +83,9 @@
                         <p class="mt-1 text-[11px] {{ $mine ? 'text-brand-50' : 'text-stone-400' }}">
                             {{ $message->created_at->translatedFormat('d F, H:i') }}@if ($mine && $message->read_at) · lu @endif
                         </p>
+                        @if (! $mine && $message->raisesScamAlert())
+                            @include('contact-requests.partials.scam-alert')
+                        @endif
                     </div>
                 </div>
             @empty

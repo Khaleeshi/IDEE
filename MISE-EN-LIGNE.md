@@ -217,6 +217,23 @@ Renseignez aussi le nom, l'adresse, le RCCM et le NINEA de la société
 des organisations (espace organisations, sur devis) s'émettent dans
 **Administration › Paiements**.
 
+## 10. Compléter les mentions légales
+
+Les mentions légales, les conditions d'utilisation, la politique de
+confidentialité et la charte communautaire sont en ligne dès l'installation,
+avec un bandeau « Texte provisoire ». Avant d'ouvrir IDEE au public :
+
+1. Renseignez dans `.env` l'adresse de contact (`IDEE_CONTACT_EMAIL`), la
+   personne responsable de la publication (`IDEE_PUBLISHER`) et l'hébergeur,
+   avec son adresse (`IDEE_HOST`), en plus des `IDEE_COMPANY_…`.
+2. Faites relire les quatre textes par un avocat. Les textes sont dans
+   `backend/resources/views/legal/`.
+3. Une fois les textes validés, passez `IDEE_LEGAL_VALIDATED=true` : le bandeau
+   disparaît.
+4. Si vous modifiez ensuite les conditions ou la charte, changez la version
+   `legal.version` dans `backend/config/idee.php` : chaque membre devra les
+   accepter de nouveau à sa prochaine visite.
+
 ## En cas de problème
 
 | Symptôme | Où regarder |

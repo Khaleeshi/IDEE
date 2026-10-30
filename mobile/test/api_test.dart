@@ -48,6 +48,19 @@ void main() {
     );
   });
 
+  test('une recherche de financement porte la mention légale', () {
+    final need = Need.fromJson({'id': '01n', 'type': {'value': 'financement', 'label': 'Financement'}, 'title': 'Séchoir', 'notice': 'Ceci n\'est pas une offre au public.'});
+
+    expect(need.notice, 'Ceci n\'est pas une offre au public.');
+  });
+
+  test('un message suspect porte l\'alerte anti-arnaque', () {
+    final message = Message.fromJson({'id': '01m', 'sender_id': '01u', 'body': 'Réglez les frais de dossier', 'scam_alert': true, 'created_at': '2026-10-30T10:00:00Z'});
+
+    expect(message.scamAlert, isTrue);
+    expect(Message.fromJson({'id': '01n', 'sender_id': '01u', 'body': 'Bonjour'}).scamAlert, isFalse);
+  });
+
   test('la suppression du compte envoie la confirmation', () async {
     late http.Request sent;
     final api = ApiClient(

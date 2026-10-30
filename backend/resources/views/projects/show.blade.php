@@ -1,4 +1,4 @@
-<x-layout :title="$project->title" :description="\Illuminate\Support\Str::limit($project->summary, 180)">
+<x-layout :title="$project->title" :description="\Illuminate\Support\Str::limit($project->summary, 180)" :noindex="$needs->contains(fn ($need) => $need->isFundraising())">
     <a href="{{ url()->previous() !== url()->current() ? url()->previous() : route('home') }}" class="mb-3 inline-block py-1 text-sm text-stone-500">← Retour</a>
 
     <div class="flex flex-wrap items-center gap-2 text-xs text-stone-500">
@@ -236,6 +236,9 @@
                     <div><dt class="inline text-stone-500">Résultat :</dt> <dd class="inline">{{ $need->outcome }}</dd></div>
                 @endif
             </dl>
+            @if ($need->isFundraising())
+                <p class="mt-2 rounded-xl bg-stone-50 px-3 py-2 text-xs text-stone-600">{{ \App\Enums\NeedType::FUNDRAISING_NOTICE }}</p>
+            @endif
 
             @if ($isOwner)
                 @foreach ($need->helpOffers as $offer)

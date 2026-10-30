@@ -187,8 +187,11 @@ class _ConversationScreenState extends State<ConversationScreen> {
                           padding: const EdgeInsets.all(10),
                           constraints: const BoxConstraints(maxWidth: 300),
                           decoration: BoxDecoration(color: mine ? brand : Colors.white, borderRadius: BorderRadius.circular(14), border: Border.all(color: Colors.black12)),
-                          child: Text(message.body ?? (message.attachmentName != null ? '📎 ${message.attachmentName}' : ''),
-                              style: TextStyle(color: mine ? Colors.white : Colors.black87)),
+                          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                            Text(message.body ?? (message.attachmentName != null ? '📎 ${message.attachmentName}' : ''),
+                                style: TextStyle(color: mine ? Colors.white : Colors.black87)),
+                            if (!mine && message.scamAlert) const ScamAlert(),
+                          ]),
                         ),
                       );
                     }).toList(),

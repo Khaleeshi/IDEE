@@ -115,15 +115,39 @@ clients, matériel) et chaque demande de contact reçoit une réponse.
   livraison puis confirmation par le client ; règlement direct entre eux (SE-02)
 - Rencontres ciblées en ligne : porteurs et partenaires en binômes, tour par tour,
   sans se revoir, avec un lien de visio gratuit (Jitsi) et un rappel la veille (EV-02)
-- 188 tests automatisés au total
 
-**Reste à faire** : saisie vocale en wolof (IA-04, après des tests de qualité) ; traduction et enregistrement des fiches en wolof ; paiement par carte
-(avec un agrégateur comme PayDunya ou PayTech) ; compléter l'application mobile
-(organisations, paiements, assistant) et la publier sur les boutiques.
+**Étape 7 — exigences des sections 7 à 10** : terminée.
 
-**Application mobile** (`mobile/`, Flutter) : connexion par code, projets et
-recherche, fiche projet et demande de contact, demandes et messagerie, parcours
-guidés, notifications et profil, branchée sur l'API. Voir `mobile/README.md`.
+- Droits sur ses données : export de toutes ses données et suppression du compte
+  depuis le site, l'API et l'application. Projets, documents et profil sont effacés ;
+  les messages restent chez les interlocuteurs sous le nom « Membre supprimé », les
+  reçus pour la comptabilité (section 10, critère de recette 8)
+- Mentions légales, conditions d'utilisation, politique de confidentialité et charte
+  communautaire, liées depuis chaque page, acceptées à l'inscription puis à chaque
+  nouvelle version ; textes provisoires tant qu'un avocat ne les a pas validés (section 9)
+- Alerte dans la messagerie quand un message parle d'argent à transférer, d'un code
+  reçu par SMS ou de coordonnées bancaires (section 8)
+- Suspension préventive d'un compte signalé par trois personnes différentes, levée
+  dès qu'un modérateur décide (section 8)
+- Effacer ses échanges avec l'assistant et couper les recommandations personnalisées
+  (section 7, règle 8)
+- Mention « Ceci n'est pas une offre au public » sur chaque recherche de financement ;
+  ces projets et les sessions de pitch ne sont pas indexés par les moteurs de recherche
+  (section 9)
+- Business plan téléchargeable en Word, en plus de la version à imprimer en PDF (section 7)
+- 204 tests automatisés au total
+
+**Reste à faire** : saisie vocale en wolof (IA-04, après des tests de qualité) ;
+traduction et enregistrement des fiches en wolof ; paiement par carte (avec un
+agrégateur comme PayDunya ou PayTech) ; documents privés marqués au nom du lecteur ;
+détection des comptes multiples et des liens suspects ; interface en wolof puis en
+anglais ; compléter l'application mobile (hors ligne, organisations, paiements,
+assistant) et la publier sur les boutiques ; faire valider les textes légaux par un avocat.
+
+**Application mobile** (`mobile/`, Flutter) : connexion par code et acceptation de la
+charte, projets et recherche, fiche projet et demande de contact, demandes et
+messagerie avec l'alerte anti-arnaque, parcours guidés, notifications, profil et
+suppression du compte, branchée sur l'API. Voir `mobile/README.md`.
 
 ## Structure du dépôt
 
@@ -182,14 +206,18 @@ de connexion ne sont pas envoyés par SMS : ils sont écrits dans
 | `/devis` | Mes demandes de devis et prestations ; `/membres/{id}/devis` pour en demander un |
 | `/offres` | Offres payantes, mes offres en cours et mes paiements ; `/paiements/{id}/recu` pour le reçu |
 | `/opportunites?projet={id}` | Programmes compatibles avec l'un de mes projets |
-| `/profil` | Mon profil, mes rôles, mes préférences |
+| `/profil` | Mon profil, mes rôles, mes préférences, l'effacement de mes échanges avec l'assistant |
+| `/profil/mes-donnees` | Télécharger toutes mes données (fichier JSON) |
+| `/profil/supprimer` | Supprimer mon compte |
+| `/charte/accepter` | Acceptation des conditions et de la charte, à l'inscription et à chaque nouvelle version |
+| `/mentions-legales`, `/conditions-d-utilisation`, `/confidentialite`, `/charte` | Textes légaux |
 | `/membres/{id}` | Profil public d'un membre et sa réactivité |
 | `/parcours` | Parcours guidés : choix de la situation, mes démarches, rappels |
 | `/parcours/{id}` | Les étapes d'un parcours et mon avancement |
 | `/parcours/forme-juridique` | Questionnaire « Quelle forme juridique choisir ? » |
 | `/?vue=suivis` | Activité de ce que je suis |
 | `/opportunites` | Programmes et financements, et mes candidatures |
-| `/projets/{id}/business-plan` | Business plan rédigé par l'assistant, à corriger et imprimer |
+| `/projets/{id}/business-plan` | Business plan rédigé par l'assistant, à corriger, imprimer ou télécharger en Word |
 | `/notifications` | Mes notifications |
 | `/administration` | Équipe IDEE : indicateurs, signalements, vérifications, fiches, opportunités |
 
@@ -294,6 +322,11 @@ l'en-tête `Authorization: Bearer <jeton>` reçu à la connexion.
 | PUT | `/api/clarifications/{id}` | porteur | Répondre aux questions |
 | GET, POST | `/api/projects/{id}/business-plan` | porteur | Business plan : lire, en rédiger une version |
 | PUT | `/api/business-plans/{id}` | porteur | Corriger les sections |
+| GET | `/api/projects/{id}/business-plan/word` | porteur | Business plan au format Word (.docx) |
+| GET | `/api/me/export` | connecté | Toutes mes données |
+| DELETE | `/api/me` | connecté | Supprimer mon compte (`confirmation` : `SUPPRIMER`) |
+| POST | `/api/me/terms` | connecté | Accepter les conditions et la charte (`accept` : `true`) ; `terms_accepted` dans `/api/me` |
+| DELETE | `/api/me/assistant` | connecté | Effacer mes échanges avec l'assistant |
 
 ## Règles de gestion appliquées
 
@@ -324,6 +357,9 @@ Les valeurs se règlent dans `backend/config/idee.php` ou dans le fichier `.env`
 | Alertes | Alertes enregistrées par membre ; rappels avant une date limite | 10 ; 7 jours puis 1 jour |
 | Résumé hebdomadaire | Envoyé le lundi aux adresses e-mail confirmées, s'il y a du nouveau | activé |
 | Collaboration | Étapes, rendez-vous et collaborations ne comptent qu'avec l'accord des deux | — |
+| Section 8 | Suspension préventive après des signalements de personnes différentes | 3 |
+| Section 8 | Expressions qui déclenchent l'alerte anti-arnaque dans la messagerie | liste `scam_alert` |
+| Section 9 | Version des textes légaux : la changer fait accepter de nouveau les textes | 2026-10 |
 
 Les relances, expirations et rappels de rendez-vous tournent toutes les heures,
 la mise en sommeil chaque nuit, les rappels d'étapes et de dates limites puis

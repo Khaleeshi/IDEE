@@ -23,6 +23,7 @@ class MessageResource extends JsonResource
             'kind' => EnumResource::make($this->kind),
             'body' => $this->isRemoved() ? null : $this->body,
             'removed' => $this->isRemoved(),
+            'scam_alert' => $this->raisesScamAlert(),
             'attachment' => $this->hasAttachment() ? [
                 'name' => $this->attachment_name,
                 'mime' => $this->attachment_mime,

@@ -11,6 +11,7 @@ use App\Models\IdeaClarification;
 use App\Models\Meeting;
 use App\Models\Project;
 use App\Services\Assistant\AssistantService;
+use App\Services\Assistant\BusinessPlanDocument;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -51,6 +52,19 @@ class AssistantController extends Controller
         Gate::authorize('update', $project);
 
         return response()->json(['data' => $this->planData(BusinessPlan::where('project_id', $project->id)->orderByDesc('version')->first())]);
+    }
+
+    /**
+     * Le business plan au format Word (section 7).
+     */
+    public function word(Project $project, BusinessPlanDocument $documents): Response
+    {
+        Gate::authorize('update', $project);
+
+        return response($documents->docx($project, $documents->latestReady($project)), 200, [
+            'Content-Type' => BusinessPlanDocument::MIME,
+            'Content-Disposition' => 'attachment; filename="'.$documents->fileName($project).'"',
+        ]);
     }
 
     public function generate(Project $project): JsonResponse
@@ -170,5 +184,13 @@ class AssistantController extends Controller
             'generated_at' => $plan->generated_at?->toIso8601String(),
             'edited_at' => $plan->edited_at?->toIso8601String(),
         ] : null;
+    }
+
+    /**
+     * Efface les échanges du membre avec l'assistant (section 7, règle 8).
+     */
+    public function forget(Request $request): JsonResponse
+    {
+        return response()->json(['data' => ['deleted' => $this->assistant->forgetConversations($request->user())]]);
     }
 }

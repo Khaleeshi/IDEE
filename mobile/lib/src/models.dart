@@ -28,7 +28,7 @@ class Member {
 }
 
 class Need {
-  const Need({required this.id, required this.type, required this.title, this.description, this.amountFcfa});
+  const Need({required this.id, required this.type, required this.title, this.description, this.amountFcfa, this.notice});
 
   factory Need.fromJson(Map<String, dynamic> json) => Need(
         id: json['id'] as String,
@@ -36,6 +36,7 @@ class Need {
         title: json['title'] as String? ?? '',
         description: json['description'] as String?,
         amountFcfa: json['amount_fcfa'] as int?,
+        notice: json['notice'] as String?,
       );
 
   final String id;
@@ -43,6 +44,9 @@ class Need {
   final String title;
   final String? description;
   final int? amountFcfa;
+
+  /// « Ceci n'est pas une offre au public », sur les recherches de financement.
+  final String? notice;
 }
 
 class Project {
@@ -118,7 +122,7 @@ class ContactRequest {
 }
 
 class Message {
-  const Message({required this.id, required this.senderId, required this.createdAt, this.body, this.attachmentName});
+  const Message({required this.id, required this.senderId, required this.createdAt, this.body, this.attachmentName, this.scamAlert = false});
 
   factory Message.fromJson(Map<String, dynamic> json) => Message(
         id: json['id'] as String,
@@ -126,6 +130,7 @@ class Message {
         body: json['body'] as String?,
         attachmentName: json['attachment'] is Map ? (json['attachment'] as Map)['name'] as String? : null,
         createdAt: DateTime.tryParse(json['created_at'] as String? ?? '') ?? DateTime.now(),
+        scamAlert: json['scam_alert'] == true,
       );
 
   final String id;
@@ -133,6 +138,9 @@ class Message {
   final String? body;
   final String? attachmentName;
   final DateTime createdAt;
+
+  /// Le message parle d'argent, d'un code ou de coordonnées bancaires.
+  final bool scamAlert;
 }
 
 class Journey {

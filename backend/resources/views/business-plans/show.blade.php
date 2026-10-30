@@ -52,6 +52,7 @@
         @endif
 
         <x-button :href="route('business-plans.print', $project)" variant="secondary" class="mt-4 w-full" target="_blank">Version à imprimer ou à enregistrer en PDF</x-button>
+        <x-button :href="route('business-plans.word', $project)" variant="secondary" class="mt-2 w-full">Télécharger en Word</x-button>
     @endif
 
     @if ($plan && $plan->status->value !== 'en_cours' && $enabled)

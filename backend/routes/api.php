@@ -69,6 +69,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('me', [ProfileController::class, 'update']);
     Route::delete('me', [ProfileController::class, 'destroy']);
     Route::post('me/terms', [ProfileController::class, 'acceptTerms']);
+    Route::delete('me/assistant', [AssistantController::class, 'forget']);
     Route::get('me/export', [ProfileController::class, 'export'])->middleware('throttle:5,1');
     Route::get('me/projects', [ProfileController::class, 'projects']);
     Route::get('me/journeys', [JourneyController::class, 'mine']);
@@ -146,6 +147,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('projects/{project}/clarification', [AssistantController::class, 'clarify']);
     Route::put('clarifications/{ideaClarification}', [AssistantController::class, 'answer']);
     Route::get('projects/{project}/business-plan', [AssistantController::class, 'businessPlan']);
+    Route::get('projects/{project}/business-plan/word', [AssistantController::class, 'word']);
     Route::post('projects/{project}/business-plan', [AssistantController::class, 'generate']);
     Route::put('business-plans/{businessPlan}', [AssistantController::class, 'update']);
     Route::get('projects/{project}/pitch-deck', [AssistantController::class, 'pitchDeck']);

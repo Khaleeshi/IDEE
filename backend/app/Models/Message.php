@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\MessageKind;
+use App\Services\Moderation\ScamDetector;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -50,5 +51,13 @@ class Message extends Model
     public function isRemoved(): bool
     {
         return $this->removed_at !== null;
+    }
+
+    /**
+     * Le message parle d'argent, d'un code ou de coordonnées bancaires (section 8).
+     */
+    public function raisesScamAlert(): bool
+    {
+        return ! $this->isRemoved() && app(ScamDetector::class)->isSuspicious($this->body);
     }
 }

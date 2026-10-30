@@ -62,6 +62,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/projets/{project}/business-plan', [AssistantController::class, 'show'])->name('business-plans.show');
     Route::post('/projets/{project}/business-plan', [AssistantController::class, 'generate'])->name('business-plans.generate');
     Route::get('/projets/{project}/business-plan/impression', [AssistantController::class, 'print'])->name('business-plans.print');
+    Route::get('/projets/{project}/business-plan/word', [AssistantController::class, 'word'])->name('business-plans.word');
     Route::put('/business-plans/{businessPlan}', [AssistantController::class, 'update'])->name('business-plans.update');
     Route::get('/projets/{project}/presentation', [AssistantController::class, 'pitchDeck'])->name('pitch-decks.show');
     Route::post('/projets/{project}/presentation', [AssistantController::class, 'generatePitchDeck'])->name('pitch-decks.generate');
@@ -181,6 +182,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/charte/accepter', [TermsController::class, 'accept'])->name('terms.accept');
     Route::get('/profil/mes-donnees', [AccountController::class, 'export'])->middleware('throttle:5,1')->name('account.export');
     Route::get('/profil/supprimer', [AccountController::class, 'confirm'])->name('account.delete');
+    Route::delete('/profil/echanges-assistant', [AssistantController::class, 'forget'])->name('assistant.forget');
     Route::delete('/profil', [AccountController::class, 'destroy'])->name('account.destroy');
 });
 

@@ -1,4 +1,4 @@
-@props(['title' => null, 'description' => null, 'refresh' => null])
+@props(['title' => null, 'description' => null, 'refresh' => null, 'noindex' => false])
 
 <!DOCTYPE html>
 <html lang="fr">
@@ -19,6 +19,10 @@
     <meta property="og:image" content="{{ url('/icons/icon-512.png') }}">
     @if ($refresh)
         <meta http-equiv="refresh" content="{{ (int) $refresh }}">
+    @endif
+    {{-- Section 9 : les espaces de levée de fonds ne sont pas indexés par les moteurs de recherche. --}}
+    @if ($noindex)
+        <meta name="robots" content="noindex, nofollow">
     @endif
     <link rel="manifest" href="/manifest.webmanifest">
     <link rel="icon" href="/favicon.ico" sizes="any">

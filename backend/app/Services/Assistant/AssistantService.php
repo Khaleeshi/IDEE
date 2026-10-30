@@ -519,4 +519,17 @@ class AssistantService
             throw ValidationException::withMessages(['assistant' => 'L\'assistant IA n\'est pas encore activé sur IDEE.']);
         }
     }
+
+    /**
+     * Efface les échanges du membre avec l'assistant : questions sur ses idées et
+     * préparations de rendez-vous (section 7, règle 8). Les business plans et
+     * présentations restent : ce sont ses documents, qui partent avec son projet.
+     */
+    public function forgetConversations(User $user): int
+    {
+        $clarifications = IdeaClarification::whereIn('project_id', $user->projects()->withTrashed()->select('id'))->delete();
+        $preparations = AssistantDocument::whereBelongsTo($user)->where('kind', AssistantDocumentKind::PreparationRendezVous)->delete();
+
+        return $clarifications + $preparations;
+    }
 }
