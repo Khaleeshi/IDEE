@@ -42,6 +42,12 @@
     @endforeach
 
     <x-card class="mt-2">
+        <h2 class="font-semibold">Programmes et financements</h2>
+        <p class="mt-1 text-sm text-stone-600">Prêts, garanties, investisseurs et programmes d'accompagnement, avec leurs critères. Suivez vos candidatures et réglez des rappels.</p>
+        <x-button variant="secondary" :href="route('opportunities.index')" class="mt-3 w-full">Voir le répertoire</x-button>
+    </x-card>
+
+    <x-card class="mt-2">
         <h2 class="font-semibold">Quelle forme juridique choisir ?</h2>
         <p class="mt-1 text-sm text-stone-600">Trois questions pour vous orienter entre l'entreprenant, l'entreprise individuelle, la SARL et la SAS.</p>
         <x-button variant="secondary" :href="route('journeys.legal-form')" class="mt-3 w-full">Faire le questionnaire</x-button>

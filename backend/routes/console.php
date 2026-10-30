@@ -3,6 +3,7 @@
 use App\Models\User;
 use App\Services\ContactRequests\ContactRequestService;
 use App\Services\Journeys\JourneyService;
+use App\Services\Opportunities\OpportunityService;
 use App\Services\Projects\ProjectService;
 use App\Support\PhoneNumber;
 use Illuminate\Support\Facades\Artisan;
@@ -21,11 +22,12 @@ Artisan::command('idee:dormant-projects', function (ProjectService $projects) {
     $this->info("{$count} projet(s) mis en sommeil.");
 })->purpose('Met en sommeil les projets sans mise à jour depuis 90 jours (RG-07)');
 
-Artisan::command('idee:step-reminders', function (JourneyService $journeys) {
+Artisan::command('idee:step-reminders', function (JourneyService $journeys, OpportunityService $opportunities) {
     $count = $journeys->sendReminders();
+    $applications = $opportunities->sendReminders();
 
-    $this->info("{$count} rappel(s) d'étape envoyé(s).");
-})->purpose('Envoie les rappels fixés par les membres sur leurs étapes de parcours (PG-05)');
+    $this->info("{$count} rappel(s) d'étape envoyé(s), {$applications} rappel(s) de candidature envoyé(s).");
+})->purpose('Envoie les rappels fixés par les membres sur leurs étapes de parcours et leurs candidatures (PG-05)');
 
 Artisan::command('idee:stale-guides', function (JourneyService $journeys) {
     $steps = $journeys->staleSteps();

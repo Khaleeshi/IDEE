@@ -7,6 +7,7 @@
         'mes-projets' => [route('projects.mine'), 'Voir mes projets'],
         'demandes' => [route('contact-requests.index'), 'Voir mes demandes'],
         'forme-juridique' => [route('journeys.legal-form'), 'Faire le questionnaire'],
+        'opportunites' => [route('opportunities.index'), 'Voir les programmes et financements'],
         default => $step->relatedJourney
             ? [route('journeys.show', $step->relatedJourney), 'Voir le parcours « '.$step->relatedJourney->title.' »']
             : null,

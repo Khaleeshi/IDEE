@@ -14,7 +14,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $this->call([SectorSeeder::class, JourneySeeder::class]);
+        $this->call([SectorSeeder::class, JourneySeeder::class, OpportunitySeeder::class]);
 
         if (app()->environment('local')) {
             $this->call(DemoSeeder::class);

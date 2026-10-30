@@ -10,6 +10,7 @@ use App\Http\Controllers\Web\LoginController;
 use App\Http\Controllers\Web\MemberController;
 use App\Http\Controllers\Web\MessageController;
 use App\Http\Controllers\Web\NeedController;
+use App\Http\Controllers\Web\OpportunityController;
 use App\Http\Controllers\Web\ProfileController;
 use App\Http\Controllers\Web\ProjectController;
 use App\Http\Controllers\Web\TrustController;
@@ -68,6 +69,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/moderation/{report}/recours', [TrustController::class, 'appeal'])->name('moderation.appeal');
     Route::post('/profil/verification', [TrustController::class, 'verify'])->name('verification.store');
 
+    Route::put('/opportunites/{opportunity}/candidature', [OpportunityController::class, 'track'])->name('opportunities.track');
+    Route::delete('/opportunites/{opportunity}/candidature', [OpportunityController::class, 'forget'])->name('opportunities.forget');
+
     Route::get('/profil', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profil', [ProfileController::class, 'update'])->name('profile.update');
 });
@@ -82,6 +86,12 @@ Route::middleware(['auth', 'can:administrer'])->prefix('administration')->name('
     Route::get('/verifications', [AdminController::class, 'verifications'])->name('verifications');
     Route::get('/verifications/{verification}/piece', [AdminController::class, 'verificationDocument'])->name('verifications.document');
     Route::post('/verifications/{verification}/decision', [AdminController::class, 'decideVerification'])->name('verifications.decide');
+    Route::get('/opportunites', [AdminController::class, 'opportunities'])->name('opportunities');
+    Route::get('/opportunites/nouvelle', [AdminController::class, 'createOpportunity'])->name('opportunities.create');
+    Route::post('/opportunites', [AdminController::class, 'storeOpportunity'])->name('opportunities.store');
+    Route::get('/opportunites/{opportunity}', [AdminController::class, 'editOpportunity'])->name('opportunities.edit');
+    Route::put('/opportunites/{opportunity}', [AdminController::class, 'updateOpportunity'])->name('opportunities.update');
+    Route::delete('/opportunites/{opportunity}', [AdminController::class, 'destroyOpportunity'])->name('opportunities.destroy');
     Route::get('/fiches', [AdminController::class, 'guides'])->name('guides');
     Route::get('/fiches/{journeyStep}', [AdminController::class, 'editGuide'])->name('guides.edit');
     Route::put('/fiches/{journeyStep}', [AdminController::class, 'updateGuide'])->name('guides.update');
@@ -95,3 +105,7 @@ Route::get('/membres/{user}', [MemberController::class, 'show'])->name('members.
 Route::get('/parcours', [JourneyController::class, 'index'])->name('journeys.index');
 Route::get('/parcours/forme-juridique', [JourneyController::class, 'legalForm'])->name('journeys.legal-form');
 Route::get('/parcours/{journey}', [JourneyController::class, 'show'])->name('journeys.show');
+
+// Répertoire des programmes, concours et financements (OP-01).
+Route::get('/opportunites', [OpportunityController::class, 'index'])->name('opportunities.index');
+Route::get('/opportunites/{opportunity}', [OpportunityController::class, 'show'])->name('opportunities.show');

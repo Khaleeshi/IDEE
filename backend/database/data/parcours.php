@@ -296,6 +296,7 @@ return [
                     .'une banque. Les démarches se font directement auprès des organismes officiels : méfiez-vous de '
                     .'quiconque demande de l\'argent pour « faciliter » un dossier.',
                 'organisation' => 'DER/FJ, FONGIP, banques',
+                'action' => 'opportunites',
                 'source_label' => 'DER/FJ',
                 'source_url' => 'https://www.der.sn/devenez-entrepreneur/types-de-financements/',
                 'checked_on' => $consulted,

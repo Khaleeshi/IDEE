@@ -3,9 +3,12 @@
 namespace App\Http\Controllers\Web\Admin;
 
 use App\Enums\ModerationDecision;
+use App\Enums\OpportunityKind;
 use App\Enums\ReportStatus;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\OpportunityRequest;
 use App\Models\JourneyStep;
+use App\Models\Opportunity;
 use App\Models\Report;
 use App\Models\Verification;
 use App\Services\Admin\IndicatorService;
@@ -15,13 +18,14 @@ use App\Services\Trust\VerificationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
  * Administration de l'équipe IDEE : indicateurs (AD-03), modération (AD-01),
- * vérifications (AD-04) et fiches pratiques (AD-02).
+ * vérifications (AD-04), fiches pratiques et opportunités (AD-02).
  */
 class AdminController extends Controller
 {
@@ -100,6 +104,52 @@ class AdminController extends Controller
             : $verifications->refuse($verification, $request->user(), $data['reason']);
 
         return redirect()->route('admin.verifications')->with('status', 'Vérification traitée.');
+    }
+
+    public function opportunities(): View
+    {
+        return view('admin.opportunities', ['opportunities' => Opportunity::orderByDesc('is_published')->orderBy('title')->get()]);
+    }
+
+    public function createOpportunity(): View
+    {
+        return view('admin.opportunity', ['opportunity' => new Opportunity(['is_published' => true]), 'kinds' => OpportunityKind::cases()]);
+    }
+
+    public function storeOpportunity(OpportunityRequest $request): RedirectResponse
+    {
+        $opportunity = new Opportunity(['slug' => Str::slug($request->validated('title')).'-'.Str::lower(Str::random(6))]);
+
+        return $this->saveOpportunity($request, $opportunity, 'Opportunité ajoutée au répertoire.');
+    }
+
+    public function editOpportunity(Opportunity $opportunity): View
+    {
+        return view('admin.opportunity', ['opportunity' => $opportunity, 'kinds' => OpportunityKind::cases()]);
+    }
+
+    public function updateOpportunity(OpportunityRequest $request, Opportunity $opportunity): RedirectResponse
+    {
+        return $this->saveOpportunity($request, $opportunity, 'Opportunité mise à jour.');
+    }
+
+    public function destroyOpportunity(Opportunity $opportunity): RedirectResponse
+    {
+        $opportunity->delete();
+
+        return redirect()->route('admin.opportunities')->with('status', 'Opportunité supprimée.');
+    }
+
+    /**
+     * Toute fiche saisie ou corrigée par l'équipe est datée du jour et n'est plus écrasée à la mise en ligne.
+     */
+    private function saveOpportunity(OpportunityRequest $request, Opportunity $opportunity, string $status): RedirectResponse
+    {
+        $opportunity->fill([...$request->validated(), 'is_published' => $request->boolean('is_published'), 'checked_on' => today()]);
+        $opportunity->edited_at = now();
+        $opportunity->save();
+
+        return redirect()->route('admin.opportunities')->with('status', $status);
     }
 
     public function guides(): View

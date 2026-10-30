@@ -15,6 +15,7 @@ fi
 "$PHP" artisan migrate --force
 "$PHP" artisan db:seed --class=SectorSeeder --force
 "$PHP" artisan db:seed --class=JourneySeeder --force
+"$PHP" artisan db:seed --class=OpportunitySeeder --force
 "$PHP" artisan optimize
 "$PHP" artisan up
 

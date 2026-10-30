@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\MemberController;
 use App\Http\Controllers\Api\MessageController;
 use App\Http\Controllers\Api\NeedController;
 use App\Http\Controllers\Api\NetworkController;
+use App\Http\Controllers\Api\OpportunityController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\ProjectController;
 use App\Http\Controllers\Api\ProjectUpdateController;
@@ -35,12 +36,17 @@ Route::get('members/{user}', [MemberController::class, 'show']);
 Route::get('journeys', [JourneyController::class, 'index']);
 Route::get('journeys/{journey}', [JourneyController::class, 'show']);
 Route::get('legal-form', [JourneyController::class, 'legalForm']);
+Route::get('opportunities', [OpportunityController::class, 'index']);
+Route::get('opportunities/{opportunity}', [OpportunityController::class, 'show']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('me', [ProfileController::class, 'show']);
     Route::patch('me', [ProfileController::class, 'update']);
     Route::get('me/projects', [ProfileController::class, 'projects']);
     Route::get('me/journeys', [JourneyController::class, 'mine']);
+    Route::get('me/applications', [OpportunityController::class, 'applications']);
+    Route::put('opportunities/{opportunity}/application', [OpportunityController::class, 'track']);
+    Route::delete('opportunities/{opportunity}/application', [OpportunityController::class, 'forget']);
     Route::post('reports', [TrustController::class, 'report']);
     Route::get('me/moderation', [TrustController::class, 'decisions']);
     Route::post('reports/{report}/appeal', [TrustController::class, 'appeal']);
