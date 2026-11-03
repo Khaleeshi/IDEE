@@ -8,6 +8,7 @@ use App\Enums\TaskStatus;
 use App\Models\Agreement;
 use App\Models\Collaboration;
 use App\Models\Project;
+use App\Models\ProjectMember;
 use App\Models\ProjectTask;
 use App\Models\User;
 use Illuminate\Support\Carbon;
@@ -37,7 +38,10 @@ class TaskService
                 ->where('status', CollaborationStatus::Confirmee)
                 ->get(['declared_by', 'partner_id'])
                 ->flatMap(fn (Collaboration $collaboration) => [$collaboration->declared_by, $collaboration->partner_id]))
+            // EQ-02 : les membres d'IDEE qui ont accepté de rejoindre l'équipe.
+            ->merge(ProjectMember::query()->where('project_id', $project->id)->where('invitation_status', 'acceptee')->pluck('user_id'))
             ->push($project->owner_id)
+            ->filter()
             ->unique();
 
         return User::query()->whereIn('id', $ids)->orderBy('name')->get()

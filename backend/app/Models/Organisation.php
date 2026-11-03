@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Collection;
 
 /**
  * Page d'organisation gérée par plusieurs membres (CP-05).
@@ -85,6 +86,29 @@ class Organisation extends Model
             ->where('user_id', $user->id)
             ->where('role', OrganisationRole::Administrateur)
             ->exists();
+    }
+
+    /**
+     * IN-01 : administrateurs et gestionnaires gèrent programmes, candidatures et cohortes.
+     */
+    public function managesProgrammes(?User $user): bool
+    {
+        return $user !== null && $this->members()
+            ->where('user_id', $user->id)
+            ->whereIn('role', [OrganisationRole::Administrateur, OrganisationRole::Gestionnaire])
+            ->exists();
+    }
+
+    /**
+     * IN-02 : les coachs de la structure, avec les responsables de programmes.
+     *
+     * @return Collection<string, string> identifiant => nom
+     */
+    public function coachOptions(): Collection
+    {
+        return $this->members()->with('user')->get()
+            ->filter(fn (OrganisationMember $member) => $member->role !== OrganisationRole::Membre && $member->user !== null)
+            ->mapWithKeys(fn (OrganisationMember $member) => [$member->user_id => $member->user->name.' · '.$member->role->label()]);
     }
 
     /**

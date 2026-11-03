@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Project;
 use App\Models\QuoteRequest;
 use App\Models\User;
+use App\Services\Accompaniments\ReviewService;
 use App\Services\Experts\QuoteService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -121,5 +122,20 @@ class QuoteController extends Controller
         $this->quotes->cancel($quoteRequest, $request->user());
 
         return redirect()->route('quotes.show', $quoteRequest)->with('status', 'Demande annulée.');
+    }
+
+    /**
+     * AV-01 : le client laisse un avis une fois la prestation confirmée terminée.
+     */
+    public function review(Request $request, QuoteRequest $quoteRequest, ReviewService $reviews): RedirectResponse
+    {
+        $data = $request->validate([
+            'rating' => ['required', 'integer', 'min:1', 'max:5'],
+            'comment' => ['nullable', 'string', 'max:2000'],
+        ], ['rating.required' => 'Choisissez une note de 1 à 5.']);
+
+        $reviews->forQuote($quoteRequest, $request->user(), (int) $data['rating'], $data['comment'] ?? null);
+
+        return back()->with('status', 'Merci pour votre avis.');
     }
 }

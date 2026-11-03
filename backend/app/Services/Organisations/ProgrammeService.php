@@ -16,6 +16,7 @@ use App\Models\OrganisationMember;
 use App\Models\ProgrammeApplication;
 use App\Models\Project;
 use App\Models\User;
+use App\Notifications\OrganisationNotice;
 use App\Notifications\ProgrammeNotice;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
@@ -136,6 +137,20 @@ class ProgrammeService
     }
 
     /**
+     * IN-02 : confie le projet à un coach de la structure (ou retire le suivi).
+     */
+    public function assignCoach(CohortProject $member, ?User $coach): CohortProject
+    {
+        $member->forceFill(['coach_id' => $coach?->id])->save();
+
+        if ($coach !== null) {
+            $coach->notify(new OrganisationNotice($member->cohort->organisation, 'Vous suivez désormais le projet « '.$member->project->title.' » dans la cohorte « '.$member->cohort->name.' ».'));
+        }
+
+        return $member;
+    }
+
+    /**
      * Seul un projet retenu à l'un des programmes de l'organisation entre dans une cohorte :
      * sa candidature vaut accord du porteur.
      *
@@ -166,7 +181,7 @@ class ProgrammeService
 
     public function canReview(?User $user, ProgrammeApplication $application): bool
     {
-        return $application->opportunity->organisationPage?->isManagedBy($user) ?? false;
+        return $application->opportunity->organisationPage?->managesProgrammes($user) ?? false;
     }
 
     /**
@@ -174,7 +189,7 @@ class ProgrammeService
      */
     private function managers(?Organisation $organisation)
     {
-        return $organisation?->members()->with('user')->where('role', OrganisationRole::Administrateur)->get()
+        return $organisation?->members()->with('user')->whereIn('role', [OrganisationRole::Administrateur, OrganisationRole::Gestionnaire])->get()
             ->map(fn (OrganisationMember $member) => $member->user) ?? collect();
     }
 }

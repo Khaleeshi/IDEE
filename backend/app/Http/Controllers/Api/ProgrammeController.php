@@ -58,7 +58,7 @@ class ProgrammeController extends Controller
     public function received(Opportunity $opportunity): JsonResponse
     {
         abort_if($opportunity->organisationPage === null, Response::HTTP_NOT_FOUND);
-        Gate::authorize('update', $opportunity->organisationPage);
+        Gate::authorize('manageProgrammes', $opportunity->organisationPage);
 
         return response()->json(['data' => $opportunity->programmeApplications()->with(['project', 'user'])->get()->map(fn (ProgrammeApplication $application) => [
             ...$this->present($application),
@@ -82,7 +82,7 @@ class ProgrammeController extends Controller
 
     public function cohorts(Organisation $organisation): JsonResponse
     {
-        Gate::authorize('update', $organisation);
+        Gate::authorize('manageProgrammes', $organisation);
 
         return response()->json(['data' => $organisation->cohorts()->withCount('members')->get()->map(fn (Cohort $cohort) => [
             'id' => $cohort->id,
@@ -98,7 +98,7 @@ class ProgrammeController extends Controller
      */
     public function cohort(Cohort $cohort): JsonResponse
     {
-        Gate::authorize('update', $cohort->organisation);
+        Gate::authorize('manageProgrammes', $cohort->organisation);
 
         return response()->json(['data' => $cohort->members()->with(['project.openNeeds', 'latestCheckin'])->get()->map(fn (CohortProject $member) => [
             'id' => $member->id,

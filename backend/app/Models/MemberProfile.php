@@ -17,6 +17,20 @@ class MemberProfile extends Model
     use HasUlids;
 
     /**
+     * Valeurs par défaut, identiques à celles de la base : un profil créé est
+     * aussitôt actif, sans attendre d'être relu.
+     *
+     * @var array<string, mixed>
+     */
+    protected $attributes = [
+        'offers_paid' => false,
+        'offers_volunteer' => false,
+        'offers_mentoring' => false,
+        'is_primary' => false,
+        'active' => true,
+    ];
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>

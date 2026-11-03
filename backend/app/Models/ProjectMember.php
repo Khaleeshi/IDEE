@@ -19,7 +19,7 @@ class ProjectMember extends Model
      */
     protected function casts(): array
     {
-        return ['share_percent' => 'float'];
+        return ['share_percent' => 'float', 'responded_at' => 'datetime'];
     }
 
     /**
@@ -28,5 +28,23 @@ class ProjectMember extends Model
     public function project(): BelongsTo
     {
         return $this->belongsTo(Project::class);
+    }
+
+    /**
+     * EQ-01 : membre d'IDEE invité, qui n'a pas encore répondu.
+     */
+    public function isPending(): bool
+    {
+        return $this->invitation_status === 'invitee';
+    }
+
+    /**
+     * Compte d'IDEE de cette personne, s'il y en a un.
+     *
+     * @return BelongsTo<User, $this>
+     */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 }
