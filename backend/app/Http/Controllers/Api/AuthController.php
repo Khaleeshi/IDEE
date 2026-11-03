@@ -17,7 +17,7 @@ class AuthController extends Controller
 
     public function requestCode(RequestCodeRequest $request): JsonResponse
     {
-        $this->codes->issue($request->identifier());
+        $this->codes->issue($request->identifier(), $request->validated('channel'), $request->validated('sms_purchase_id'));
 
         return response()->json([
             'message' => 'Un code de connexion vous a été envoyé. Il est valable '.config('idee.otp.ttl_minutes').' minutes.',

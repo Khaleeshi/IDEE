@@ -90,7 +90,7 @@ class PaymentController extends Controller
         return redirect()->route('payments.show', $payment)->with('status', match ($payment->status) {
             PaymentStatus::Payee => 'Paiement reçu, merci ! Votre offre est active.',
             PaymentStatus::Echouee => 'Le paiement n\'a pas abouti. Vous pouvez réessayer.',
-            default => 'Paiement en cours de confirmation par Wave. Actualisez dans un instant.',
+            default => 'Paiement en cours de confirmation. Actualisez dans un instant.',
         });
     }
 

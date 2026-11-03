@@ -24,7 +24,7 @@
                     @foreach ($methods as $method)
                         <label class="flex min-h-12 items-center gap-3 rounded-xl border border-stone-200 bg-white px-3">
                             <input type="radio" name="method" value="{{ $method->value }}" @checked($loop->first) class="h-5 w-5 accent-brand-700">
-                            <span>{{ $method->label() }}@if ($method->value === 'orange_money') <span class="text-xs text-stone-500">· transfert vérifié par l'équipe</span>@endif</span>
+                            <span>{{ $method->label() }}@if ($method->value === 'orange_money' && ! config('idee.payments.bictorys')) <span class="text-xs text-stone-500">· transfert vérifié par l'équipe</span>@endif</span>
                         </label>
                     @endforeach
                 </div>

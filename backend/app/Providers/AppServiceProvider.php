@@ -12,6 +12,7 @@ use App\Services\Messaging\FallbackCodeSender;
 use App\Services\Messaging\LogCodeSender;
 use App\Services\Messaging\MessageService;
 use App\Services\Messaging\OrangeSmsCodeSender;
+use App\Services\Messaging\TwilioSmsCodeSender;
 use App\Services\Messaging\WhatsAppCodeSender;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
@@ -39,6 +40,13 @@ class AppServiceProvider extends ServiceProvider
             'whatsapp_sms' => new FallbackCodeSender([new WhatsAppCodeSender, new OrangeSmsCodeSender]),
             default => new LogCodeSender,
         });
+
+        // CP-07 : envoi des SMS payés d'avance, choisi par IDEE_OTP_SMS_DRIVER.
+        $this->app->bind('otp.sms', fn () => match (config('idee.otp.sms_driver')) {
+            'twilio' => new TwilioSmsCodeSender,
+            'orange' => new OrangeSmsCodeSender,
+            default => new LogCodeSender,
+        });
     }
 
     /**
@@ -61,6 +69,12 @@ class AppServiceProvider extends ServiceProvider
             fn (PersonalAccessToken $token, bool $isValid) => $isValid
                 && ($token->last_used_at ?? $token->created_at)->gt(now()->subDays(config('idee.sessions.idle_days'))),
         );
+
+        // CP-07 : ouverture d'un paiement de SMS, comptée à part de l'envoi des codes.
+        RateLimiter::for('sms-purchase', fn (Request $request) => [
+            Limit::perMinute(3)->by('sms:'.$request->input('phone')),
+            Limit::perHour(10)->by('sms-ip:'.$request->ip()),
+        ]);
 
         RateLimiter::for('otp-verify', fn (Request $request) => Limit::perMinute(10)->by($request->ip()));
 

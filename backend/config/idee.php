@@ -193,6 +193,8 @@ return [
     // Orange Money : transfert vers le numéro marchand d'IDEE, vérifié à la main par l'équipe.
     'payments' => [
         'wave' => (bool) env('IDEE_PAY_WAVE', false),
+        // PA-04 : Wave, Orange Money et carte par Bictorys ; remplace l'appel direct à Wave.
+        'bictorys' => (bool) env('IDEE_PAY_BICTORYS', false),
         'orange_money_number' => env('IDEE_ORANGE_MONEY_NUMBER'),
         // Un paiement Wave non confirmé passe « expiré » après ce délai (en heures).
         'expire_after_hours' => 24,
@@ -230,6 +232,15 @@ return [
         // Canal d'envoi : log (développement), sms (Orange), whatsapp, ou
         // whatsapp_sms (WhatsApp d'abord, SMS Orange en secours).
         'driver' => env('IDEE_OTP_DRIVER', 'log'),
+        // CP-07 : SMS payé d'avance par le membre (WhatsApp et e-mail restent gratuits).
+        // Envoi : log (développement), twilio, ou orange (numéros sénégalais seulement).
+        'sms_driver' => env('IDEE_OTP_SMS_DRIVER', 'log'),
+        'paid_sms' => (bool) env('IDEE_PAID_SMS', false),
+        'sms_price_fcfa' => (int) env('IDEE_SMS_PRICE', 500),
+        // Un achat donne droit à un envoi et à un renvoi si le premier code n'arrive pas.
+        'sms_sends_per_purchase' => (int) env('IDEE_SMS_SENDS_PER_PURCHASE', 2),
+        // Passé ce délai, un achat non utilisé reste un avoir à demander à l'équipe.
+        'sms_purchase_valid_hours' => (int) env('IDEE_SMS_PURCHASE_VALID_HOURS', 24),
     ],
 
     // Sessions de l'application mobile (jetons de connexion) : un appareil est

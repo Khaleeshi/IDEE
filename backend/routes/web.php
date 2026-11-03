@@ -43,6 +43,11 @@ Route::middleware('guest')->group(function () {
     Route::get('/connexion', [LoginController::class, 'create'])->name('login');
     Route::post('/connexion', [LoginController::class, 'sendCode'])->middleware('throttle:otp')->name('login.send');
     Route::get('/connexion/code', [LoginController::class, 'codeForm'])->name('login.code');
+    // CP-07 : SMS de connexion payé d'avance.
+    Route::get('/connexion/sms', [LoginController::class, 'smsForm'])->name('login.sms');
+    Route::post('/connexion/sms', [LoginController::class, 'smsStart'])->middleware('throttle:sms-purchase')->name('login.sms.start');
+    Route::get('/connexion/sms/{smsPurchase}', [LoginController::class, 'smsShow'])->middleware('throttle:30,1')->name('login.sms.show');
+    Route::post('/connexion/sms/{smsPurchase}/code', [LoginController::class, 'smsResend'])->middleware('throttle:otp')->name('login.sms.resend');
     Route::post('/connexion/code', [LoginController::class, 'verify'])->middleware('throttle:otp-verify')->name('login.verify');
 });
 Route::post('/deconnexion', [LoginController::class, 'logout'])->middleware('auth')->name('logout');

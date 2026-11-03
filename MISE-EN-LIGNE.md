@@ -160,6 +160,36 @@ avec les vrais services : faites un essai avec votre propre numéro avant
 d'ouvrir le site au public. En cas d'échec, le motif est écrit dans
 `storage/logs`.
 
+## 6 bis. Bictorys et le SMS payé d'avance
+
+**Bictorys** (Wave, Orange Money et carte bancaire par une seule API). Dans le
+tableau de bord Bictorys :
+
+1. Récupérez la **clé publique** de production (elle commence par `public-`) et
+   mettez-la dans `BICTORYS_PUBLIC_KEY`. Pour essayer d'abord en test, prenez la clé
+   `test_public-…` et mettez `BICTORYS_API_URL=https://api.test.bictorys.com`.
+2. **Développeurs → Webhooks** : ajoutez l'adresse
+   `https://VOTRE-DOMAINE/api/webhooks/bictorys` et choisissez un secret au hasard
+   (au moins 32 caractères) ; recopiez-le dans `BICTORYS_WEBHOOK_SECRET`.
+3. Mettez `IDEE_PAY_BICTORYS=true`, puis `php artisan optimize`. Les offres se
+   paient alors par Wave, Orange Money ou carte, confirmées automatiquement : IDEE
+   relit toujours le statut auprès de Bictorys avant d'ouvrir un droit.
+
+**SMS payé d'avance** (500 FCFA, réglable avec `IDEE_SMS_PRICE`). Sur
+console.twilio.com, notez l'identifiant du compte (`AC…`) et le jeton d'accès dans
+`TWILIO_ACCOUNT_SID` et `TWILIO_AUTH_TOKEN`, puis l'expéditeur dans `TWILIO_FROM`
+(numéro Twilio ou nom d'expéditeur autorisé au Sénégal) ou un service de messagerie
+dans `TWILIO_MESSAGING_SERVICE_SID`. Dans **Messaging → Settings → Geo
+permissions**, cochez les pays que vous ouvrez. Mettez enfin
+`IDEE_OTP_SMS_DRIVER=twilio` et `IDEE_PAID_SMS=true`.
+
+Le membre choisit « SMS » à la connexion, paie par Bictorys, et le code part
+seulement quand le paiement est confirmé. Un renvoi est compris. Comme personne ne
+reçoit de SMS sans avoir payé, les fausses demandes en masse ne coûtent rien à IDEE.
+
+Ces branchements ont été vérifiés avec des réponses simulées de Bictorys et de
+Twilio : faites un premier paiement réel de 500 FCFA avant d'ouvrir au public.
+
 ## 7. Activer les notifications push (gratuites)
 
 Les membres peuvent recevoir les alertes sur leur téléphone, même IDEE fermé.

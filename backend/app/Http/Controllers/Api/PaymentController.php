@@ -8,6 +8,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\EnumResource;
 use App\Models\Payment;
 use App\Models\Project;
+use App\Models\SmsPurchase;
+use App\Services\Auth\SmsPurchaseService;
+use App\Services\Payments\BictorysGateway;
 use App\Services\Payments\PaymentService;
 use App\Services\Projects\VisibilityStats;
 use Illuminate\Http\JsonResponse;
@@ -41,7 +44,8 @@ class PaymentController extends Controller
     }
 
     /**
-     * Ouvre un achat. Avec Wave, `launch_url` mène à la page de paiement Wave.
+     * Ouvre un achat. `launch_url` mène à la page de paiement (Bictorys ou Wave) ;
+     * `instructions` donne le code USSD d'Orange Money quand il y en a un.
      */
     public function store(Request $request): JsonResponse
     {
@@ -89,6 +93,36 @@ class PaymentController extends Controller
     /**
      * Avis de Wave : il déclenche seulement une relecture du paiement auprès de Wave.
      */
+    /**
+     * Avis de Bictorys (PA-04) : authentifié par le secret X-Secret-Key, puis le
+     * statut est relu auprès de Bictorys. Sert aux offres et aux SMS payés (CP-07).
+     */
+    public function bictorysWebhook(Request $request, BictorysGateway $bictorys, SmsPurchaseService $smsPurchases): Response
+    {
+        if (! $bictorys->isAuthentic($request)) {
+            return response()->noContent(401);
+        }
+
+        $reference = (string) ($request->input('paymentReference') ?? $request->input('merchantReference') ?? '');
+        $transaction = (string) ($request->input('id') ?? $request->input('transactionId') ?? '');
+        $find = fn (string $model) => $model::query()
+            ->where(fn ($query) => $query->when($reference !== '', fn ($query) => $query->whereKey($reference))
+                ->when($transaction !== '', fn ($query) => $query->orWhere('provider_reference', $transaction)))
+            ->first();
+
+        if ($reference === '' && $transaction === '') {
+            return response()->noContent();
+        }
+
+        if ($payment = $find(Payment::class)) {
+            $this->payments->refresh($payment);
+        } elseif ($purchase = $find(SmsPurchase::class)) {
+            $smsPurchases->refresh($purchase);
+        }
+
+        return response()->noContent();
+    }
+
     public function waveWebhook(Request $request): Response
     {
         $reference = $request->input('data.client_reference');
@@ -130,6 +164,9 @@ class PaymentController extends Controller
             'method' => EnumResource::make($payment->method),
             'status' => EnumResource::make($payment->status),
             'payer_reference' => $payment->payer_reference,
+            // PA-04 : consignes de Bictorys (code USSD d'Orange Money) et lien pour payer.
+            'instructions' => $payment->status->value === 'en_attente' ? $payment->instructions : null,
+            'payment_url' => $payment->status->value === 'en_attente' ? $payment->launch_url : null,
             'receipt_number' => $payment->receipt_number,
             'receipt_url' => $payment->isPaid() ? route('payments.receipt', $payment) : null,
             'paid_at' => $payment->paid_at?->toIso8601String(),

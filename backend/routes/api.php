@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\FeedController;
 use App\Http\Controllers\Api\GroupController;
 use App\Http\Controllers\Api\HelpOfferController;
 use App\Http\Controllers\Api\JourneyController;
+use App\Http\Controllers\Api\LoginOptionsController;
 use App\Http\Controllers\Api\MatchingController;
 use App\Http\Controllers\Api\MemberController;
 use App\Http\Controllers\Api\MemberProfileController;
@@ -38,6 +39,10 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('auth')->group(function () {
     Route::post('code', [AuthController::class, 'requestCode'])->middleware('throttle:otp');
     Route::post('verify', [AuthController::class, 'verifyCode'])->middleware('throttle:otp-verify');
+    // CP-07 : canaux de réception du code, et paiement du SMS avant son envoi.
+    Route::get('options', [LoginOptionsController::class, 'index']);
+    Route::post('sms-purchases', [LoginOptionsController::class, 'store'])->middleware('throttle:sms-purchase');
+    Route::get('sms-purchases/{smsPurchase}', [LoginOptionsController::class, 'show'])->middleware('throttle:30,1');
     Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
 });
 
@@ -59,6 +64,7 @@ Route::get('offers', [PaymentController::class, 'offers']);
 Route::get('opportunities/{opportunity}/questions', [ProgrammeController::class, 'questions']);
 // Avis de paiement de Wave : il ne fait que déclencher une relecture auprès de Wave.
 Route::post('webhooks/wave', [PaymentController::class, 'waveWebhook'])->middleware('throttle:120,1');
+Route::post('webhooks/bictorys', [PaymentController::class, 'bictorysWebhook'])->middleware('throttle:120,1');
 Route::get('events', [EventController::class, 'index']);
 Route::get('events/{event}', [EventController::class, 'show']);
 Route::get('groups', [GroupController::class, 'index']);

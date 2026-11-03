@@ -2,6 +2,7 @@
 
 use App\Models\User;
 use App\Services\Alerts\SavedSearchService;
+use App\Services\Auth\SmsPurchaseService;
 use App\Services\Collaboration\MeetingService;
 use App\Services\ContactRequests\ContactRequestService;
 use App\Services\Events\EventService;
@@ -55,11 +56,12 @@ Artisan::command('idee:meeting-reminders', function (MeetingService $meetings, E
     $this->info("{$count} rendez-vous rappelé(s), {$sessions} rappel(s) de session de pitch.");
 })->purpose('Rappelle les rendez-vous confirmés (MR-07) et les sessions de pitch (EV-01) du lendemain');
 
-Artisan::command('idee:payments', function (PaymentService $payments) {
+Artisan::command('idee:payments', function (PaymentService $payments, SmsPurchaseService $smsPurchases) {
     $expired = $payments->sweep();
+    $expiredSms = $smsPurchases->sweep();
 
-    $this->info("Paiements en attente relus, {$expired} paiement(s) expiré(s).");
-})->purpose('Relit les paiements Wave en attente et fait expirer les achats abandonnés (PA-01)');
+    $this->info("Paiements en attente relus, {$expired} paiement(s) expiré(s), {$expiredSms} SMS expiré(s).");
+})->purpose('Relit les paiements en attente (Bictorys, Wave) et fait expirer les achats abandonnés (PA-01, CP-07)');
 
 Artisan::command('idee:stale-guides', function (JourneyService $journeys) {
     $steps = $journeys->staleSteps();
