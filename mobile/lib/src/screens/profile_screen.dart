@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../api.dart';
 import '../session.dart';
 import '../widgets.dart';
+import 'accompaniments_screen.dart';
 import 'devices_screen.dart';
 import 'professions_screen.dart';
 
@@ -40,6 +41,14 @@ class ProfileScreen extends StatelessWidget {
             subtitle: Text(((me['profiles'] as List?) ?? const []).map((profile) => (profile as Map)['label']).join(', ').ifEmpty('Coach, chef de projet, comptable…')),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => ProfessionsScreen(session: session))),
+          ),
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            leading: const Icon(Icons.handshake_outlined, color: brand),
+            title: const Text('Accompagnements'),
+            subtitle: const Text('Mentorat et aide bénévole'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => AccompanimentsScreen(session: session))),
           ),
           ListTile(
             contentPadding: EdgeInsets.zero,
