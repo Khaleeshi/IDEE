@@ -1,6 +1,14 @@
 <x-layout title="Mon profil">
     <h1 class="mb-4 text-2xl font-bold">Mon profil</h1>
 
+    <a href="{{ route('member-profiles.index') }}" class="mb-4 flex items-center justify-between rounded-2xl border border-brand-100 bg-brand-50 p-4">
+        <span>
+            <span class="block font-semibold text-brand-800">Mes métiers</span>
+            <span class="text-sm text-stone-600">{{ $user->memberProfiles()->count() ? $user->memberProfiles->pluck('profession.name')->implode(', ') : 'Coach, chef de projet, comptable… ajoutez vos métiers' }}</span>
+        </span>
+        <span aria-hidden="true" class="text-brand-700">›</span>
+    </a>
+
     <x-card>
         <form method="POST" action="{{ route('profile.update') }}" enctype="multipart/form-data">
             @csrf
@@ -149,6 +157,7 @@
 
     <x-card class="text-sm">
         <h2 class="font-semibold">Mes données</h2>
+        <a href="{{ route('devices.index') }}" class="mt-1 block py-1 font-medium text-brand-700 underline">Mes appareils connectés</a>
         <p class="mt-1 text-stone-600">Téléchargez tout ce qu'IDEE garde sur vous, ou supprimez votre compte.</p>
         <a href="{{ route('account.export') }}" class="mt-3 block py-1 font-medium text-brand-700 underline">Télécharger mes données</a>
         <a href="{{ route('account.delete') }}" class="block py-1 font-medium text-red-700 underline">Supprimer mon compte</a>

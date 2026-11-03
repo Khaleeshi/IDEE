@@ -36,6 +36,8 @@ dependencies:
   cupertino_icons: ^1.0.8
   http: ^1.6.0
   flutter_secure_storage: ^11.2.0
+  # Ouvre le paiement dans Wave, Orange Money ou le navigateur (CP-07).
+  url_launcher: ^6.3.1
   flutter_localizations:
     sdk: flutter
 

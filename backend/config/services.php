@@ -55,6 +55,26 @@ return [
         'base_url' => env('WAVE_API_URL', 'https://api.wave.com'),
     ],
 
+    // Bictorys (docs.bictorys.com) : Wave, Orange Money et carte bancaire par une seule API.
+    // Clé publique pour créer les paiements et relire leur statut ; secret choisi dans le
+    // tableau de bord (Développeurs → Webhooks), renvoyé par Bictorys dans l'en-tête X-Secret-Key.
+    'bictorys' => [
+        'public_key' => env('BICTORYS_PUBLIC_KEY'),
+        'webhook_secret' => env('BICTORYS_WEBHOOK_SECRET'),
+        'base_url' => env('BICTORYS_API_URL', 'https://api.bictorys.com'),
+        'country' => env('BICTORYS_COUNTRY', 'SN'),
+    ],
+
+    // Twilio (API Messages) : SMS des codes de connexion, payés d'avance par le membre.
+    'twilio' => [
+        'account_sid' => env('TWILIO_ACCOUNT_SID'),
+        'auth_token' => env('TWILIO_AUTH_TOKEN'),
+        // Numéro ou nom d'expéditeur, ou service de messagerie (MG…) si vous en avez créé un.
+        'from' => env('TWILIO_FROM'),
+        'messaging_service_sid' => env('TWILIO_MESSAGING_SERVICE_SID'),
+        'base_url' => env('TWILIO_API_URL', 'https://api.twilio.com'),
+    ],
+
     'anthropic' => [
         'key' => env('ANTHROPIC_API_KEY'),
         'model' => env('IDEE_AI_MODEL', 'claude-opus-5-5'),

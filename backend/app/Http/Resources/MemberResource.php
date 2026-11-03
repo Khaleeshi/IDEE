@@ -31,6 +31,8 @@ class MemberResource extends JsonResource
             'skills' => $this->skills ?? [],
             'sectors' => $this->sectors ?? [],
             'roles' => array_map(EnumResource::make(...), $this->publicRoles()),
+            // PM-05 : seulement les profils visibles des autres membres.
+            'profiles' => MemberProfileResource::collection($this->publicMemberProfiles()->load('profession.category')),
             'verification' => EnumResource::make($this->verification_level),
             'member_since' => $this->created_at?->toDateString(),
         ];

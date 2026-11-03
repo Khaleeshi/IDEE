@@ -110,4 +110,40 @@ class AuthTest extends TestCase
             ->assertUnprocessable()
             ->assertJsonValidationErrors('phone');
     }
+
+    public function test_a_session_ends_after_ninety_days_without_use(): void
+    {
+        $user = User::factory()->create();
+        $token = $user->createToken('test', ['*'], now()->addDays(365))->plainTextToken;
+
+        $this->travel(80)->days();
+        $this->withToken($token)->getJson('/api/me')->assertOk();
+
+        // Utilisé il y a 80 jours : encore valable 10 jours de plus.
+        $this->travel(85)->days();
+        $this->app['auth']->forgetGuards();
+        $this->withToken($token)->getJson('/api/me')->assertOk();
+
+        $this->travel(91)->days();
+        $this->app['auth']->forgetGuards();
+        $this->withToken($token)->getJson('/api/me')->assertUnauthorized();
+    }
+
+    public function test_a_session_never_lasts_longer_than_a_year(): void
+    {
+        $this->postJson('/api/auth/code', ['phone' => '+221770000005']);
+        $token = $this->postJson('/api/auth/verify', [
+            'phone' => '+221770000005',
+            'code' => $this->sentCodes['+221770000005'],
+            'name' => 'Moussa Ndiaye',
+        ])->json('token');
+
+        for ($month = 1; $month <= 12; $month++) {
+            $this->travel(31)->days();
+            $this->app['auth']->forgetGuards();
+            $response = $this->withToken($token)->getJson('/api/me');
+        }
+
+        $response->assertUnauthorized();
+    }
 }

@@ -8,13 +8,14 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
- * Annuaire des experts vérifiés avec leurs tarifs (SE-01). RG-11 : un
- * expert n'y figure qu'une fois son identité vérifiée.
+ * Annuaire des experts, coachs et mentors vérifiés avec leurs tarifs (SE-01).
+ * RG-11 : un membre n'y figure qu'une fois son identité vérifiée. Le filtre
+ * `metier` cherche parmi leurs profils professionnels actifs (PM-02).
  */
 class ExpertDirectory
 {
     /**
-     * @param  array{q?: string|null, sector?: string|null, region?: string|null}  $filters
+     * @param  array{q?: string|null, sector?: string|null, region?: string|null, metier?: string|null}  $filters
      * @return Builder<User>
      */
     public function query(array $filters = []): Builder
@@ -26,7 +27,7 @@ class ExpertDirectory
         $search = trim((string) ($filters['q'] ?? ''));
 
         return User::query()
-            ->whereHas('roleAssignments', fn (Builder $query) => $query->where('role', UserRole::Expert))
+            ->whereHas('roleAssignments', fn (Builder $query) => $query->whereIn('role', [UserRole::Expert, UserRole::Coach]))
             ->whereIn('verification_level', $verified)
             ->whereNull('banned_at')
             ->when($search !== '', fn (Builder $query) => $query->where(fn (Builder $query) => $query
@@ -36,7 +37,10 @@ class ExpertDirectory
                 ->orWhere('bio', 'like', "%{$search}%")))
             ->when($filters['sector'] ?? null, fn (Builder $query, string $sector) => $query->whereJsonContains('sectors', $sector))
             ->when($filters['region'] ?? null, fn (Builder $query, string $region) => $query->where('region', $region))
-            ->with('roleAssignments')
+            ->when($filters['metier'] ?? null, fn (Builder $query, string $slug) => $query->whereHas('memberProfiles', fn (Builder $query) => $query
+                ->where('active', true)
+                ->whereHas('profession', fn (Builder $query) => $query->where('slug', $slug))))
+            ->with(['roleAssignments', 'memberProfiles.profession.category'])
             ->orderByRaw('expertise is null')
             ->orderBy('name');
     }

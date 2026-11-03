@@ -23,7 +23,10 @@ use Illuminate\Validation\ValidationException;
  */
 class PaymentService
 {
-    public function __construct(private readonly WaveGateway $wave) {}
+    public function __construct(
+        private readonly WaveGateway $wave,
+        private readonly BictorysGateway $bictorys,
+    ) {}
 
     /**
      * Moyens de paiement configurés.
@@ -32,6 +35,11 @@ class PaymentService
      */
     public function methods(): array
     {
+        // PA-04 : avec Bictorys, Wave, Orange Money et la carte sont automatiques.
+        if ($this->bictorys->isConfigured()) {
+            return PaymentMethod::cases();
+        }
+
         return array_values(array_filter([
             $this->wave->isConfigured() ? PaymentMethod::Wave : null,
             filled(config('idee.payments.orange_money_number')) ? PaymentMethod::OrangeMoney : null,
@@ -78,16 +86,27 @@ class PaymentService
             'status' => PaymentStatus::EnAttente,
         ])->save();
 
-        if ($method === PaymentMethod::Wave) {
-            try {
+        try {
+            if ($this->bictorys->isConfigured()) {
+                $charge = $this->bictorys->createCharge($payment->id, $payment->amount_fcfa, $method, route('payments.return', $payment), [
+                    'name' => $buyer->name,
+                    'phone' => $buyer->phone,
+                    'email' => $buyer->email,
+                ]);
+                $payment->forceFill([
+                    'provider' => 'bictorys',
+                    'provider_reference' => $charge['id'],
+                    'launch_url' => $charge['link'],
+                    'instructions' => $charge['instructions'],
+                ])->save();
+            } elseif ($method === PaymentMethod::Wave) {
                 $session = $this->wave->createSession($payment);
-            } catch (PaymentUnavailable $exception) {
-                $payment->forceFill(['status' => PaymentStatus::Echouee])->save();
-
-                throw ValidationException::withMessages(['method' => $exception->getMessage()]);
+                $payment->forceFill(['provider' => 'wave', 'provider_reference' => $session['id'], 'launch_url' => $session['launch_url']])->save();
             }
+        } catch (PaymentUnavailable $exception) {
+            $payment->forceFill(['status' => PaymentStatus::Echouee])->save();
 
-            $payment->forceFill(['provider_reference' => $session['id'], 'launch_url' => $session['launch_url']])->save();
+            throw ValidationException::withMessages(['method' => $exception->getMessage()]);
         }
 
         return $payment;
@@ -100,7 +119,7 @@ class PaymentService
      */
     public function submitReference(Payment $payment, string $reference): Payment
     {
-        if ($payment->method !== PaymentMethod::OrangeMoney || $payment->status !== PaymentStatus::EnAttente) {
+        if ($payment->method !== PaymentMethod::OrangeMoney || $payment->provider !== null || $payment->status !== PaymentStatus::EnAttente) {
             throw ValidationException::withMessages(['payer_reference' => 'Ce paiement n\'attend pas de référence.']);
         }
 
@@ -110,16 +129,20 @@ class PaymentService
     }
 
     /**
-     * Relit le statut d'un paiement Wave auprès de Wave.
+     * Relit le statut d'un paiement auprès de Bictorys ou de Wave.
      */
     public function refresh(Payment $payment): Payment
     {
-        if ($payment->method !== PaymentMethod::Wave || $payment->status !== PaymentStatus::EnAttente || blank($payment->provider_reference)) {
+        if ($payment->status !== PaymentStatus::EnAttente || blank($payment->provider_reference)) {
             return $payment;
         }
 
         try {
-            $status = $this->wave->status($payment->provider_reference);
+            $status = match (true) {
+                $payment->provider === 'bictorys' => $this->bictorys->status($payment->provider_reference),
+                $payment->method === PaymentMethod::Wave => $this->wave->status($payment->provider_reference),
+                default => 'pending',
+            };
         } catch (PaymentUnavailable) {
             return $payment;
         }
@@ -194,7 +217,7 @@ class PaymentService
             $payment = $this->refresh($payment);
             $limit = now()->subHours(config('idee.payments.expire_after_hours'));
 
-            // Un transfert Orange Money annoncé attend la vérification de l'équipe.
+            // Un transfert Orange Money annoncé à la main attend la vérification de l'équipe.
             if ($payment->status === PaymentStatus::EnAttente && $payment->created_at->lt($limit) && blank($payment->payer_reference)) {
                 $payment->forceFill(['status' => PaymentStatus::Expiree])->save();
                 $expired++;

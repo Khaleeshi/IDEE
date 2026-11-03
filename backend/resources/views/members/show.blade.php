@@ -38,6 +38,22 @@
             <p class="mt-3 whitespace-pre-line text-stone-700">{{ $member->bio }}</p>
         @endif
 
+        @php($memberProfiles = $member->publicMemberProfiles())
+        @if ($memberProfiles->isNotEmpty())
+            {{-- PM-02 : les métiers du membre, le principal en premier. --}}
+            <ul class="mt-3 space-y-2">
+                @foreach ($memberProfiles as $profile)
+                    <li class="rounded-xl bg-stone-50 p-3 text-sm">
+                        <p class="font-semibold text-stone-900">{{ $profile->label() }}@if ($profile->experience_years) <span class="font-normal text-stone-500">· {{ $profile->experience_years }} an{{ $profile->experience_years > 1 ? 's' : '' }} d'expérience</span>@endif</p>
+                        <p class="text-xs text-brand-800">{{ implode(' · ', $profile->offerLabels()) }}@if ($profile->offers_paid) · {{ $profile->rate ?? 'tarif sur demande' }}@endif</p>
+                        @if ($profile->description)
+                            <p class="mt-1 whitespace-pre-line text-stone-700">{{ $profile->description }}</p>
+                        @endif
+                    </li>
+                @endforeach
+            </ul>
+        @endif
+
         @if ($member->expertise && $member->hasVerifiedIdentity())
             {{-- SE-01 : services et tarif indicatif d'un expert vérifié. --}}
             <div class="mt-3 rounded-xl bg-stone-50 p-3 text-sm">

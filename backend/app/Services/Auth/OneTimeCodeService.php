@@ -21,13 +21,23 @@ use Illuminate\Validation\ValidationException;
  */
 class OneTimeCodeService
 {
-    public function __construct(private readonly CodeSender $sender) {}
+    public function __construct(
+        private readonly CodeSender $sender,
+        private readonly SmsPurchaseService $smsPurchases,
+    ) {}
 
     /**
-     * @throws ValidationException si aucun canal n'a pu remettre le code
+     * Envoie le code. Pour un numéro, le canal est WhatsApp (gratuit, par défaut)
+     * ou le SMS payé d'avance (CP-07), sur présentation de l'achat.
+     *
+     * @throws ValidationException si le canal est indisponible ou n'a pas pu remettre le code
      */
-    public function issue(string $identifier): void
+    public function issue(string $identifier, ?string $channel = null, ?string $smsPurchaseId = null): void
     {
+        $purchase = ! self::isEmail($identifier) && $channel === 'sms'
+            ? $this->smsPurchases->usableFor($identifier, $smsPurchaseId)
+            : null;
+
         OneTimeCode::query()
             ->where('identifier', $identifier)
             ->whereNull('consumed_at')
@@ -49,13 +59,20 @@ class OneTimeCodeService
         }
 
         try {
-            $this->sender->send($identifier, $code);
+            ($purchase ? app('otp.sms') : $this->sender)->send($identifier, $code);
         } catch (CodeDeliveryFailed $exception) {
-            Log::error('Code de connexion non envoyé', ['raison' => $exception->getMessage()]);
+            Log::error('Code de connexion non envoyé', ['raison' => $exception->getMessage(), 'canal' => $purchase ? 'sms' : 'whatsapp']);
 
+            // Un SMS payé qui n'est pas parti reste dû : l'achat garde ses envois.
             throw ValidationException::withMessages([
-                'phone' => 'Impossible d\'envoyer le code pour le moment. Réessayez dans quelques minutes.',
+                'phone' => $purchase
+                    ? 'Le SMS n\'a pas pu partir. Votre paiement reste valable : réessayez dans quelques minutes.'
+                    : 'Impossible d\'envoyer le code pour le moment. Réessayez dans quelques minutes.',
             ]);
+        }
+
+        if ($purchase) {
+            $this->smsPurchases->consume($purchase);
         }
     }
 

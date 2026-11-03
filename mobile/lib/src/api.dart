@@ -86,11 +86,15 @@ class ApiClient {
   }
 }
 
-/// Numéro sénégalais au format international : « 77 123 45 67 » devient « +221771234567 ».
-String? normalizePhone(String input) {
+/// Numéro au format international : « 77 123 45 67 » devient « +221771234567 ».
+/// Avec l'indicatif d'un autre pays, « 06 12 34 56 78 » et « +33 » donnent « +33612345678 ».
+String? normalizePhone(String input, {String dialCode = '+221'}) {
   var number = input.replaceAll(RegExp(r'[\s.\-()]'), '');
   if (number.startsWith('00')) {
     number = '+${number.substring(2)}';
+  }
+  if (dialCode != '+221' && !number.startsWith('+') && number.isNotEmpty) {
+    number = '$dialCode${number.replaceFirst(RegExp(r'^0+'), '')}';
   }
   if (RegExp(r'^[37]\d{8}$').hasMatch(number)) {
     number = '+221$number';

@@ -17,7 +17,7 @@ class AuthController extends Controller
 
     public function requestCode(RequestCodeRequest $request): JsonResponse
     {
-        $this->codes->issue($request->identifier());
+        $this->codes->issue($request->identifier(), $request->validated('channel'), $request->validated('sms_purchase_id'));
 
         return response()->json([
             'message' => 'Un code de connexion vous a été envoyé. Il est valable '.config('idee.otp.ttl_minutes').' minutes.',
@@ -32,7 +32,11 @@ class AuthController extends Controller
             $request->validated('name'),
         );
 
-        $token = $user->createToken($request->validated('device_name') ?? 'application')->plainTextToken;
+        $token = $user->createToken(
+            $request->validated('device_name') ?? 'application',
+            ['*'],
+            now()->addDays(config('idee.sessions.max_days')),
+        )->plainTextToken;
 
         return response()->json([
             'token' => $token,

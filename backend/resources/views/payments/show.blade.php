@@ -9,6 +9,8 @@
         @if ($payment->isPaid())
             <p class="mt-1 text-sm text-stone-600">Reçu {{ $payment->receipt_number }} du {{ $payment->paid_at->translatedFormat('d F Y') }}.</p>
             <x-button :href="route('payments.receipt', $payment)" variant="secondary" class="mt-3 w-full" target="_blank">Voir le reçu</x-button>
+        @elseif ($payment->status->value === 'en_attente' && $payment->provider === 'bictorys')
+            @include('payments.partials.pending-bictorys', ['instructions' => $payment->instructions, 'link' => $payment->launch_url, 'check' => route('payments.check', $payment)])
         @elseif ($payment->status->value === 'en_attente' && $payment->method->value === 'wave')
             <p class="mt-1 text-sm text-stone-600">Si vous avez payé dans Wave, la confirmation arrive en quelques instants.</p>
             <form method="POST" action="{{ route('payments.check', $payment) }}" class="mt-3">

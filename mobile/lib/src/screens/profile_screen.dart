@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import '../api.dart';
 import '../session.dart';
 import '../widgets.dart';
+import 'devices_screen.dart';
+import 'professions_screen.dart';
 
 /// Profil du membre et déconnexion. La modification complète se fait sur le site.
 class ProfileScreen extends StatelessWidget {
@@ -30,6 +32,21 @@ class ProfileScreen extends StatelessWidget {
             contentPadding: EdgeInsets.zero,
             title: const Text('Vérification'),
             trailing: Text((me['verification'] as Map?)?['label'] as String? ?? ''),
+          ),
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            leading: const Icon(Icons.work_outline, color: brand),
+            title: const Text('Mes métiers'),
+            subtitle: Text(((me['profiles'] as List?) ?? const []).map((profile) => (profile as Map)['label']).join(', ').ifEmpty('Coach, chef de projet, comptable…')),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => ProfessionsScreen(session: session))),
+          ),
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            leading: const Icon(Icons.devices_outlined, color: brand),
+            title: const Text('Mes appareils connectés'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => DevicesScreen(session: session))),
           ),
           const SizedBox(height: 8),
           Text('Pour modifier votre profil, vos rôles ou vos préférences, ouvrez $apiUrl/profil.', style: const TextStyle(fontSize: 13, color: Colors.black54)),
@@ -119,4 +136,9 @@ class _DeleteAccountDialogState extends State<DeleteAccountDialog> {
       ],
     );
   }
+}
+
+extension on String {
+  /// Texte de remplacement quand la chaîne est vide.
+  String ifEmpty(String fallback) => isEmpty ? fallback : this;
 }

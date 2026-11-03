@@ -14,12 +14,12 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 class ExpertController extends Controller
 {
     /**
-     * Filtres : `q`, `sector`, `region`.
+     * Filtres : `q`, `sector`, `region`, `metier` (slug d'un métier du référentiel).
      */
     public function index(Request $request, ExpertDirectory $directory): AnonymousResourceCollection
     {
         return MemberResource::collection(
-            $directory->query(array_filter($request->only(['q', 'sector', 'region']), fn ($value) => filled($value)))->paginate(20)
+            $directory->query(array_filter($request->only(['q', 'sector', 'region', 'metier']), fn ($value) => filled($value)))->paginate(20)
         );
     }
 }

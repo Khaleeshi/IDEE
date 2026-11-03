@@ -2,10 +2,12 @@
 
 use App\Http\Controllers\Web\AccountController;
 use App\Http\Controllers\Web\Admin\AdminController;
+use App\Http\Controllers\Web\Admin\ProfessionController;
 use App\Http\Controllers\Web\AlertController;
 use App\Http\Controllers\Web\AssistantController;
 use App\Http\Controllers\Web\CollaborationController;
 use App\Http\Controllers\Web\ContactRequestController;
+use App\Http\Controllers\Web\DeviceController;
 use App\Http\Controllers\Web\DocumentController;
 use App\Http\Controllers\Web\EventController;
 use App\Http\Controllers\Web\ExpertController;
@@ -16,6 +18,7 @@ use App\Http\Controllers\Web\JourneyController;
 use App\Http\Controllers\Web\LoginController;
 use App\Http\Controllers\Web\MatchingController;
 use App\Http\Controllers\Web\MemberController;
+use App\Http\Controllers\Web\MemberProfileController;
 use App\Http\Controllers\Web\MessageController;
 use App\Http\Controllers\Web\NeedController;
 use App\Http\Controllers\Web\NotificationController;
@@ -40,6 +43,11 @@ Route::middleware('guest')->group(function () {
     Route::get('/connexion', [LoginController::class, 'create'])->name('login');
     Route::post('/connexion', [LoginController::class, 'sendCode'])->middleware('throttle:otp')->name('login.send');
     Route::get('/connexion/code', [LoginController::class, 'codeForm'])->name('login.code');
+    // CP-07 : SMS de connexion payé d'avance.
+    Route::get('/connexion/sms', [LoginController::class, 'smsForm'])->name('login.sms');
+    Route::post('/connexion/sms', [LoginController::class, 'smsStart'])->middleware('throttle:sms-purchase')->name('login.sms.start');
+    Route::get('/connexion/sms/{smsPurchase}', [LoginController::class, 'smsShow'])->middleware('throttle:30,1')->name('login.sms.show');
+    Route::post('/connexion/sms/{smsPurchase}/code', [LoginController::class, 'smsResend'])->middleware('throttle:otp')->name('login.sms.resend');
     Route::post('/connexion/code', [LoginController::class, 'verify'])->middleware('throttle:otp-verify')->name('login.verify');
 });
 Route::post('/deconnexion', [LoginController::class, 'logout'])->middleware('auth')->name('logout');
@@ -178,6 +186,14 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/profil', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profil', [ProfileController::class, 'update'])->name('profile.update');
+    Route::get('/profil/appareils', [DeviceController::class, 'index'])->name('devices.index');
+    Route::delete('/profil/appareils/{device}', [DeviceController::class, 'destroy'])->name('devices.destroy');
+    Route::post('/profil/appareils/autres', [DeviceController::class, 'destroyOthers'])->name('devices.destroy-others');
+    Route::get('/profil/metiers', [MemberProfileController::class, 'index'])->name('member-profiles.index');
+    Route::post('/profil/metiers', [MemberProfileController::class, 'store'])->name('member-profiles.store');
+    Route::get('/profil/metiers/{memberProfile}', [MemberProfileController::class, 'edit'])->name('member-profiles.edit');
+    Route::put('/profil/metiers/{memberProfile}', [MemberProfileController::class, 'update'])->name('member-profiles.update');
+    Route::delete('/profil/metiers/{memberProfile}', [MemberProfileController::class, 'destroy'])->name('member-profiles.destroy');
     Route::get('/charte/accepter', [TermsController::class, 'show'])->name('terms.show');
     Route::post('/charte/accepter', [TermsController::class, 'accept'])->name('terms.accept');
     Route::get('/profil/mes-donnees', [AccountController::class, 'export'])->middleware('throttle:5,1')->name('account.export');
@@ -209,6 +225,11 @@ Route::middleware(['auth', 'can:administrer'])->prefix('administration')->name('
     Route::get('/opportunites/{opportunity}', [AdminController::class, 'editOpportunity'])->name('opportunities.edit');
     Route::put('/opportunites/{opportunity}', [AdminController::class, 'updateOpportunity'])->name('opportunities.update');
     Route::delete('/opportunites/{opportunity}', [AdminController::class, 'destroyOpportunity'])->name('opportunities.destroy');
+    Route::get('/metiers', [ProfessionController::class, 'index'])->name('professions');
+    Route::post('/metiers', [ProfessionController::class, 'store'])->name('professions.store');
+    Route::post('/metiers/categories', [ProfessionController::class, 'storeCategory'])->name('professions.categories.store');
+    Route::get('/metiers/{profession}', [ProfessionController::class, 'edit'])->name('professions.edit');
+    Route::put('/metiers/{profession}', [ProfessionController::class, 'update'])->name('professions.update');
     Route::get('/fiches', [AdminController::class, 'guides'])->name('guides');
     Route::get('/fiches/{journeyStep}', [AdminController::class, 'editGuide'])->name('guides.edit');
     Route::put('/fiches/{journeyStep}', [AdminController::class, 'updateGuide'])->name('guides.update');

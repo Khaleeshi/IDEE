@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\AssistantController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CollaborationController;
 use App\Http\Controllers\Api\ContactRequestController;
+use App\Http\Controllers\Api\DeviceController;
 use App\Http\Controllers\Api\DocumentController;
 use App\Http\Controllers\Api\EventController;
 use App\Http\Controllers\Api\ExpertController;
@@ -12,8 +13,10 @@ use App\Http\Controllers\Api\FeedController;
 use App\Http\Controllers\Api\GroupController;
 use App\Http\Controllers\Api\HelpOfferController;
 use App\Http\Controllers\Api\JourneyController;
+use App\Http\Controllers\Api\LoginOptionsController;
 use App\Http\Controllers\Api\MatchingController;
 use App\Http\Controllers\Api\MemberController;
+use App\Http\Controllers\Api\MemberProfileController;
 use App\Http\Controllers\Api\MessageController;
 use App\Http\Controllers\Api\NeedController;
 use App\Http\Controllers\Api\NetworkController;
@@ -21,6 +24,7 @@ use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\OpportunityController;
 use App\Http\Controllers\Api\OrganisationController;
 use App\Http\Controllers\Api\PaymentController;
+use App\Http\Controllers\Api\ProfessionController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\ProgrammeController;
 use App\Http\Controllers\Api\ProjectController;
@@ -35,11 +39,16 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('auth')->group(function () {
     Route::post('code', [AuthController::class, 'requestCode'])->middleware('throttle:otp');
     Route::post('verify', [AuthController::class, 'verifyCode'])->middleware('throttle:otp-verify');
+    // CP-07 : canaux de réception du code, et paiement du SMS avant son envoi.
+    Route::get('options', [LoginOptionsController::class, 'index']);
+    Route::post('sms-purchases', [LoginOptionsController::class, 'store'])->middleware('throttle:sms-purchase');
+    Route::get('sms-purchases/{smsPurchase}', [LoginOptionsController::class, 'show'])->middleware('throttle:30,1');
     Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
 });
 
 // Consultation publique.
 Route::get('sectors', [SectorController::class, 'index']);
+Route::get('professions', [ProfessionController::class, 'index']);
 Route::get('projects', [ProjectController::class, 'index']);
 Route::get('projects/{project}', [ProjectController::class, 'show']);
 Route::get('projects/{project}/needs', [NeedController::class, 'index']);
@@ -55,6 +64,7 @@ Route::get('offers', [PaymentController::class, 'offers']);
 Route::get('opportunities/{opportunity}/questions', [ProgrammeController::class, 'questions']);
 // Avis de paiement de Wave : il ne fait que déclencher une relecture auprès de Wave.
 Route::post('webhooks/wave', [PaymentController::class, 'waveWebhook'])->middleware('throttle:120,1');
+Route::post('webhooks/bictorys', [PaymentController::class, 'bictorysWebhook'])->middleware('throttle:120,1');
 Route::get('events', [EventController::class, 'index']);
 Route::get('events/{event}', [EventController::class, 'show']);
 Route::get('groups', [GroupController::class, 'index']);
@@ -69,6 +79,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('me', [ProfileController::class, 'update']);
     Route::delete('me', [ProfileController::class, 'destroy']);
     Route::post('me/terms', [ProfileController::class, 'acceptTerms']);
+    Route::get('me/devices', [DeviceController::class, 'index']);
+    Route::delete('me/devices/{device}', [DeviceController::class, 'destroy']);
+    Route::post('me/devices/logout-others', [DeviceController::class, 'destroyOthers']);
+    Route::get('me/profiles', [MemberProfileController::class, 'index']);
+    Route::post('me/profiles', [MemberProfileController::class, 'store']);
+    Route::patch('member-profiles/{memberProfile}', [MemberProfileController::class, 'update']);
+    Route::delete('member-profiles/{memberProfile}', [MemberProfileController::class, 'destroy']);
     Route::delete('me/assistant', [AssistantController::class, 'forget']);
     Route::get('me/export', [ProfileController::class, 'export'])->middleware('throttle:5,1');
     Route::get('me/projects', [ProfileController::class, 'projects']);

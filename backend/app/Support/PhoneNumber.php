@@ -11,12 +11,22 @@ class PhoneNumber
 {
     public const SENEGAL_PREFIX = '+221';
 
-    public static function normalize(string $input): ?string
+    /**
+     * @param  string|null  $country  pays choisi à l'inscription (code ISO) : son
+     *                                indicatif s'ajoute à un numéro saisi sans « + »
+     */
+    public static function normalize(string $input, ?string $country = null): ?string
     {
         $number = preg_replace('/[\s.\-()]/', '', trim($input)) ?? '';
 
         if (str_starts_with($number, '00')) {
             $number = '+'.substr($number, 2);
+        }
+
+        $dialCode = $country ? Countries::dialCode($country) : null;
+        if ($dialCode !== null && $dialCode !== self::SENEGAL_PREFIX && ! str_starts_with($number, '+') && $number !== '') {
+            // 06 12 34 56 78 depuis la France devient +33612345678 : le 0 national tombe.
+            $number = $dialCode.ltrim($number, '0');
         }
 
         if (preg_match('/^[37]\d{8}$/', $number) === 1) {

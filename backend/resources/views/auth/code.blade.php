@@ -14,9 +14,16 @@
         </form>
     </x-card>
 
+    @if ($smsPurchase)
+        {{-- CP-07 : un renvoi par SMS est compris dans le paiement. --}}
+        <form method="POST" action="{{ route('login.sms.resend', $smsPurchase) }}" class="text-center">
+            @csrf
+            <button type="submit" class="py-2 text-sm font-medium text-brand-700 underline">Renvoyer le code par SMS (renvoi compris)</button>
+        </form>
+    @endif
     <form method="POST" action="{{ route('login.send') }}" class="text-center">
         @csrf
         <input type="hidden" name="phone" value="{{ $phone }}">
-        <button type="submit" class="py-3 text-sm font-medium text-brand-700 underline">Recevoir un nouveau code</button>
+        <button type="submit" class="py-3 text-sm font-medium text-brand-700 underline">{{ $smsPurchase ? 'Recevoir plutôt un code par WhatsApp (gratuit)' : 'Recevoir un nouveau code' }}</button>
     </form>
 </x-layout>

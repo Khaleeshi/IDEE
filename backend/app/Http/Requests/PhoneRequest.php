@@ -18,7 +18,8 @@ abstract class PhoneRequest extends FormRequest
         if (is_string($value) && str_contains($value, '@')) {
             $this->merge(['email' => mb_strtolower(trim($value)), 'phone' => null]);
         } elseif (is_string($value)) {
-            $this->merge(['phone' => PhoneNumber::normalize($value) ?? $value]);
+            $country = is_string($this->input('country')) ? $this->input('country') : null;
+            $this->merge(['phone' => PhoneNumber::normalize($value, $country) ?? $value]);
         }
 
         if (is_string($this->input('email'))) {
