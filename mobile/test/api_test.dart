@@ -15,6 +15,9 @@ void main() {
     expect(normalizePhone('77 123 45 67'), '+221771234567');
     expect(normalizePhone('00221 77 123 45 67'), '+221771234567');
     expect(normalizePhone('12'), isNull);
+    // CP-07 : l'indicatif du pays choisi, sans le 0 national.
+    expect(normalizePhone('06 12 34 56 78', dialCode: '+33'), '+33612345678');
+    expect(normalizePhone('+221 77 123 45 67', dialCode: '+33'), '+221771234567');
   });
 
   test('le client envoie le jeton et lit les données', () async {
