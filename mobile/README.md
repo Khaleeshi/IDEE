@@ -32,6 +32,19 @@ flutter run --dart-define=API_URL=http://10.0.2.2:8000
 le serveur avec `php artisan serve` dans `backend/`. En production, donnez
 l'adresse du site : `--dart-define=API_URL=https://votre-domaine`.
 
+## Essayer sur une tablette ou un téléphone Android (USB)
+
+1. Sur l'appareil : **Paramètres → À propos → Informations sur le logiciel**, touchez
+   7 fois **Numéro de build** ; puis **Options pour les développeurs → Débogage USB**.
+2. Branchez-le au PC avec un câble de données et acceptez « Autoriser le débogage USB ».
+3. Dans `backend` : `php artisan serve`.
+4. Dans `mobile`, une fois par branchement : `powershell -ExecutionPolicy Bypass -File relier-appareil.ps1`.
+5. Dans Android Studio, choisissez l'appareil et la configuration
+   **IDEE - tablette ou téléphone (USB)**, puis le triangle vert.
+
+Chaque modification enregistrée s'affiche aussitôt sur l'appareil (rechargement à
+chaud). Le site mobile s'ouvre aussi dans Chrome sur l'appareil : `http://127.0.0.1:8000`.
+
 ## Vérifier
 
 ```bash
