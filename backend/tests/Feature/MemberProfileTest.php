@@ -7,6 +7,7 @@ use App\Enums\VerificationLevel;
 use App\Models\MemberProfile;
 use App\Models\Profession;
 use App\Models\User;
+use App\Services\Members\MemberProfileService;
 use Database\Seeders\ProfessionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
@@ -246,5 +247,17 @@ class MemberProfileTest extends TestCase
 
         $this->deleteJson('/api/me', ['confirmation' => 'SUPPRIMER'])->assertSuccessful();
         $this->assertSame(0, MemberProfile::count());
+    }
+
+    public function test_a_profile_is_active_and_public_as_soon_as_it_is_created(): void
+    {
+        $user = User::factory()->create();
+        $profile = app(MemberProfileService::class)->create($user, [
+            'profession_id' => $this->profession('chef-de-projet')->id,
+            'offers_volunteer' => true,
+        ]);
+
+        $this->assertTrue($profile->active);
+        $this->assertTrue($profile->isPublic());
     }
 }
