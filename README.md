@@ -151,6 +151,14 @@ clients, matériel) et chaque demande de contact reçoit une réponse.
   qu'après vérification de l'identité (PM-05)
 - Nouveaux rôles : coach ou mentor (identité vérifiée exigée), fournisseur, acheteur ;
   l'annuaire des experts accueille les coachs et se filtre par métier
+- Sessions : un appareil inutilisé 90 jours est déconnecté, un jeton dure un an au plus ;
+  page « Mes appareils » pour voir où l'on est connecté et déconnecter à distance (CP-06)
+- Connexion : choix du pays (indicatif ajouté au numéro), code par WhatsApp ou e-mail
+  gratuits, ou par SMS Twilio payé d'avance (500 FCFA, un renvoi compris) (CP-07)
+- Paiements par Bictorys : Wave, Orange Money et carte bancaire, confirmés
+  automatiquement, statut toujours relu auprès de Bictorys (PA-04)
+- E-mails par Resend ; couleurs violet foncé et violet clair
+- Application mobile : pays et SMS payant à la connexion, « Mes métiers », « Mes appareils »
 
 **Reste à faire** : saisie vocale en wolof (IA-04, après des tests de qualité) ;
 traduction et enregistrement des fiches en wolof ; paiement par carte (avec un
@@ -222,6 +230,8 @@ de connexion ne sont pas envoyés par SMS : ils sont écrits dans
 | `/offres` | Offres payantes, mes offres en cours et mes paiements ; `/paiements/{id}/recu` pour le reçu |
 | `/opportunites?projet={id}` | Programmes compatibles avec l'un de mes projets |
 | `/profil` | Mon profil, mes rôles, mes préférences, l'effacement de mes échanges avec l'assistant |
+| `/profil/appareils` | Mes appareils connectés, déconnexion à distance |
+| `/connexion/sms` | Payer le SMS de connexion, puis recevoir le code |
 | `/profil/metiers` | Mes métiers : profils professionnels, profil principal, interventions payantes, bénévoles ou de mentorat |
 | `/profil/mes-donnees` | Télécharger toutes mes données (fichier JSON) |
 | `/profil/supprimer` | Supprimer mon compte |
@@ -339,6 +349,11 @@ l'en-tête `Authorization: Bearer <jeton>` reçu à la connexion.
 | GET, POST | `/api/projects/{id}/business-plan` | porteur | Business plan : lire, en rédiger une version |
 | PUT | `/api/business-plans/{id}` | porteur | Corriger les sections |
 | GET | `/api/projects/{id}/business-plan/word` | porteur | Business plan au format Word (.docx) |
+| GET | `/api/auth/options` | public | Canaux de réception du code (WhatsApp, e-mail, SMS et son prix), moyens de paiement, pays |
+| POST, GET | `/api/auth/sms-purchases` · `/api/auth/sms-purchases/{id}` | public | Payer le SMS de connexion (`phone`, `country`, `method`) ; relire le paiement. Puis `POST /api/auth/code` avec `channel: sms` et `sms_purchase_id` |
+| POST | `/api/webhooks/bictorys` | Bictorys | Avis de paiement (secret `X-Secret-Key`), qui déclenche une relecture auprès de Bictorys |
+| GET | `/api/me/devices` | connecté | Mes appareils connectés |
+| DELETE, POST | `/api/me/devices/{id}` · `/api/me/devices/logout-others` | connecté | Déconnecter un appareil, ou tous les autres |
 | GET | `/api/professions` | public | Référentiel des métiers actifs, par catégorie |
 | GET, POST | `/api/me/profiles` | connecté | Mes profils professionnels ; en ajouter un (`profession_id`, `offers_paid`, `offers_volunteer`, `offers_mentoring`…) |
 | PATCH, DELETE | `/api/member-profiles/{id}` | titulaire | Modifier (profil principal, pause) ou supprimer un profil |
@@ -379,6 +394,8 @@ Les valeurs se règlent dans `backend/config/idee.php` ou dans le fichier `.env`
 | Section 8 | Suspension préventive après des signalements de personnes différentes | 3 |
 | Section 8 | Expressions qui déclenchent l'alerte anti-arnaque dans la messagerie | liste `scam_alert` |
 | PM-02 | Profils professionnels par membre | 5 |
+| CP-06 | Déconnexion d'un appareil inutilisé ; durée maximale d'une session | 90 jours ; 1 an |
+| CP-07 | Prix du SMS de connexion, payé d'avance ; envois par achat | 500 FCFA ; 2 |
 | Section 9 | Version des textes légaux : la changer fait accepter de nouveau les textes | 2026-10 |
 
 Les relances, expirations et rappels de rendez-vous tournent toutes les heures,
