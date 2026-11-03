@@ -30,7 +30,7 @@ class IdeeApp extends StatelessWidget {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      theme: ThemeData(colorSchemeSeed: brand, useMaterial3: true, scaffoldBackgroundColor: const Color(0xFFFAFAF9)),
+      theme: ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: brand, primary: brand, secondary: brandLight, primaryContainer: brandTint), useMaterial3: true, scaffoldBackgroundColor: const Color(0xFFFAFAF9)),
       home: ListenableBuilder(
         listenable: session,
         builder: (context, _) {

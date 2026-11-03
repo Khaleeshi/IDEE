@@ -45,7 +45,7 @@
                 <span class="text-2xl font-bold text-brand-700">{{ $readiness['score'] }}<span class="text-sm text-stone-500">/100</span></span>
             </div>
             <div class="mt-2 h-2 rounded-full bg-stone-100" role="progressbar" aria-valuenow="{{ $readiness['score'] }}" aria-valuemin="0" aria-valuemax="100" aria-label="Score de préparation">
-                <div class="h-2 rounded-full bg-brand-600" style="width: {{ $readiness['score'] }}%"></div>
+                <div class="h-2 rounded-full bg-linear-to-r from-brand-700 to-brand-400" style="width: {{ $readiness['score'] }}%"></div>
             </div>
             @if ($readiness['missing'])
                 <p class="mt-3 text-sm font-medium">Pour progresser :</p>

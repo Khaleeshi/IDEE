@@ -3,7 +3,18 @@ import 'package:flutter/material.dart';
 import 'api.dart';
 import 'models.dart';
 
-const brand = Color(0xFF077A3F);
+/// Violet IDEE : le foncé pour les boutons et le texte, le clair pour les décors.
+const brand = Color(0xFF5B21B6);
+const brandDark = Color(0xFF3B0764);
+const brandLight = Color(0xFF8B5CF6);
+const brandTint = Color(0xFFEDE9FE);
+
+/// Dégradé du violet foncé au violet clair, pour les en-têtes.
+const brandGradient = LinearGradient(
+  begin: Alignment.topLeft,
+  end: Alignment.bottomRight,
+  colors: [brandDark, brand, Color(0xFF6D28D9)],
+);
 
 /// Charge des données et affiche le chargement, l'erreur ou le résultat.
 class Loader<T> extends StatefulWidget {

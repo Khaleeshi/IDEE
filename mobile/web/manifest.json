@@ -4,7 +4,7 @@
     "start_url": ".",
     "display": "standalone",
     "background_color": "#FAFAF9",
-    "theme_color": "#077A3F",
+    "theme_color": "#5B21B6",
     "description": "Application mobile d'IDEE",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
