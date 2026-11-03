@@ -227,4 +227,12 @@ return [
         'driver' => env('IDEE_OTP_DRIVER', 'log'),
     ],
 
+    // Sessions de l'application mobile (jetons de connexion) : un appareil est
+    // déconnecté après une période sans utilisation, et chaque jeton a une durée
+    // maximale, même s'il sert tous les jours.
+    'sessions' => [
+        'idle_days' => (int) env('IDEE_SESSION_IDLE_DAYS', 90),
+        'max_days' => (int) env('IDEE_SESSION_MAX_DAYS', 365),
+    ],
+
 ];

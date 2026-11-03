@@ -106,3 +106,5 @@ Schedule::command('idee:alerts')->dailyAt('09:00');
 Schedule::command('idee:weekly-digest')->weeklyOn(1, '08:30');
 Schedule::command('idee:stale-guides')->weeklyOn(1, '07:00');
 Schedule::command('idee:dormant-projects')->dailyAt('03:00');
+// Jetons de connexion arrivés à leur durée maximale : effacés chaque nuit.
+Schedule::command('sanctum:prune-expired --hours=24')->dailyAt('03:30');
