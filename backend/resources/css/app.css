@@ -10,11 +10,13 @@
 @theme {
     --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans', Arial, sans-serif;
 
-    --color-brand-50: #ecfdf3;
-    --color-brand-100: #d1fadf;
-    --color-brand-600: #0b8a4a;
-    --color-brand-700: #077a3f;
-    --color-brand-800: #065f32;
+    /* Violet IDEE (décision du 3 novembre 2026) : le 700 est la couleur principale. */
+    --color-brand-50: #f5f3ff;
+    --color-brand-100: #ede9fe;
+    --color-brand-600: #6d28d9;
+    --color-brand-700: #5b21b6;
+    --color-brand-800: #4c1d95;
+    --color-brand-900: #3b0764;
 }
 
 @layer base {

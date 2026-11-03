@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'api.dart';
 import 'models.dart';
 
-const brand = Color(0xFF077A3F);
+const brand = Color(0xFF5B21B6);
 
 /// Charge des données et affiche le chargement, l'erreur ou le résultat.
 class Loader<T> extends StatefulWidget {
