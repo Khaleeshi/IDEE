@@ -40,7 +40,11 @@ class _LoginScreenState extends State<LoginScreen> {
           padding: const EdgeInsets.all(24),
           children: [
             const SizedBox(height: 32),
-            const Text('IDEE', style: TextStyle(fontSize: 36, fontWeight: FontWeight.bold, color: brand)),
+            // Logo en dégradé, du violet foncé au violet clair.
+            ShaderMask(
+              shaderCallback: (bounds) => const LinearGradient(colors: [brandDark, brandLight]).createShader(bounds),
+              child: const Text('IDEE', style: TextStyle(fontSize: 36, fontWeight: FontWeight.bold, color: Colors.white)),
+            ),
             const SizedBox(height: 8),
             const Text('Le réseau où les projets trouvent les personnes qui les font avancer.', style: TextStyle(fontSize: 16, color: Colors.black54)),
             const SizedBox(height: 32),

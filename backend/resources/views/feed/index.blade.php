@@ -1,6 +1,6 @@
 <x-layout>
     @guest
-        <section class="mb-6 rounded-2xl bg-brand-700 px-5 py-6 text-white">
+        <section class="mb-6 rounded-2xl bg-linear-to-br from-brand-900 via-brand-700 to-brand-600 px-5 py-6 text-white">
             <h1 class="text-2xl font-bold leading-tight">Ton projet ne reste plus un dossier sans réponse.</h1>
             <p class="mt-2 text-brand-50">Publie ce qui te manque : financement, associé, compétence, clients. Le réseau te répond.</p>
             <div class="mt-4 flex flex-wrap gap-2">
