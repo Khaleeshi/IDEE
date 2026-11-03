@@ -46,7 +46,7 @@ class Session extends ChangeNotifier {
     final response = await api.post('auth/code', {
       ...payload,
       if (payload.containsKey('phone')) 'channel': channel ?? 'whatsapp',
-      if (smsPurchaseId != null) 'sms_purchase_id': smsPurchaseId,
+      'sms_purchase_id': ?smsPurchaseId,
     });
     return response['message'] as String? ?? 'Code envoyé.';
   }
