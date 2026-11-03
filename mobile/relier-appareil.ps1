@@ -1,4 +1,4 @@
-# Relie la tablette ou le téléphone branché en USB au serveur IDEE de ce PC.
+﻿# Relie la tablette ou le téléphone branché en USB au serveur IDEE de ce PC.
 # À lancer après avoir branché l'appareil, et à relancer s'il a été débranché.
 # Ensuite, sur l'appareil, http://127.0.0.1:8000 mène au serveur du PC :
 # l'application (configuration « IDEE - tablette ou téléphone (USB) ») et le
