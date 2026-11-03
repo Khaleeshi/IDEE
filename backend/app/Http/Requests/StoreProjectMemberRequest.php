@@ -12,7 +12,9 @@ class StoreProjectMemberRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:120'],
+            'name' => ['required_without:identifier', 'nullable', 'string', 'max:120'],
+            // EQ-01 : téléphone ou e-mail d'un membre d'IDEE à inviter.
+            'identifier' => ['nullable', 'string', 'max:255'],
             'role' => ['required', 'string', 'max:120'],
             'share_percent' => ['nullable', 'numeric', 'min:0', 'max:100'],
         ];
@@ -24,7 +26,7 @@ class StoreProjectMemberRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.required' => 'Indiquez le nom de la personne.',
+            'name.required_without' => 'Indiquez le nom de la personne, ou le numéro d\'un membre d\'IDEE à inviter.',
             'role.required' => 'Indiquez son rôle dans le projet, par exemple « Production » ou « Ventes ».',
             'share_percent.numeric' => 'Indiquez la part envisagée en pourcentage, par exemple 30.',
             'share_percent.min' => 'La part envisagée est comprise entre 0 et 100 %.',

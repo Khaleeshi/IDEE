@@ -167,6 +167,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('projects/{project}/team', [ProjectController::class, 'addTeamMember']);
     Route::patch('team-members/{projectMember}', [ProjectController::class, 'updateTeamMember']);
     Route::delete('team-members/{projectMember}', [ProjectController::class, 'removeTeamMember']);
+    Route::post('team-members/{projectMember}/answer', [ProjectController::class, 'answerInvitation']);
+    Route::get('projects/{project}/calendar', [ProjectController::class, 'calendar']);
 
     Route::post('projects/{project}/updates', [ProjectUpdateController::class, 'store']);
     Route::post('projects/{project}/needs', [NeedController::class, 'store']);

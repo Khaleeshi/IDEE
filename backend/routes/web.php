@@ -65,6 +65,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/projets/{project}/equipe', [ProjectController::class, 'addTeamMember'])->name('projects.team.store');
     Route::patch('/equipe/{projectMember}', [ProjectController::class, 'updateTeamMember'])->name('projects.team.update');
     Route::delete('/equipe/{projectMember}', [ProjectController::class, 'removeTeamMember'])->name('projects.team.destroy');
+    Route::get('/equipe/{projectMember}/invitation', [ProjectController::class, 'invitation'])->name('team.invitation');
+    Route::post('/equipe/{projectMember}/invitation', [ProjectController::class, 'answerInvitation'])->name('team.invitation.answer');
+    Route::get('/projets/{project}/calendrier', [ProjectController::class, 'calendar'])->name('projects.calendar');
     Route::post('/projets/{project}/besoins', [NeedController::class, 'store'])->name('needs.store');
     Route::post('/projets/{project}/assistant/questions', [AssistantController::class, 'clarify'])->name('assistant.clarify');
     Route::put('/clarifications/{ideaClarification}', [AssistantController::class, 'answer'])->name('assistant.answer');
