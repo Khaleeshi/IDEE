@@ -45,4 +45,14 @@ class CohortProject extends Model
     {
         return $this->hasOne(CohortCheckin::class)->latestOfMany();
     }
+
+    /**
+     * IN-02 : coach ou mentor de la structure qui suit ce projet.
+     *
+     * @return BelongsTo<User, $this>
+     */
+    public function coach(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'coach_id')->withTrashed();
+    }
 }

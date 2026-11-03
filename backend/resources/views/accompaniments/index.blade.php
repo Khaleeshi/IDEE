@@ -20,6 +20,16 @@
         @endforelse
     @endforeach
 
+    @if ($incubated->isNotEmpty())
+        <h2 class="mb-2 mt-5 font-semibold">Projets incubés que je suis</h2>
+        @foreach ($incubated as $member)
+            <a href="{{ route('cohorts.show', $member->cohort) }}#projet-{{ $member->id }}" class="mb-2 block rounded-2xl border border-stone-200 bg-white p-4 shadow-sm">
+                <span class="block font-medium">{{ $member->project->title }}</span>
+                <span class="block text-xs text-stone-500">{{ $member->cohort->organisation->name }} · {{ $member->cohort->name }}</span>
+            </a>
+        @endforeach
+    @endif
+
     <div class="mt-4 grid grid-cols-2 gap-2 text-sm">
         <x-button :href="route('experts.index')" variant="secondary">Trouver un coach</x-button>
         <x-button :href="route('member-profiles.index')" variant="secondary">Mes métiers</x-button>

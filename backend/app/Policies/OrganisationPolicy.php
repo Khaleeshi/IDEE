@@ -14,4 +14,12 @@ class OrganisationPolicy
     {
         return $organisation->isManagedBy($user);
     }
+
+    /**
+     * IN-01 : programmes, candidatures et cohortes.
+     */
+    public function manageProgrammes(User $user, Organisation $organisation): bool
+    {
+        return $organisation->managesProgrammes($user);
+    }
 }

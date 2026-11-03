@@ -6,6 +6,7 @@ use App\Enums\AccompanimentKind;
 use App\Enums\AccompanimentStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Accompaniment;
+use App\Models\CohortProject;
 use App\Models\MemberProfile;
 use App\Models\Project;
 use App\Models\Review;
@@ -35,6 +36,8 @@ class AccompanimentController extends Controller
         return view('accompaniments.index', [
             'asCoach' => Accompaniment::where('coach_id', $user->id)->with('requester', 'memberProfile.profession')->latest()->get(),
             'asRequester' => Accompaniment::where('requester_id', $user->id)->with('coach', 'memberProfile.profession')->latest()->get(),
+            // IN-02 : projets incubés confiés à ce membre par une structure.
+            'incubated' => CohortProject::where('coach_id', $user->id)->with('project', 'cohort.organisation')->latest()->get(),
         ]);
     }
 

@@ -62,6 +62,7 @@ class OrganisationController extends Controller
             'organisation' => $organisation->load('members.user'),
             'programmes' => $organisation->opportunities()->open()->get(),
             'canManage' => $organisation->isManagedBy($request->user()),
+            'managesProgrammes' => $organisation->managesProgrammes($request->user()),
         ]);
     }
 

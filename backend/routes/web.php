@@ -169,6 +169,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/cohortes/{cohort}', [ProgrammeController::class, 'cohort'])->name('cohorts.show');
     Route::post('/cohortes/{cohort}/projets', [ProgrammeController::class, 'addToCohort'])->name('cohorts.add');
     Route::post('/suivi-cohorte/{cohortProject}', [ProgrammeController::class, 'checkin'])->name('cohorts.checkin');
+    Route::post('/cohortes/projets/{cohortProject}/coach', [ProgrammeController::class, 'assignCoach'])->name('cohorts.coach');
+    Route::get('/cohortes/{cohort}/export', [ProgrammeController::class, 'export'])->name('cohorts.export');
     Route::get('/accompagnements', [AccompanimentController::class, 'index'])->name('accompaniments.index');
     Route::get('/metiers/{memberProfile}/accompagnement', [AccompanimentController::class, 'create'])->name('accompaniments.create');
     Route::post('/metiers/{memberProfile}/accompagnement', [AccompanimentController::class, 'store'])->name('accompaniments.store');

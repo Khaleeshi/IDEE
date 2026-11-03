@@ -11,13 +11,16 @@ use App\Models\Opportunity;
 use App\Models\Organisation;
 use App\Models\ProgrammeApplication;
 use App\Models\Project;
+use App\Models\User;
 use App\Services\Organisations\ProgrammeService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
  * Candidatures depuis un dossier IDEE (OR-02) et suivi de cohortes (OR-03).
@@ -49,7 +52,7 @@ class ProgrammeController extends Controller
     {
         $organisation = $opportunity->organisationPage;
         abort_if($organisation === null, 404);
-        Gate::authorize('update', $organisation);
+        Gate::authorize('manageProgrammes', $organisation);
 
         return view('programmes.applications', [
             'programme' => $opportunity,
@@ -88,7 +91,7 @@ class ProgrammeController extends Controller
 
     public function cohorts(Organisation $organisation): View
     {
-        Gate::authorize('update', $organisation);
+        Gate::authorize('manageProgrammes', $organisation);
 
         return view('programmes.cohorts', [
             'organisation' => $organisation,
@@ -99,7 +102,7 @@ class ProgrammeController extends Controller
 
     public function storeCohort(Request $request, Organisation $organisation): RedirectResponse
     {
-        Gate::authorize('update', $organisation);
+        Gate::authorize('manageProgrammes', $organisation);
         $data = $request->validate([
             'name' => ['required', 'string', 'max:150'],
             'starts_on' => ['nullable', 'date'],
@@ -118,13 +121,20 @@ class ProgrammeController extends Controller
         return redirect()->route('cohorts.show', $cohort)->with('status', 'Cohorte créée.');
     }
 
-    public function cohort(Cohort $cohort): View
+    public function cohort(Request $request, Cohort $cohort): View
     {
-        Gate::authorize('update', $cohort->organisation);
+        // IN-02 : les responsables voient toute la cohorte ; un coach, les projets qu'il suit.
+        $manages = $cohort->organisation->managesProgrammes($request->user());
+        $members = $cohort->members()->with(['project.openNeeds', 'latestCheckin', 'coach'])
+            ->when(! $manages, fn ($query) => $query->where('coach_id', $request->user()->id))
+            ->get();
+        abort_unless($manages || $members->isNotEmpty(), 403);
 
         return view('programmes.cohort', [
             'cohort' => $cohort,
-            'members' => $cohort->members()->with(['project.openNeeds', 'latestCheckin'])->get(),
+            'manages' => $manages,
+            'coaches' => $manages ? $cohort->organisation->coachOptions() : collect(),
+            'members' => $members,
             'retained' => ProgrammeApplication::query()
                 ->where('status', ProgrammeApplicationStatus::Retenue)
                 ->whereHas('opportunity', fn ($query) => $query->where('organisation_id', $cohort->organisation_id))
@@ -137,7 +147,7 @@ class ProgrammeController extends Controller
 
     public function addToCohort(Request $request, Cohort $cohort): RedirectResponse
     {
-        Gate::authorize('update', $cohort->organisation);
+        Gate::authorize('manageProgrammes', $cohort->organisation);
         $data = $request->validate(['application_id' => ['required', 'string', 'exists:programme_applications,id']]);
 
         $this->programmes->addToCohort($cohort, ProgrammeApplication::findOrFail($data['application_id']));
@@ -147,7 +157,7 @@ class ProgrammeController extends Controller
 
     public function checkin(Request $request, CohortProject $cohortProject): RedirectResponse
     {
-        Gate::authorize('update', $cohortProject->cohort->organisation);
+        abort_unless($cohortProject->coach_id === $request->user()->id || $cohortProject->cohort->organisation->managesProgrammes($request->user()), 403);
         $data = $request->validate([
             'status' => ['required', Rule::enum(CheckinStatus::class)],
             'note' => ['required', 'string', 'max:2000'],
@@ -156,5 +166,50 @@ class ProgrammeController extends Controller
         $this->programmes->checkin($cohortProject, $request->user(), CheckinStatus::from($data['status']), $data['note']);
 
         return redirect()->to(route('cohorts.show', $cohortProject->cohort).'#projet-'.$cohortProject->id)->with('status', 'Point de suivi enregistré.');
+    }
+
+    /**
+     * IN-02 : confier un projet de la cohorte à un coach ou mentor de la structure.
+     */
+    public function assignCoach(Request $request, CohortProject $cohortProject): RedirectResponse
+    {
+        $organisation = $cohortProject->cohort->organisation;
+        Gate::authorize('manageProgrammes', $organisation);
+        $data = $request->validate(['coach_id' => ['nullable', 'string', Rule::in($organisation->coachOptions()->keys()->all())]],
+            ['coach_id.in' => 'Choisissez un coach ou un responsable de votre structure.']);
+
+        $this->programmes->assignCoach($cohortProject, isset($data['coach_id']) ? User::find($data['coach_id']) : null);
+
+        return redirect()->to(route('cohorts.show', $cohortProject->cohort).'#projet-'.$cohortProject->id)->with('status', 'Suivi du projet mis à jour.');
+    }
+
+    /**
+     * IN-03 : tableau de suivi de la cohorte, à ouvrir dans un tableur.
+     */
+    public function export(Cohort $cohort): StreamedResponse
+    {
+        Gate::authorize('manageProgrammes', $cohort->organisation);
+
+        return response()->streamDownload(function () use ($cohort) {
+            $out = fopen('php://output', 'w');
+            fwrite($out, "\xEF\xBB\xBF"); // accents lisibles dans Excel
+            fputcsv($out, ['Projet', 'Porteur', 'Région', 'Stade', 'Score de préparation', 'Besoins ouverts', 'Coach', 'Dernier point', 'Date du dernier point', 'Note'], ';');
+            $cohort->members()->with(['project.owner', 'project.openNeeds', 'coach', 'latestCheckin'])->get()->each(function (CohortProject $member) use ($out) {
+                $project = $member->project;
+                fputcsv($out, [
+                    $project->title,
+                    $project->owner?->name,
+                    $project->region,
+                    $project->stage?->label(),
+                    $project->readiness_score,
+                    $project->openNeeds->count(),
+                    $member->coach?->name,
+                    $member->latestCheckin?->status->label(),
+                    $member->latestCheckin?->created_at->format('d/m/Y'),
+                    $member->latestCheckin?->note,
+                ], ';');
+            });
+            fclose($out);
+        }, 'cohorte-'.Str::slug($cohort->name).'.csv', ['Content-Type' => 'text/csv; charset=UTF-8']);
     }
 }
