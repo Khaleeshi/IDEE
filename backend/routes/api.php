@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\HelpOfferController;
 use App\Http\Controllers\Api\JourneyController;
 use App\Http\Controllers\Api\MatchingController;
 use App\Http\Controllers\Api\MemberController;
+use App\Http\Controllers\Api\MemberProfileController;
 use App\Http\Controllers\Api\MessageController;
 use App\Http\Controllers\Api\NeedController;
 use App\Http\Controllers\Api\NetworkController;
@@ -21,6 +22,7 @@ use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\OpportunityController;
 use App\Http\Controllers\Api\OrganisationController;
 use App\Http\Controllers\Api\PaymentController;
+use App\Http\Controllers\Api\ProfessionController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\ProgrammeController;
 use App\Http\Controllers\Api\ProjectController;
@@ -40,6 +42,7 @@ Route::prefix('auth')->group(function () {
 
 // Consultation publique.
 Route::get('sectors', [SectorController::class, 'index']);
+Route::get('professions', [ProfessionController::class, 'index']);
 Route::get('projects', [ProjectController::class, 'index']);
 Route::get('projects/{project}', [ProjectController::class, 'show']);
 Route::get('projects/{project}/needs', [NeedController::class, 'index']);
@@ -69,6 +72,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('me', [ProfileController::class, 'update']);
     Route::delete('me', [ProfileController::class, 'destroy']);
     Route::post('me/terms', [ProfileController::class, 'acceptTerms']);
+    Route::get('me/profiles', [MemberProfileController::class, 'index']);
+    Route::post('me/profiles', [MemberProfileController::class, 'store']);
+    Route::patch('member-profiles/{memberProfile}', [MemberProfileController::class, 'update']);
+    Route::delete('member-profiles/{memberProfile}', [MemberProfileController::class, 'destroy']);
     Route::delete('me/assistant', [AssistantController::class, 'forget']);
     Route::get('me/export', [ProfileController::class, 'export'])->middleware('throttle:5,1');
     Route::get('me/projects', [ProfileController::class, 'projects']);
