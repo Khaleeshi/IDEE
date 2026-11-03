@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Web\AccountController;
 use App\Http\Controllers\Web\Admin\AdminController;
+use App\Http\Controllers\Web\Admin\ProfessionController;
 use App\Http\Controllers\Web\AlertController;
 use App\Http\Controllers\Web\AssistantController;
 use App\Http\Controllers\Web\CollaborationController;
@@ -16,6 +17,7 @@ use App\Http\Controllers\Web\JourneyController;
 use App\Http\Controllers\Web\LoginController;
 use App\Http\Controllers\Web\MatchingController;
 use App\Http\Controllers\Web\MemberController;
+use App\Http\Controllers\Web\MemberProfileController;
 use App\Http\Controllers\Web\MessageController;
 use App\Http\Controllers\Web\NeedController;
 use App\Http\Controllers\Web\NotificationController;
@@ -178,6 +180,11 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/profil', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profil', [ProfileController::class, 'update'])->name('profile.update');
+    Route::get('/profil/metiers', [MemberProfileController::class, 'index'])->name('member-profiles.index');
+    Route::post('/profil/metiers', [MemberProfileController::class, 'store'])->name('member-profiles.store');
+    Route::get('/profil/metiers/{memberProfile}', [MemberProfileController::class, 'edit'])->name('member-profiles.edit');
+    Route::put('/profil/metiers/{memberProfile}', [MemberProfileController::class, 'update'])->name('member-profiles.update');
+    Route::delete('/profil/metiers/{memberProfile}', [MemberProfileController::class, 'destroy'])->name('member-profiles.destroy');
     Route::get('/charte/accepter', [TermsController::class, 'show'])->name('terms.show');
     Route::post('/charte/accepter', [TermsController::class, 'accept'])->name('terms.accept');
     Route::get('/profil/mes-donnees', [AccountController::class, 'export'])->middleware('throttle:5,1')->name('account.export');
@@ -209,6 +216,11 @@ Route::middleware(['auth', 'can:administrer'])->prefix('administration')->name('
     Route::get('/opportunites/{opportunity}', [AdminController::class, 'editOpportunity'])->name('opportunities.edit');
     Route::put('/opportunites/{opportunity}', [AdminController::class, 'updateOpportunity'])->name('opportunities.update');
     Route::delete('/opportunites/{opportunity}', [AdminController::class, 'destroyOpportunity'])->name('opportunities.destroy');
+    Route::get('/metiers', [ProfessionController::class, 'index'])->name('professions');
+    Route::post('/metiers', [ProfessionController::class, 'store'])->name('professions.store');
+    Route::post('/metiers/categories', [ProfessionController::class, 'storeCategory'])->name('professions.categories.store');
+    Route::get('/metiers/{profession}', [ProfessionController::class, 'edit'])->name('professions.edit');
+    Route::put('/metiers/{profession}', [ProfessionController::class, 'update'])->name('professions.update');
     Route::get('/fiches', [AdminController::class, 'guides'])->name('guides');
     Route::get('/fiches/{journeyStep}', [AdminController::class, 'editGuide'])->name('guides.edit');
     Route::put('/fiches/{journeyStep}', [AdminController::class, 'updateGuide'])->name('guides.update');

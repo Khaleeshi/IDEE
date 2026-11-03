@@ -217,6 +217,11 @@ return [
         'validated' => (bool) env('IDEE_LEGAL_VALIDATED', false),
     ],
 
+    // PM-02 : profils professionnels par membre (coach, chef de projet, formatrice…).
+    'member_profiles' => [
+        'max_per_member' => (int) env('IDEE_MAX_MEMBER_PROFILES', 5),
+    ],
+
     // Code de connexion à usage unique (section 10).
     'otp' => [
         'length' => 6,

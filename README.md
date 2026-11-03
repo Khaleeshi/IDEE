@@ -137,6 +137,21 @@ clients, matériel) et chaque demande de contact reçoit une réponse.
 - Business plan téléchargeable en Word, en plus de la version à imprimer en PDF (section 7)
 - 204 tests automatisés au total
 
+**Étape 8 — cahier des charges v3, lot 1** : en cours.
+
+- Référentiel des métiers administrable : 24 catégories et 190 métiers de départ
+  (gestion de projet, coaching et mentorat, incubation, finance, juridique…),
+  ajout, renommage et désactivation depuis l'administration sans toucher au code (PM-01)
+- Profils multiples : un compte peut être coach de projet, cheffe de projet et
+  formatrice à la fois, avec un profil principal, jusqu'à 5 profils (PM-02)
+- Chaque profil propose des prestations payantes, du bénévolat ou du mentorat,
+  cumulables, avec un tarif indicatif réglé directement entre les membres (PM-03)
+- Un métier désactivé ne se choisit plus mais reste sur les profils existants (PM-04) ;
+  un profil payant, de mentorat ou d'une profession réglementée n'est visible
+  qu'après vérification de l'identité (PM-05)
+- Nouveaux rôles : coach ou mentor (identité vérifiée exigée), fournisseur, acheteur ;
+  l'annuaire des experts accueille les coachs et se filtre par métier
+
 **Reste à faire** : saisie vocale en wolof (IA-04, après des tests de qualité) ;
 traduction et enregistrement des fiches en wolof ; paiement par carte (avec un
 agrégateur comme PayDunya ou PayTech) ; documents privés marqués au nom du lecteur ;
@@ -207,6 +222,7 @@ de connexion ne sont pas envoyés par SMS : ils sont écrits dans
 | `/offres` | Offres payantes, mes offres en cours et mes paiements ; `/paiements/{id}/recu` pour le reçu |
 | `/opportunites?projet={id}` | Programmes compatibles avec l'un de mes projets |
 | `/profil` | Mon profil, mes rôles, mes préférences, l'effacement de mes échanges avec l'assistant |
+| `/profil/metiers` | Mes métiers : profils professionnels, profil principal, interventions payantes, bénévoles ou de mentorat |
 | `/profil/mes-donnees` | Télécharger toutes mes données (fichier JSON) |
 | `/profil/supprimer` | Supprimer mon compte |
 | `/charte/accepter` | Acceptation des conditions et de la charte, à l'inscription et à chaque nouvelle version |
@@ -323,6 +339,9 @@ l'en-tête `Authorization: Bearer <jeton>` reçu à la connexion.
 | GET, POST | `/api/projects/{id}/business-plan` | porteur | Business plan : lire, en rédiger une version |
 | PUT | `/api/business-plans/{id}` | porteur | Corriger les sections |
 | GET | `/api/projects/{id}/business-plan/word` | porteur | Business plan au format Word (.docx) |
+| GET | `/api/professions` | public | Référentiel des métiers actifs, par catégorie |
+| GET, POST | `/api/me/profiles` | connecté | Mes profils professionnels ; en ajouter un (`profession_id`, `offers_paid`, `offers_volunteer`, `offers_mentoring`…) |
+| PATCH, DELETE | `/api/member-profiles/{id}` | titulaire | Modifier (profil principal, pause) ou supprimer un profil |
 | GET | `/api/me/export` | connecté | Toutes mes données |
 | DELETE | `/api/me` | connecté | Supprimer mon compte (`confirmation` : `SUPPRIMER`) |
 | POST | `/api/me/terms` | connecté | Accepter les conditions et la charte (`accept` : `true`) ; `terms_accepted` dans `/api/me` |
@@ -359,6 +378,7 @@ Les valeurs se règlent dans `backend/config/idee.php` ou dans le fichier `.env`
 | Collaboration | Étapes, rendez-vous et collaborations ne comptent qu'avec l'accord des deux | — |
 | Section 8 | Suspension préventive après des signalements de personnes différentes | 3 |
 | Section 8 | Expressions qui déclenchent l'alerte anti-arnaque dans la messagerie | liste `scam_alert` |
+| PM-02 | Profils professionnels par membre | 5 |
 | Section 9 | Version des textes légaux : la changer fait accepter de nouveau les textes | 2026-10 |
 
 Les relances, expirations et rappels de rendez-vous tournent toutes les heures,

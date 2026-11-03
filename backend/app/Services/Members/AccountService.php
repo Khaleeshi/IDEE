@@ -78,6 +78,15 @@ class AccountService
                 'disponibilite' => $user->availability?->label(),
                 'preferences_de_contact' => $user->contact_preferences,
                 'roles' => array_map(fn (UserRole $role) => $role->label(), $user->roles()),
+                'profils_professionnels' => $user->memberProfiles()->with('profession')->get()->map(fn ($profile) => [
+                    'metier' => $profile->profession->name,
+                    'intitule' => $profile->title,
+                    'presentation' => $profile->description,
+                    'annees_d_experience' => $profile->experience_years,
+                    'interventions' => $profile->offerLabels(),
+                    'tarif' => $profile->rate,
+                    'principal' => $profile->is_primary,
+                ])->all(),
                 'verification' => $user->verification_level->label(),
                 'inscrit_le' => $user->created_at?->toIso8601String(),
             ],
@@ -203,6 +212,7 @@ class AccountService
             $user->tokens()->delete();
             $user->pushSubscriptions()->delete();
             $user->roleAssignments()->delete();
+            $user->memberProfiles()->delete();
             $user->savedSearches()->delete();
             $user->stepProgress()->delete();
             $user->helpOffers()->delete();

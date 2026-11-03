@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
+use App\Models\Profession;
 use App\Models\Sector;
 use App\Services\Experts\ExpertDirectory;
 use Illuminate\Http\Request;
@@ -15,12 +16,13 @@ class ExpertController extends Controller
 {
     public function index(Request $request, ExpertDirectory $directory): View
     {
-        $filters = array_filter($request->only(['q', 'sector', 'region']), fn ($value) => filled($value));
+        $filters = array_filter($request->only(['q', 'sector', 'region', 'metier']), fn ($value) => filled($value));
 
         return view('experts.index', [
             'experts' => $directory->query($filters)->paginate(20)->withQueryString(),
             'filters' => $filters,
             'sectors' => Sector::options('slug'),
+            'professions' => Profession::query()->active()->orderBy('name')->pluck('name', 'slug'),
         ]);
     }
 }

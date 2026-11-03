@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 use Laravel\Sanctum\HasApiTokens;
 
@@ -100,6 +101,26 @@ class User extends Authenticatable
     public function roleAssignments(): HasMany
     {
         return $this->hasMany(RoleAssignment::class);
+    }
+
+    /**
+     * Profils professionnels du membre, le principal en premier (PM-02).
+     *
+     * @return HasMany<MemberProfile, $this>
+     */
+    public function memberProfiles(): HasMany
+    {
+        return $this->hasMany(MemberProfile::class)->chaperone('user')->orderByDesc('is_primary')->oldest();
+    }
+
+    /**
+     * Profils affichés aux autres membres (PM-05).
+     *
+     * @return Collection<int, MemberProfile>
+     */
+    public function publicMemberProfiles(): Collection
+    {
+        return $this->memberProfiles->loadMissing('profession')->filter(fn (MemberProfile $profile) => $profile->isPublic())->values();
     }
 
     /**
