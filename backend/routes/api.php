@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\AssistantController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CollaborationController;
 use App\Http\Controllers\Api\ContactRequestController;
+use App\Http\Controllers\Api\DeviceController;
 use App\Http\Controllers\Api\DocumentController;
 use App\Http\Controllers\Api\EventController;
 use App\Http\Controllers\Api\ExpertController;
@@ -72,6 +73,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('me', [ProfileController::class, 'update']);
     Route::delete('me', [ProfileController::class, 'destroy']);
     Route::post('me/terms', [ProfileController::class, 'acceptTerms']);
+    Route::get('me/devices', [DeviceController::class, 'index']);
+    Route::delete('me/devices/{device}', [DeviceController::class, 'destroy']);
+    Route::post('me/devices/logout-others', [DeviceController::class, 'destroyOthers']);
     Route::get('me/profiles', [MemberProfileController::class, 'index']);
     Route::post('me/profiles', [MemberProfileController::class, 'store']);
     Route::patch('member-profiles/{memberProfile}', [MemberProfileController::class, 'update']);

@@ -157,6 +157,7 @@
 
     <x-card class="text-sm">
         <h2 class="font-semibold">Mes données</h2>
+        <a href="{{ route('devices.index') }}" class="mt-1 block py-1 font-medium text-brand-700 underline">Mes appareils connectés</a>
         <p class="mt-1 text-stone-600">Téléchargez tout ce qu'IDEE garde sur vous, ou supprimez votre compte.</p>
         <a href="{{ route('account.export') }}" class="mt-3 block py-1 font-medium text-brand-700 underline">Télécharger mes données</a>
         <a href="{{ route('account.delete') }}" class="block py-1 font-medium text-red-700 underline">Supprimer mon compte</a>

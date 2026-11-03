@@ -7,6 +7,7 @@ use App\Http\Controllers\Web\AlertController;
 use App\Http\Controllers\Web\AssistantController;
 use App\Http\Controllers\Web\CollaborationController;
 use App\Http\Controllers\Web\ContactRequestController;
+use App\Http\Controllers\Web\DeviceController;
 use App\Http\Controllers\Web\DocumentController;
 use App\Http\Controllers\Web\EventController;
 use App\Http\Controllers\Web\ExpertController;
@@ -180,6 +181,9 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/profil', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profil', [ProfileController::class, 'update'])->name('profile.update');
+    Route::get('/profil/appareils', [DeviceController::class, 'index'])->name('devices.index');
+    Route::delete('/profil/appareils/{device}', [DeviceController::class, 'destroy'])->name('devices.destroy');
+    Route::post('/profil/appareils/autres', [DeviceController::class, 'destroyOthers'])->name('devices.destroy-others');
     Route::get('/profil/metiers', [MemberProfileController::class, 'index'])->name('member-profiles.index');
     Route::post('/profil/metiers', [MemberProfileController::class, 'store'])->name('member-profiles.store');
     Route::get('/profil/metiers/{memberProfile}', [MemberProfileController::class, 'edit'])->name('member-profiles.edit');
