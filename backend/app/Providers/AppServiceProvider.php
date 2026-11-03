@@ -20,6 +20,8 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\View\View as ViewInstance;
+use Laravel\Sanctum\PersonalAccessToken;
+use Laravel\Sanctum\Sanctum;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -52,6 +54,13 @@ class AppServiceProvider extends ServiceProvider
             Limit::perMinute(1)->by('code:'.($request->input('phone') ?: $request->input('email'))),
             Limit::perHour(10)->by('ip:'.$request->ip()),
         ]);
+
+        // Un appareil inutilisé depuis trop longtemps est déconnecté (la durée maximale
+        // d'un jeton est fixée à sa création, dans AuthController).
+        Sanctum::authenticateAccessTokensUsing(
+            fn (PersonalAccessToken $token, bool $isValid) => $isValid
+                && ($token->last_used_at ?? $token->created_at)->gt(now()->subDays(config('idee.sessions.idle_days'))),
+        );
 
         RateLimiter::for('otp-verify', fn (Request $request) => Limit::perMinute(10)->by($request->ip()));
 

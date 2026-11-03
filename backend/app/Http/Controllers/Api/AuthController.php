@@ -32,7 +32,11 @@ class AuthController extends Controller
             $request->validated('name'),
         );
 
-        $token = $user->createToken($request->validated('device_name') ?? 'application')->plainTextToken;
+        $token = $user->createToken(
+            $request->validated('device_name') ?? 'application',
+            ['*'],
+            now()->addDays(config('idee.sessions.max_days')),
+        )->plainTextToken;
 
         return response()->json([
             'token' => $token,
