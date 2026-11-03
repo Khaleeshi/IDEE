@@ -6,7 +6,9 @@ use App\Models\User;
 use App\Notifications\LoginCode;
 use App\Notifications\VerifyEmailAddress;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Mail\Transport\ResendTransport;
 use Illuminate\Notifications\AnonymousNotifiable;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\URL;
 use Tests\TestCase;
@@ -89,5 +91,12 @@ class EmailLoginTest extends TestCase
 
         $this->get(route('email.verify', ['user' => $member->id, 'hash' => sha1('fatou@exemple.sn')]))->assertForbidden();
         $this->assertNull($member->fresh()->email_verified_at);
+    }
+
+    public function test_codes_can_be_sent_through_resend_in_production(): void
+    {
+        config(['mail.default' => 'resend', 'services.resend.key' => 're_test']);
+
+        $this->assertInstanceOf(ResendTransport::class, Mail::mailer()->getSymfonyTransport());
     }
 }
