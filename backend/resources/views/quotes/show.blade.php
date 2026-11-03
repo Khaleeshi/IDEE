@@ -54,5 +54,23 @@
         @endif
     </div>
 
+    @if ($quote->status->value === 'terminee')
+        {{-- AV-01 : avis du client après une prestation confirmée terminée. --}}
+        @php($review = \App\Models\Review::where('quote_request_id', $quote->id)->first())
+        <h2 class="mb-2 mt-5 font-semibold">Avis</h2>
+        @if ($review)
+            @include('accompaniments.partials.review', ['review' => $review])
+        @elseif (! $isExpert)
+            <x-card>
+                <form method="POST" action="{{ route('quotes.review', $quote) }}">
+                    @csrf
+                    <x-select name="rating" label="Votre note" :options="[5 => '5 · Excellent', 4 => '4 · Très bien', 3 => '3 · Bien', 2 => '2 · Moyen', 1 => '1 · Décevant']" :value="old('rating', 5)" />
+                    <x-field name="comment" type="textarea" rows="3" label="Votre avis (facultatif)" maxlength="2000" />
+                    <x-button class="w-full">Publier mon avis</x-button>
+                </form>
+            </x-card>
+        @endif
+    @endif
+
     <p class="mt-6 text-xs text-stone-500">Le paiement de la prestation se fait directement entre vous : aucun argent ne transite par IDEE.</p>
 </x-layout>

@@ -141,6 +141,7 @@
         <a href="{{ route('organisations.index') }}" class="rounded-xl border border-stone-200 bg-white p-3 text-center font-medium text-stone-800">Organisations</a>
         <a href="{{ route('experts.index') }}" class="rounded-xl border border-stone-200 bg-white p-3 text-center font-medium text-stone-800">Experts vérifiés</a>
         <a href="{{ route('groups.index') }}" class="rounded-xl border border-stone-200 bg-white p-3 text-center font-medium text-stone-800">Groupes</a>
+        <a href="{{ route('accompaniments.index') }}" class="col-span-2 rounded-xl border border-stone-200 bg-white p-3 text-center font-medium text-stone-800">Accompagnements (mentorat, bénévolat)</a>
         <a href="{{ route('quotes.index') }}" class="col-span-2 rounded-xl border border-stone-200 bg-white p-3 text-center font-medium text-stone-800">Devis et prestations</a>
         <a href="{{ route('offers.index') }}" class="col-span-2 rounded-xl border border-stone-200 bg-white p-3 text-center font-medium text-stone-800">Offres et paiements</a>
     </nav>

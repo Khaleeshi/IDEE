@@ -26,9 +26,9 @@ class QuoteService
             throw ValidationException::withMessages(['description' => 'Vous ne pouvez pas vous demander un devis.']);
         }
 
-        // RG-11 : seul un expert à l'identité vérifiée reçoit des demandes de devis.
-        if (! $expert->hasRole(UserRole::Expert) || ! $expert->hasVerifiedIdentity()) {
-            throw ValidationException::withMessages(['description' => 'Ce membre n\'est pas un expert vérifié.']);
+        // RG-11 : seul un expert ou un coach à l'identité vérifiée reçoit des demandes de devis.
+        if (! ($expert->hasRole(UserRole::Expert) || $expert->hasRole(UserRole::Coach)) || ! $expert->hasVerifiedIdentity()) {
+            throw ValidationException::withMessages(['description' => 'Ce membre n\'est pas un expert ou un coach vérifié.']);
         }
 
         if ($project !== null && ! $project->isOwnedBy($client)) {

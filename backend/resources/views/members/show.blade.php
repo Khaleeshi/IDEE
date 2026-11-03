@@ -38,6 +38,10 @@
             <p class="mt-3 whitespace-pre-line text-stone-700">{{ $member->bio }}</p>
         @endif
 
+        @php($reviewSummary = app(\App\Services\Accompaniments\ReviewService::class)->summary($member))
+        @if ($reviewSummary['count'] > 0)
+            <p class="mt-3 text-sm"><a href="#avis" class="font-semibold text-brand-800">★ {{ number_format($reviewSummary['average'], 1, ',', ' ') }}/5</a> <span class="text-stone-500">· {{ $reviewSummary['count'] }} avis après un accompagnement ou une prestation</span></p>
+        @endif
         @php($memberProfiles = $member->publicMemberProfiles())
         @if ($memberProfiles->isNotEmpty())
             {{-- PM-02 : les métiers du membre, le principal en premier. --}}
@@ -49,6 +53,11 @@
                         @if ($profile->description)
                             <p class="mt-1 whitespace-pre-line text-stone-700">{{ $profile->description }}</p>
                         @endif
+                        @auth
+                            @if (! $member->is(auth()->user()) && ($profile->offers_mentoring || $profile->offers_volunteer))
+                                <a href="{{ route('accompaniments.create', $profile) }}" class="mt-2 inline-block font-medium text-brand-700 underline">Demander un accompagnement</a>
+                            @endif
+                        @endauth
                     </li>
                 @endforeach
             </ul>
@@ -117,4 +126,11 @@
             <x-report-form type="membre" :id="$member->id" label="Signaler ce profil" class="mt-6 text-center" />
         @endunless
     @endauth
+    @php($memberReviews = \App\Models\Review::where('reviewee_id', $member->id)->with('reviewer')->latest()->limit(10)->get())
+    @if ($memberReviews->isNotEmpty())
+        <h2 id="avis" class="mb-2 mt-5 font-semibold">Avis</h2>
+        @foreach ($memberReviews as $review)
+            @include('accompaniments.partials.review', ['review' => $review])
+        @endforeach
+    @endif
 </x-layout>
