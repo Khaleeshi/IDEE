@@ -5,7 +5,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <meta name="theme-color" content="#077a3f">
+    <meta name="theme-color" content="#5b21b6">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     @php($description ??= 'IDEE, le réseau où les projets trouvent les personnes qui les font avancer.')
     <meta name="description" content="{{ $description }}">
@@ -35,7 +35,7 @@
 <body class="min-h-screen bg-stone-50 font-sans text-stone-900 antialiased">
     <header class="sticky top-0 z-10 border-b border-stone-200 bg-white/95 backdrop-blur">
         <div class="mx-auto flex h-14 max-w-2xl items-center justify-between px-4">
-            <a href="{{ route('home') }}" class="text-xl font-bold tracking-tight text-brand-700">IDEE</a>
+            <a href="{{ route('home') }}" class="bg-linear-to-r from-brand-800 to-brand-500 bg-clip-text text-xl font-bold tracking-tight text-transparent">IDEE</a>
             @guest
                 <a href="{{ route('login') }}" class="rounded-full bg-brand-700 px-4 py-2 text-sm font-semibold text-white">Se connecter</a>
             @else
