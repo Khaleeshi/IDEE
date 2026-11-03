@@ -88,14 +88,15 @@ void main() {
   testWidgets('un identifiant invalide est refusé sans appel au serveur', (tester) async {
     FlutterSecureStorage.setMockInitialValues({});
     var calls = 0;
-    final session = Session(api: ApiClient(baseUrl: 'https://idee.test', client: MockClient((_) async {
-      calls++;
+    final session = Session(api: ApiClient(baseUrl: 'https://idee.test', client: MockClient((request) async {
+      // Seule la liste des canaux est lue à l'ouverture ; aucun code ne doit être demandé.
+      if (request.url.path != '/api/auth/options') calls++;
       return http.Response('{}', 200);
     })));
     await session.restore();
 
     await tester.pumpWidget(IdeeApp(session: session));
-    await tester.enterText(find.byType(TextField).first, '12');
+    await tester.enterText(find.widgetWithText(TextField, 'Numéro de téléphone ou e-mail'), '12');
     await tester.tap(find.text('Recevoir mon code'));
     await tester.pump();
 

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../api.dart';
 import '../countries.dart';
 import '../session.dart';
 import '../widgets.dart';
@@ -65,8 +64,8 @@ class _LoginScreenState extends State<LoginScreen> {
         _smsPrice = (sms['price_fcfa'] as num?)?.toInt() ?? 500;
         _methods = (options['payment_methods'] as List? ?? const []).cast<Map<String, dynamic>>();
       });
-    } on ApiException {
-      // Sans réponse du serveur, WhatsApp et l'e-mail restent proposés.
+    } catch (_) {
+      // Sans réponse exploitable du serveur, WhatsApp et l'e-mail restent proposés.
     }
   }
 
