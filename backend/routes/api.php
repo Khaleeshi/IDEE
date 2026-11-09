@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\AccompanimentController;
 use App\Http\Controllers\Api\AlertController;
 use App\Http\Controllers\Api\AssistantController;
 use App\Http\Controllers\Api\AuthController;
@@ -49,6 +50,7 @@ Route::prefix('auth')->group(function () {
 // Consultation publique.
 Route::get('sectors', [SectorController::class, 'index']);
 Route::get('professions', [ProfessionController::class, 'index']);
+Route::get('members/{user}/reviews', [AccompanimentController::class, 'memberReviews']);
 Route::get('projects', [ProjectController::class, 'index']);
 Route::get('projects/{project}', [ProjectController::class, 'show']);
 Route::get('projects/{project}/needs', [NeedController::class, 'index']);
@@ -122,6 +124,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('programme-applications/{programmeApplication}/decide', [ProgrammeController::class, 'decide']);
     Route::get('organisations/{organisation}/cohorts', [ProgrammeController::class, 'cohorts']);
     Route::get('cohorts/{cohort}', [ProgrammeController::class, 'cohort']);
+    Route::get('me/accompaniments', [AccompanimentController::class, 'index']);
+    Route::post('member-profiles/{memberProfile}/accompaniments', [AccompanimentController::class, 'store']);
+    Route::get('accompaniments/{accompaniment}', [AccompanimentController::class, 'show']);
+    Route::post('accompaniments/{accompaniment}/respond', [AccompanimentController::class, 'respond']);
+    Route::post('accompaniments/{accompaniment}/cancel', [AccompanimentController::class, 'cancel']);
+    Route::post('accompaniments/{accompaniment}/sessions', [AccompanimentController::class, 'storeSession']);
+    Route::post('accompaniments/{accompaniment}/complete', [AccompanimentController::class, 'complete']);
+    Route::post('accompaniments/{accompaniment}/review', [AccompanimentController::class, 'review']);
+    Route::post('reviews/{review}/reply', [AccompanimentController::class, 'reply']);
     Route::get('me/quotes', [QuoteController::class, 'index']);
     Route::post('members/{user}/quotes', [QuoteController::class, 'store']);
     Route::get('quotes/{quoteRequest}', [QuoteController::class, 'show']);
@@ -156,6 +167,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('projects/{project}/team', [ProjectController::class, 'addTeamMember']);
     Route::patch('team-members/{projectMember}', [ProjectController::class, 'updateTeamMember']);
     Route::delete('team-members/{projectMember}', [ProjectController::class, 'removeTeamMember']);
+    Route::post('team-members/{projectMember}/answer', [ProjectController::class, 'answerInvitation']);
+    Route::get('projects/{project}/calendar', [ProjectController::class, 'calendar']);
 
     Route::post('projects/{project}/updates', [ProjectUpdateController::class, 'store']);
     Route::post('projects/{project}/needs', [NeedController::class, 'store']);

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Web\AccompanimentController;
 use App\Http\Controllers\Web\AccountController;
 use App\Http\Controllers\Web\Admin\AdminController;
 use App\Http\Controllers\Web\Admin\ProfessionController;
@@ -64,6 +65,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/projets/{project}/equipe', [ProjectController::class, 'addTeamMember'])->name('projects.team.store');
     Route::patch('/equipe/{projectMember}', [ProjectController::class, 'updateTeamMember'])->name('projects.team.update');
     Route::delete('/equipe/{projectMember}', [ProjectController::class, 'removeTeamMember'])->name('projects.team.destroy');
+    Route::get('/equipe/{projectMember}/invitation', [ProjectController::class, 'invitation'])->name('team.invitation');
+    Route::post('/equipe/{projectMember}/invitation', [ProjectController::class, 'answerInvitation'])->name('team.invitation.answer');
+    Route::get('/projets/{project}/calendrier', [ProjectController::class, 'calendar'])->name('projects.calendar');
     Route::post('/projets/{project}/besoins', [NeedController::class, 'store'])->name('needs.store');
     Route::post('/projets/{project}/assistant/questions', [AssistantController::class, 'clarify'])->name('assistant.clarify');
     Route::put('/clarifications/{ideaClarification}', [AssistantController::class, 'answer'])->name('assistant.answer');
@@ -168,6 +172,19 @@ Route::middleware('auth')->group(function () {
     Route::get('/cohortes/{cohort}', [ProgrammeController::class, 'cohort'])->name('cohorts.show');
     Route::post('/cohortes/{cohort}/projets', [ProgrammeController::class, 'addToCohort'])->name('cohorts.add');
     Route::post('/suivi-cohorte/{cohortProject}', [ProgrammeController::class, 'checkin'])->name('cohorts.checkin');
+    Route::post('/cohortes/projets/{cohortProject}/coach', [ProgrammeController::class, 'assignCoach'])->name('cohorts.coach');
+    Route::get('/cohortes/{cohort}/export', [ProgrammeController::class, 'export'])->name('cohorts.export');
+    Route::get('/accompagnements', [AccompanimentController::class, 'index'])->name('accompaniments.index');
+    Route::get('/metiers/{memberProfile}/accompagnement', [AccompanimentController::class, 'create'])->name('accompaniments.create');
+    Route::post('/metiers/{memberProfile}/accompagnement', [AccompanimentController::class, 'store'])->name('accompaniments.store');
+    Route::get('/accompagnements/{accompaniment}', [AccompanimentController::class, 'show'])->name('accompaniments.show');
+    Route::post('/accompagnements/{accompaniment}/reponse', [AccompanimentController::class, 'respond'])->name('accompaniments.respond');
+    Route::post('/accompagnements/{accompaniment}/retrait', [AccompanimentController::class, 'cancel'])->name('accompaniments.cancel');
+    Route::post('/accompagnements/{accompaniment}/seances', [AccompanimentController::class, 'storeSession'])->name('accompaniments.sessions.store');
+    Route::post('/accompagnements/{accompaniment}/fin', [AccompanimentController::class, 'complete'])->name('accompaniments.complete');
+    Route::post('/accompagnements/{accompaniment}/avis', [AccompanimentController::class, 'review'])->name('accompaniments.review');
+    Route::post('/devis/{quoteRequest}/avis', [QuoteController::class, 'review'])->name('quotes.review');
+    Route::post('/avis/{review}/reponse', [AccompanimentController::class, 'reply'])->name('reviews.reply');
     Route::get('/devis', [QuoteController::class, 'index'])->name('quotes.index');
     Route::get('/membres/{user}/devis', [QuoteController::class, 'create'])->name('quotes.create');
     Route::post('/membres/{user}/devis', [QuoteController::class, 'store'])->name('quotes.store');

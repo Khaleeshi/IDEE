@@ -14,6 +14,10 @@
         <p class="mt-3 text-xs text-stone-500">RCCM {{ $organisation->rccm }} · NINEA {{ $organisation->ninea }} · vérifiés par IDEE le {{ $organisation->verified_at->translatedFormat('d F Y') }}</p>
     @endif
 
+    @if ($managesProgrammes && ! $canManage)
+        {{-- IN-01 : un gestionnaire suit programmes et cohortes sans gérer la page. --}}
+        <x-button :href="route('cohorts.index', $organisation)" variant="secondary" class="mb-3 w-full">Suivre les cohortes</x-button>
+    @endif
     @if ($canManage)
         <x-button :href="route('organisations.manage', $organisation)" variant="secondary" class="mt-4 w-full">Gérer la page</x-button>
     @endif

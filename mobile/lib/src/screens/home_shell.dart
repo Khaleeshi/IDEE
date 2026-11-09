@@ -33,17 +33,19 @@ class _HomeShellState extends State<HomeShell> {
 
     return Scaffold(
       body: pages[_index],
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _index,
-        indicatorColor: brand.withValues(alpha: 0.12),
-        onDestinationSelected: (index) => setState(() => _index = index),
-        destinations: const [
-          NavigationDestination(icon: Icon(Icons.home_outlined), label: 'Accueil'),
-          NavigationDestination(icon: Icon(Icons.route_outlined), label: 'Parcours'),
-          NavigationDestination(icon: Icon(Icons.inbox_outlined), label: 'Demandes'),
-          NavigationDestination(icon: Icon(Icons.notifications_outlined), label: 'Alertes'),
-          NavigationDestination(icon: Icon(Icons.person_outline), label: 'Profil'),
-        ],
+      bottomNavigationBar: DecoratedBox(
+        decoration: const BoxDecoration(border: Border(top: BorderSide(color: line))),
+        child: NavigationBar(
+          selectedIndex: _index,
+          onDestinationSelected: (index) => setState(() => _index = index),
+          destinations: const [
+            NavigationDestination(icon: Icon(Icons.home_outlined), selectedIcon: Icon(Icons.home), label: 'Accueil'),
+            NavigationDestination(icon: Icon(Icons.route_outlined), selectedIcon: Icon(Icons.route), label: 'Parcours'),
+            NavigationDestination(icon: Icon(Icons.inbox_outlined), selectedIcon: Icon(Icons.inbox), label: 'Demandes'),
+            NavigationDestination(icon: Icon(Icons.notifications_outlined), selectedIcon: Icon(Icons.notifications), label: 'Alertes'),
+            NavigationDestination(icon: Icon(Icons.person_outline), selectedIcon: Icon(Icons.person), label: 'Profil'),
+          ],
+        ),
       ),
     );
   }

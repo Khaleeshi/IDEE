@@ -79,8 +79,8 @@ class JourneyScreen extends StatelessWidget {
               return Card(
                 child: ExpansionTile(
                   leading: CircleAvatar(
-                    backgroundColor: step.isDone ? brand : Colors.black12,
-                    child: Text(step.isDone ? '✓' : '${entry.key + 1}', style: TextStyle(color: step.isDone ? Colors.white : Colors.black87)),
+                    backgroundColor: step.isDone ? brand : brandTint,
+                    child: Text(step.isDone ? '✓' : '${entry.key + 1}', style: TextStyle(fontWeight: FontWeight.w700, color: step.isDone ? Colors.white : brand)),
                   ),
                   title: Text(step.title),
                   subtitle: step.status != null ? Text(step.status!.label) : null,

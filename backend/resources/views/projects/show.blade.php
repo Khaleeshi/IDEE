@@ -85,10 +85,17 @@
                 <span><span class="font-medium">{{ $project->owner->name }}</span> <span class="text-stone-500">· porteur du projet</span></span>
             </li>
             @foreach ($team as $member)
+                @continue($member->isPending() && ! $isOwner)
                 <li class="rounded-xl border border-stone-200 bg-white p-3">
                     <div class="flex items-center justify-between gap-2">
                         <span>
-                            <span class="font-medium">{{ $member->name }}</span> <span class="text-stone-500">· {{ $member->role }}</span>
+                            @if ($member->user_id && ! $member->isPending())
+                                <a href="{{ route('members.show', $member->user_id) }}" class="font-medium underline">{{ $member->name }}</a>
+                            @else
+                                <span class="font-medium">{{ $member->name }}</span>
+                            @endif
+                            <span class="text-stone-500">· {{ $member->role }}</span>
+                            @if ($member->isPending())<span class="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-900">invitation envoyée</span>@endif
                             @if ($showShares && $member->share_percent !== null)
                                 <span class="text-stone-500">· part envisagée {{ rtrim(rtrim(number_format($member->share_percent, 2, ',', ''), '0'), ',') }} %</span>
                             @endif
@@ -123,14 +130,25 @@
             <p class="mt-2 text-xs text-stone-500">Parts envisagées entre associés, indicatives et visibles seulement du porteur et des personnes qui ont accepté l'accord de confidentialité. IDEE n'organise aucune vente ni aucun échange de parts.</p>
         @endif
         @if ($isOwner)
-            <details class="mt-2" @if ($errors->hasAny(['name', 'role', 'share_percent'])) open @endif>
+            <details class="mt-2" @if ($errors->hasAny(['identifier', 'name', 'role', 'share_percent'])) open @endif>
                 <summary class="cursor-pointer py-2 text-sm font-medium text-brand-700">+ Ajouter une personne</summary>
                 <form method="POST" action="{{ route('projects.team.store', $project) }}" class="mt-2 grid gap-2 sm:grid-cols-2">
                     @csrf
+                    {{-- EQ-01 : inviter un membre d'IDEE, ou ajouter une personne qui n'a pas de compte. --}}
+                    <label class="sr-only" for="equipe-membre">Membre d'IDEE à inviter</label>
+                    <input id="equipe-membre" name="identifier" maxlength="255" value="{{ old('identifier') }}" placeholder="Membre d'IDEE : son numéro ou son e-mail" class="rounded-xl border border-stone-300 px-3 py-3 text-base sm:col-span-2">
                     <label class="sr-only" for="equipe-nom">Nom</label>
-                    <input id="equipe-nom" name="name" required maxlength="120" placeholder="Nom" class="rounded-xl border border-stone-300 px-3 py-3 text-base">
-                    <label class="sr-only" for="equipe-role">Rôle</label>
-                    <input id="equipe-role" name="role" required maxlength="120" placeholder="Rôle, ex. : production" class="rounded-xl border border-stone-300 px-3 py-3 text-base">
+                    <input id="equipe-nom" name="name" maxlength="120" value="{{ old('name') }}" placeholder="Ou son nom, s'il n'est pas sur IDEE" class="rounded-xl border border-stone-300 px-3 py-3 text-base">
+                    <label class="sr-only" for="equipe-role">Fonction</label>
+                    <input id="equipe-role" name="role" required maxlength="120" list="fonctions-projet" value="{{ old('role') }}" placeholder="Fonction, ex. : chef de projet" class="rounded-xl border border-stone-300 px-3 py-3 text-base">
+                    <datalist id="fonctions-projet">
+                        @foreach (['Cofondateur', 'Chef de projet', 'Coordinateur', 'Coach', 'Mentor', 'Expert-comptable', 'Juriste', 'Développeur', 'Responsable commercial', 'Responsable production', 'Responsable marketing', 'Investisseur pressenti'] as $function)
+                            <option value="{{ $function }}">
+                        @endforeach
+                    </datalist>
+                    @foreach (['identifier', 'name', 'role', 'share_percent'] as $field)
+                        @error($field)<p class="text-sm text-red-700 sm:col-span-2">{{ $message }}</p>@enderror
+                    @endforeach
                     <label class="sr-only" for="equipe-part">Part envisagée (%)</label>
                     <input id="equipe-part" name="share_percent" type="number" inputmode="decimal" min="0" max="100" step="0.01" placeholder="Part envisagée en % (facultatif)" class="rounded-xl border border-stone-300 px-3 py-3 text-base sm:col-span-2">
                     <x-button variant="secondary" class="sm:col-span-2">Ajouter</x-button>
@@ -141,6 +159,7 @@
 
     @if ($canManageTasks)
         <a href="{{ route('tasks.index', $project) }}" class="mt-4 block rounded-xl border border-brand-100 bg-brand-50 p-3 text-sm font-medium text-brand-800">Tableau de tâches partagé →</a>
+        <a href="{{ route('projects.calendar', $project) }}" class="mt-2 block rounded-xl border border-brand-100 bg-brand-50 p-3 text-sm font-medium text-brand-800">Calendrier du projet →</a>
     @endif
     @if ($isOwner)
         {{-- Offre Pro : statistiques de visibilité ; PA-02 : mise en avant « Sponsorisé ». --}}

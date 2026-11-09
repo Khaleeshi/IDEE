@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../api.dart';
 import '../session.dart';
 import '../widgets.dart';
+import 'accompaniments_screen.dart';
 import 'devices_screen.dart';
 import 'professions_screen.dart';
 
@@ -18,38 +19,62 @@ class ProfileScreen extends StatelessWidget {
       appBar: AppBar(title: const Text('Profil')),
       body: Loader<Map<String, dynamic>>(
         load: () async => (await session.api.get('me'))['data'] as Map<String, dynamic>,
-        builder: (context, me, _) => ListView(padding: const EdgeInsets.all(16), children: [
-          Text(me['name'] as String? ?? '', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 4),
-          Text([me['phone'], me['email'], me['region']].whereType<String>().join(' · '), style: const TextStyle(color: Colors.black54)),
-          const SizedBox(height: 16),
-          ListTile(
-            contentPadding: EdgeInsets.zero,
-            title: const Text('Demandes de contact cette semaine'),
-            trailing: Text('${me['contact_requests_sent_this_week']} / ${me['weekly_contact_quota']}'),
+        builder: (context, me, _) => ListView(padding: pagePadding(context, top: 20), children: [
+          Row(children: [
+            Avatar(me['name'] as String? ?? '', size: 64),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text(me['name'] as String? ?? '', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: ink)),
+                const SizedBox(height: 4),
+                Text([me['phone'], me['email'], me['region']].whereType<String>().join(' · '), style: const TextStyle(color: muted)),
+              ]),
+            ),
+          ]),
+          const SizedBox(height: 20),
+          Card(
+            child: Column(children: [
+              ListTile(
+                leading: const Icon(Icons.send_outlined),
+                title: const Text('Demandes de contact cette semaine'),
+                trailing: Text('${me['contact_requests_sent_this_week']} / ${me['weekly_contact_quota']}', style: const TextStyle(fontWeight: FontWeight.w700)),
+              ),
+              const Divider(indent: 16, endIndent: 16),
+              ListTile(
+                leading: const Icon(Icons.verified_user_outlined),
+                title: const Text('Vérification'),
+                trailing: Tag.brand((me['verification'] as Map?)?['label'] as String? ?? ''),
+              ),
+            ]),
           ),
-          ListTile(
-            contentPadding: EdgeInsets.zero,
-            title: const Text('Vérification'),
-            trailing: Text((me['verification'] as Map?)?['label'] as String? ?? ''),
-          ),
-          ListTile(
-            contentPadding: EdgeInsets.zero,
-            leading: const Icon(Icons.work_outline, color: brand),
-            title: const Text('Mes métiers'),
-            subtitle: Text(((me['profiles'] as List?) ?? const []).map((profile) => (profile as Map)['label']).join(', ').ifEmpty('Coach, chef de projet, comptable…')),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => ProfessionsScreen(session: session))),
-          ),
-          ListTile(
-            contentPadding: EdgeInsets.zero,
-            leading: const Icon(Icons.devices_outlined, color: brand),
-            title: const Text('Mes appareils connectés'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => DevicesScreen(session: session))),
+          Card(
+            child: Column(children: [
+              ListTile(
+                leading: const Icon(Icons.work_outline),
+                title: const Text('Mes métiers'),
+                subtitle: Text(((me['profiles'] as List?) ?? const []).map((profile) => (profile as Map)['label']).join(', ').ifEmpty('Coach, chef de projet, comptable…')),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => ProfessionsScreen(session: session))),
+              ),
+              const Divider(indent: 16, endIndent: 16),
+              ListTile(
+                leading: const Icon(Icons.handshake_outlined),
+                title: const Text('Accompagnements'),
+                subtitle: const Text('Mentorat et aide bénévole'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => AccompanimentsScreen(session: session))),
+              ),
+              const Divider(indent: 16, endIndent: 16),
+              ListTile(
+                leading: const Icon(Icons.devices_outlined),
+                title: const Text('Mes appareils connectés'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => DevicesScreen(session: session))),
+              ),
+            ]),
           ),
           const SizedBox(height: 8),
-          Text('Pour modifier votre profil, vos rôles ou vos préférences, ouvrez $apiUrl/profil.', style: const TextStyle(fontSize: 13, color: Colors.black54)),
+          Text('Pour modifier votre profil, vos rôles ou vos préférences, ouvrez $apiUrl/profil.', style: const TextStyle(fontSize: 13, color: muted)),
           const SizedBox(height: 24),
           OutlinedButton(
             style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(48), foregroundColor: Colors.red.shade700),
@@ -116,7 +141,7 @@ class _DeleteAccountDialogState extends State<DeleteAccountDialog> {
             'Les messages déjà envoyés restent chez vos interlocuteurs, sous le nom « Membre supprimé ».',
           ),
           const SizedBox(height: 8),
-          Text('Pour garder une copie de vos données, téléchargez-les d\'abord depuis $apiUrl/profil.', style: const TextStyle(fontSize: 13, color: Colors.black54)),
+          Text('Pour garder une copie de vos données, téléchargez-les d\'abord depuis $apiUrl/profil.', style: const TextStyle(fontSize: 13, color: muted)),
           const SizedBox(height: 12),
           TextField(
             controller: _confirmation,

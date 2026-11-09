@@ -24,6 +24,7 @@ use App\Services\ContactRequests\ReactivityIndicator;
 use App\Services\Documents\DocumentService;
 use App\Services\Journeys\JourneyService;
 use App\Services\Network\FollowService;
+use App\Services\Projects\ProjectCalendar;
 use App\Services\Projects\ProjectService;
 use App\Services\Projects\ReadinessScore;
 use App\Services\Projects\VisibilityStats;
@@ -120,6 +121,39 @@ class ProjectController extends Controller
         $this->projects->removeTeamMember($projectMember);
 
         return redirect()->to(route('projects.show', $projectMember->project).'#equipe')->with('status', 'Personne retirée de l\'équipe.');
+    }
+
+    /**
+     * EQ-01 : la personne invitée voit l'invitation et y répond.
+     */
+    public function invitation(Request $request, ProjectMember $projectMember): View
+    {
+        abort_unless($projectMember->user_id === $request->user()->id, 404);
+
+        return view('projects.invitation', ['member' => $projectMember->load('project.owner')]);
+    }
+
+    public function answerInvitation(Request $request, ProjectMember $projectMember): RedirectResponse
+    {
+        abort_unless($projectMember->user_id === $request->user()->id, 404);
+        $accepted = $request->boolean('accepted');
+        $project = $projectMember->project;
+
+        $this->projects->answerInvitation($projectMember, $accepted);
+
+        return $accepted
+            ? redirect()->to(route('projects.show', $project).'#equipe')->with('status', 'Bienvenue dans l\'équipe ! Le tableau de tâches et le calendrier du projet vous sont ouverts.')
+            : redirect()->route('notifications.index')->with('status', 'Invitation déclinée.');
+    }
+
+    /**
+     * EQ-03 : calendrier du projet, pour le porteur, l'équipe et les partenaires.
+     */
+    public function calendar(Request $request, Project $project, ProjectCalendar $calendar, TaskService $tasks): View
+    {
+        abort_unless($tasks->canManage($project, $request->user()), 403);
+
+        return view('projects.calendar', ['project' => $project, 'items' => $calendar->upcoming($project)]);
     }
 
     public function mine(Request $request): View

@@ -9,8 +9,11 @@ use App\Models\Project;
 use App\Models\ProjectMember;
 use App\Models\ProjectUpdate;
 use App\Models\User;
+use App\Notifications\TeamInvitation;
 use App\Services\Feed\FeedService;
 use App\Services\Needs\NeedService;
+use App\Support\PhoneNumber;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -92,7 +95,29 @@ class ProjectService
 
         $this->ensureSharesFit($project, $attributes['share_percent'] ?? null);
 
-        $member = $project->team()->create([...$attributes, 'position' => $project->team()->count() + 1]);
+        // EQ-01 : un membre d'IDEE est invité à sa fonction ; il apparaît une fois qu'il accepte.
+        $invitee = null;
+        if (filled($attributes['identifier'] ?? null)) {
+            $invitee = $this->findMember((string) $attributes['identifier']);
+            if ($invitee === null || $invitee->is($project->owner)) {
+                throw ValidationException::withMessages(['identifier' => 'Aucun autre membre d\'IDEE n\'a ce numéro ou cette adresse.']);
+            }
+            if ($project->team()->where('user_id', $invitee->id)->exists()) {
+                throw ValidationException::withMessages(['identifier' => 'Cette personne fait déjà partie de l\'équipe ou est déjà invitée.']);
+            }
+        }
+
+        $member = $project->team()->make([
+            ...Arr::except($attributes, ['identifier']),
+            'name' => $invitee?->name ?? $attributes['name'],
+            'position' => $project->team()->count() + 1,
+        ]);
+        $member->forceFill(['user_id' => $invitee?->id, 'invitation_status' => $invitee ? 'invitee' : null])->save();
+
+        if ($invitee) {
+            $invitee->notify(new TeamInvitation($member, $project->owner->name.' vous invite à rejoindre l\'équipe de « '.$project->title.' » comme '.$member->role.'.'));
+        }
+
         $project->recordActivity();
         $this->readiness->refresh($project);
 
@@ -190,5 +215,40 @@ class ProjectService
             ->where('status', ProjectStatus::Actif)
             ->where('last_activity_at', '<', now()->subDays(config('idee.dormant_after_days')))
             ->update(['status' => ProjectStatus::EnSommeil]);
+    }
+
+    /**
+     * EQ-01 : la personne invitée accepte ou décline.
+     *
+     * @throws ValidationException
+     */
+    public function answerInvitation(ProjectMember $member, bool $accepted): ProjectMember
+    {
+        if (! $member->isPending()) {
+            throw ValidationException::withMessages(['invitation' => 'Cette invitation a déjà reçu une réponse.']);
+        }
+
+        if (! $accepted) {
+            $project = $member->project;
+            $name = $member->name;
+            $member->delete();
+            $project->owner->notify(new TeamInvitation($member, $name.' a décliné votre invitation dans l\'équipe de « '.$project->title.' ».'));
+
+            return $member;
+        }
+
+        $member->forceFill(['invitation_status' => 'acceptee', 'responded_at' => now()])->save();
+        $member->project->owner->notify(new TeamInvitation($member, $member->name.' a rejoint l\'équipe de « '.$member->project->title.' » comme '.$member->role.'.'));
+
+        return $member;
+    }
+
+    private function findMember(string $identifier): ?User
+    {
+        $identifier = trim($identifier);
+
+        return str_contains($identifier, '@')
+            ? User::where('email', mb_strtolower($identifier))->whereNotNull('email_verified_at')->first()
+            : (($phone = PhoneNumber::normalize($identifier)) ? User::where('phone', $phone)->first() : null);
     }
 }

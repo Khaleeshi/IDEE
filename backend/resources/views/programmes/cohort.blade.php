@@ -3,7 +3,11 @@
     <h1 class="text-2xl font-bold">{{ $cohort->name }}</h1>
     <p class="mt-1 text-sm text-stone-500">{{ $members->count() }} projet{{ $members->count() > 1 ? 's' : '' }}@if ($cohort->ends_on) · jusqu'au {{ $cohort->ends_on->translatedFormat('d F Y') }}@endif</p>
 
-    @if ($retained->isNotEmpty())
+    @if ($manages)
+        <a href="{{ route('cohorts.export', $cohort) }}" class="mt-2 inline-block text-sm font-medium text-brand-700 underline">Télécharger le tableau de suivi (CSV, pour Excel)</a>
+    @endif
+
+    @if ($manages && $retained->isNotEmpty())
         <x-card class="mt-4">
             <form method="POST" action="{{ route('cohorts.add', $cohort) }}">
                 @csrf
@@ -27,6 +31,20 @@
                 <div class="rounded-xl bg-stone-50 p-2"><dt class="text-stone-500">Besoins ouverts</dt><dd class="text-base font-bold">{{ $project->openNeeds->count() }}</dd></div>
                 <div class="rounded-xl bg-stone-50 p-2"><dt class="text-stone-500">Dernière activité</dt><dd class="text-sm font-semibold">{{ $project->last_activity_at?->diffForHumans(short: true) ?? '—' }}</dd></div>
             </dl>
+            <p class="mt-2 text-xs text-stone-500">Suivi par : {{ $member->coach?->name ?? 'personne pour l\'instant' }}</p>
+            @if ($manages && $coaches->isNotEmpty())
+                <form method="POST" action="{{ route('cohorts.coach', $member) }}" class="mt-1 flex gap-2">
+                    @csrf
+                    <label for="coach-{{ $member->id }}" class="sr-only">Coach qui suit ce projet</label>
+                    <select id="coach-{{ $member->id }}" name="coach_id" class="min-w-0 flex-1 rounded-xl border border-stone-300 bg-white px-2 py-2 text-sm">
+                        <option value="">Aucun coach</option>
+                        @foreach ($coaches as $id => $name)
+                            <option value="{{ $id }}" @selected($member->coach_id === $id)>{{ $name }}</option>
+                        @endforeach
+                    </select>
+                    <x-button variant="secondary" class="min-h-10 shrink-0 px-3 py-2 text-sm">Confier</x-button>
+                </form>
+            @endif
             @if ($member->latestCheckin)
                 <p class="mt-2 text-sm text-stone-700">{{ $member->latestCheckin->note }} <span class="text-xs text-stone-400">· {{ $member->latestCheckin->created_at->translatedFormat('d F') }}</span></p>
             @endif

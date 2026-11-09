@@ -219,6 +219,12 @@ return [
         'validated' => (bool) env('IDEE_LEGAL_VALIDATED', false),
     ],
 
+    // AC-02 : un mentor accompagne quelques personnes à la fois, pour bien les suivre.
+    'accompaniments' => [
+        'max_active_per_coach' => (int) env('IDEE_MAX_MENTEES', 3),
+        'objectives_min_length' => 50,
+    ],
+
     // PM-02 : profils professionnels par membre (coach, chef de projet, formatrice…).
     'member_profiles' => [
         'max_per_member' => (int) env('IDEE_MAX_MEMBER_PROFILES', 5),

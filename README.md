@@ -160,6 +160,20 @@ clients, matériel) et chaque demande de contact reçoit une réponse.
 - E-mails par Resend ; couleurs violet foncé et violet clair
 - Application mobile : pays et SMS payant à la connexion, « Mes métiers », « Mes appareils »
 
+**Étape 9 — cahier des charges v3, lot 2** : accompagnement et incubation.
+
+- Accompagnement : demande de mentorat ou d'aide bénévole au profil d'un coach,
+  acceptation ou refus motivé, trois mentorats en cours au plus par coach, points de
+  suivi datés, fin de l'accompagnement (AC-01 à AC-04)
+- Avis : seulement après un accompagnement terminé ou une prestation confirmée,
+  une note et un commentaire, une réponse publique ; note moyenne sur la fiche (AV-01 à AV-03)
+- Devis ouverts aux coachs à l'identité vérifiée
+- Espace incubateur : postes d'administrateur, de gestionnaire (programmes et cohortes)
+  et de coach ; projets incubés confiés à un coach ; suivi exportable en CSV (IN-01 à IN-03)
+- Équipe du projet : un membre d'IDEE invité à une fonction rejoint l'équipe après
+  avoir accepté et accède au tableau de tâches ; calendrier du projet (EQ-01 à EQ-03)
+- Application mobile : écran « Accompagnements »
+
 **Reste à faire** : saisie vocale en wolof (IA-04, après des tests de qualité) ;
 traduction et enregistrement des fiches en wolof ; paiement par carte (avec un
 agrégateur comme PayDunya ou PayTech) ; documents privés marqués au nom du lecteur ;
@@ -230,6 +244,9 @@ de connexion ne sont pas envoyés par SMS : ils sont écrits dans
 | `/offres` | Offres payantes, mes offres en cours et mes paiements ; `/paiements/{id}/recu` pour le reçu |
 | `/opportunites?projet={id}` | Programmes compatibles avec l'un de mes projets |
 | `/profil` | Mon profil, mes rôles, mes préférences, l'effacement de mes échanges avec l'assistant |
+| `/accompagnements` | Mes accompagnements (mentorat, bénévolat) et les projets incubés que je suis |
+| `/projets/{id}/calendrier` | Calendrier du projet : tâches, étapes convenues, rendez-vous |
+| `/cohortes/{id}/export` | Tableau de suivi d'une cohorte, en CSV |
 | `/profil/appareils` | Mes appareils connectés, déconnexion à distance |
 | `/connexion/sms` | Payer le SMS de connexion, puis recevoir le code |
 | `/profil/metiers` | Mes métiers : profils professionnels, profil principal, interventions payantes, bénévoles ou de mentorat |
@@ -352,6 +369,12 @@ l'en-tête `Authorization: Bearer <jeton>` reçu à la connexion.
 | GET | `/api/auth/options` | public | Canaux de réception du code (WhatsApp, e-mail, SMS et son prix), moyens de paiement, pays |
 | POST, GET | `/api/auth/sms-purchases` · `/api/auth/sms-purchases/{id}` | public | Payer le SMS de connexion (`phone`, `country`, `method`) ; relire le paiement. Puis `POST /api/auth/code` avec `channel: sms` et `sms_purchase_id` |
 | POST | `/api/webhooks/bictorys` | Bictorys | Avis de paiement (secret `X-Secret-Key`), qui déclenche une relecture auprès de Bictorys |
+| GET | `/api/me/accompaniments` | connecté | Mes accompagnements, dans les deux sens |
+| POST | `/api/member-profiles/{id}/accompaniments` | connecté | Demander un accompagnement (`kind` : `mentorat` ou `benevolat`, `objectives`, `project_id`) |
+| POST | `/api/accompaniments/{id}/respond` · `cancel` · `sessions` · `complete` · `review` | coach, accompagné | Répondre, retirer, noter une séance, terminer, laisser un avis |
+| GET, POST | `/api/members/{id}/reviews` · `/api/reviews/{id}/reply` | public, évalué | Avis reçus et note moyenne ; répondre à un avis |
+| POST | `/api/team-members/{id}/answer` | invité | Accepter ou décliner une invitation dans une équipe |
+| GET | `/api/projects/{id}/calendar` | porteur, équipe, partenaires | Calendrier du projet |
 | GET | `/api/me/devices` | connecté | Mes appareils connectés |
 | DELETE, POST | `/api/me/devices/{id}` · `/api/me/devices/logout-others` | connecté | Déconnecter un appareil, ou tous les autres |
 | GET | `/api/professions` | public | Référentiel des métiers actifs, par catégorie |
@@ -394,6 +417,7 @@ Les valeurs se règlent dans `backend/config/idee.php` ou dans le fichier `.env`
 | Section 8 | Suspension préventive après des signalements de personnes différentes | 3 |
 | Section 8 | Expressions qui déclenchent l'alerte anti-arnaque dans la messagerie | liste `scam_alert` |
 | PM-02 | Profils professionnels par membre | 5 |
+| AC-02 | Mentorats en cours par coach ; longueur minimale des objectifs | 3 ; 50 caractères |
 | CP-06 | Déconnexion d'un appareil inutilisé ; durée maximale d'une session | 90 jours ; 1 an |
 | CP-07 | Prix du SMS de connexion, payé d'avance ; envois par achat | 500 FCFA ; 2 |
 | Section 9 | Version des textes légaux : la changer fait accepter de nouveau les textes | 2026-10 |

@@ -10,6 +10,8 @@ use App\Http\Requests\UpdateProjectRequest;
 use App\Http\Resources\ProjectResource;
 use App\Models\Project;
 use App\Models\ProjectMember;
+use App\Services\Collaboration\TaskService;
+use App\Services\Projects\ProjectCalendar;
 use App\Services\Projects\ProjectSearch;
 use App\Services\Projects\ProjectService;
 use App\Services\Projects\VisibilityStats;
@@ -100,10 +102,35 @@ class ProjectController extends Controller
     }
 
     /**
+     * EQ-01 : la personne invitée accepte ou décline (`accepted`).
+     */
+    public function answerInvitation(Request $request, ProjectMember $projectMember): JsonResponse
+    {
+        abort_unless($projectMember->user_id === $request->user()->id, 404);
+        $request->validate(['accepted' => ['required', 'boolean']]);
+        $member = $this->projects->answerInvitation($projectMember, $request->boolean('accepted'));
+
+        return response()->json(['data' => $request->boolean('accepted') ? $this->teamMember($member) : null]);
+    }
+
+    /**
+     * EQ-03 : calendrier du projet (tâches, étapes convenues, rendez-vous), par date.
+     */
+    public function calendar(Request $request, Project $project, ProjectCalendar $calendar, TaskService $tasks): JsonResponse
+    {
+        abort_unless($tasks->canManage($project, $request->user()), 403);
+
+        return response()->json(['data' => $calendar->upcoming($project)->flatten(1)->map(fn (array $item) => [
+            ...$item,
+            'date' => $item['date']->toIso8601String(),
+        ])->values()]);
+    }
+
+    /**
      * @return array<string, mixed>
      */
     private function teamMember(ProjectMember $member): array
     {
-        return ['id' => $member->id, 'name' => $member->name, 'role' => $member->role, 'share_percent' => $member->share_percent];
+        return ['id' => $member->id, 'name' => $member->name, 'role' => $member->role, 'share_percent' => $member->share_percent, 'member_id' => $member->user_id, 'invitation_status' => $member->invitation_status];
     }
 }
