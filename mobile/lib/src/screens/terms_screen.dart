@@ -49,14 +49,14 @@ class _TermsScreenState extends State<TermsScreen> {
           Padding(
             padding: const EdgeInsets.only(bottom: 8),
             child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              const Text('•  '),
+              const Padding(padding: EdgeInsets.only(right: 10), child: Icon(Icons.check_circle_outline, size: 20, color: brand)),
               Expanded(child: Text(rule)),
             ]),
           ),
         const SizedBox(height: 8),
         Text(
           'Textes complets : $apiUrl/conditions-d-utilisation, $apiUrl/charte et $apiUrl/confidentialite.',
-          style: const TextStyle(fontSize: 13, color: Colors.black54),
+          style: const TextStyle(fontSize: 13, color: muted),
         ),
         const SizedBox(height: 12),
         CheckboxListTile(

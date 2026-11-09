@@ -26,14 +26,22 @@ class _FeedScreenState extends State<FeedScreen> {
 
   @override
   Widget build(BuildContext context) {
+    const searchBorder = OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(14)), borderSide: BorderSide.none);
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Projets')),
       body: Column(children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+        BrandHeader(
+          title: 'Projets',
+          subtitle: 'Des projets qui cherchent des associés, des compétences ou un financement.',
           child: TextField(
             textInputAction: TextInputAction.search,
-            decoration: const InputDecoration(hintText: 'Rechercher un projet…', prefixIcon: Icon(Icons.search), border: OutlineInputBorder()),
+            decoration: const InputDecoration(
+              hintText: 'Rechercher un projet…',
+              prefixIcon: Icon(Icons.search, color: brand),
+              border: searchBorder,
+              enabledBorder: searchBorder,
+              focusedBorder: searchBorder,
+            ),
             onSubmitted: (value) => setState(() {
               _query = value.trim();
               _listKey = UniqueKey();
@@ -45,9 +53,9 @@ class _FeedScreenState extends State<FeedScreen> {
             key: _listKey,
             load: _load,
             builder: (context, projects, reload) => projects.isEmpty
-                ? const EmptyState('Aucun projet ne correspond à cette recherche.')
+                ? const EmptyState('Aucun projet ne correspond à cette recherche.', icon: Icons.search_off)
                 : ListView.separated(
-                    padding: const EdgeInsets.all(16),
+                    padding: pagePadding(context),
                     itemCount: projects.length,
                     separatorBuilder: (_, _) => const SizedBox(height: 12),
                     itemBuilder: (context, index) => ProjectCard(project: projects[index], session: widget.session),
@@ -70,24 +78,51 @@ class ProjectCard extends StatelessWidget {
     return Card(
       margin: EdgeInsets.zero,
       child: InkWell(
-        borderRadius: BorderRadius.circular(12),
         onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => ProjectScreen(session: session, projectId: project.id))),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text([project.sector, project.region, project.stage.label].whereType<String>().where((part) => part.isNotEmpty).join(' · '),
-                style: const TextStyle(fontSize: 12, color: Colors.black54)),
-            const SizedBox(height: 4),
-            Text(project.title, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600)),
-            const SizedBox(height: 4),
-            Text(project.summary, maxLines: 3, overflow: TextOverflow.ellipsis),
+            ProjectTags(project: project),
+            const SizedBox(height: 10),
+            Text(project.title, style: const TextStyle(fontSize: 18, height: 1.25, fontWeight: FontWeight.w700, color: ink)),
+            const SizedBox(height: 6),
+            Text(project.summary, maxLines: 3, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 14.5, height: 1.4, color: inkSoft)),
             if (project.needs.isNotEmpty) ...[
-              const SizedBox(height: 8),
-              Wrap(spacing: 6, runSpacing: 6, children: project.needs.map((need) => Chip(label: Text('Cherche : ${need.type.label.toLowerCase()}'), visualDensity: VisualDensity.compact)).toList()),
+              const SizedBox(height: 12),
+              Wrap(spacing: 6, runSpacing: 6, children: [
+                for (final need in project.needs.take(4)) Tag.need('Cherche : ${need.type.label.toLowerCase()}'),
+              ]),
+            ],
+            if (project.owner != null) ...[
+              const SizedBox(height: 14),
+              const Divider(),
+              const SizedBox(height: 12),
+              Row(children: [
+                Avatar(project.owner!.name, size: 28),
+                const SizedBox(width: 8),
+                Expanded(child: Text('Porté par ${project.owner!.name}', overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 13, color: muted))),
+                const Icon(Icons.arrow_forward, size: 18, color: brand),
+              ]),
             ],
           ]),
         ),
       ),
     );
+  }
+}
+
+/// Secteur, étape et région d'un projet.
+class ProjectTags extends StatelessWidget {
+  const ProjectTags({super.key, required this.project});
+
+  final Project project;
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(spacing: 6, runSpacing: 6, children: [
+      if (project.sector?.isNotEmpty ?? false) Tag.brand(project.sector!),
+      if (project.stage.label.isNotEmpty) Tag(project.stage.label),
+      if (project.region?.isNotEmpty ?? false) Tag(project.region!, icon: Icons.place_outlined),
+    ]);
   }
 }

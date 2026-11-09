@@ -17,7 +17,7 @@ class DevicesScreen extends StatelessWidget {
       body: Loader<List<Map<String, dynamic>>>(
         load: () async => ((await session.api.get('me/devices'))['data'] as List).cast<Map<String, dynamic>>(),
         builder: (context, devices, reload) => ListView(padding: const EdgeInsets.all(16), children: [
-          const Text('Où votre compte est ouvert. Un appareil inutilisé pendant 90 jours est déconnecté automatiquement.', style: TextStyle(color: Colors.black54)),
+          const Text('Où votre compte est ouvert. Un appareil inutilisé pendant 90 jours est déconnecté automatiquement.', style: TextStyle(color: muted)),
           const SizedBox(height: 12),
           for (final device in devices)
             Card(

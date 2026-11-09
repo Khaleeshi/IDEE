@@ -16,7 +16,7 @@ class ProfessionsScreen extends StatelessWidget {
       body: Loader<List<Map<String, dynamic>>>(
         load: () async => ((await session.api.get('me/profiles'))['data'] as List).cast<Map<String, dynamic>>(),
         builder: (context, profiles, reload) => ListView(padding: const EdgeInsets.all(16), children: [
-          const Text('Coach, chef de projet, comptable… Ajoutez un profil par métier, jusqu\'à 5.', style: TextStyle(color: Colors.black54)),
+          const Text('Coach, chef de projet, comptable… Ajoutez un profil par métier, jusqu\'à 5.', style: TextStyle(color: muted)),
           const SizedBox(height: 12),
           if (profiles.isEmpty)
             const Padding(padding: EdgeInsets.symmetric(vertical: 24), child: Text('Aucun métier pour l\'instant. Le premier ajouté devient votre profil principal.', textAlign: TextAlign.center)),
@@ -154,7 +154,7 @@ class _ProfileFormState extends State<ProfileForm> {
           DropdownButtonFormField<int>(
             initialValue: _professionId,
             isExpanded: true,
-            decoration: const InputDecoration(labelText: 'Métier', border: OutlineInputBorder()),
+            decoration: const InputDecoration(labelText: 'Métier'),
             items: [
               for (final category in _categories)
                 for (final item in (category['professions'] as List).cast<Map<String, dynamic>>())
@@ -163,17 +163,17 @@ class _ProfileFormState extends State<ProfileForm> {
             onChanged: (value) => setState(() => _professionId = value),
           ),
         const SizedBox(height: 12),
-        TextField(controller: _title, decoration: const InputDecoration(labelText: 'Intitulé affiché (facultatif)', border: OutlineInputBorder())),
+        TextField(controller: _title, decoration: const InputDecoration(labelText: 'Intitulé affiché (facultatif)')),
         const SizedBox(height: 12),
-        TextField(controller: _description, maxLines: 3, decoration: const InputDecoration(labelText: 'Ce que vous apportez', border: OutlineInputBorder())),
+        TextField(controller: _description, maxLines: 3, decoration: const InputDecoration(labelText: 'Ce que vous apportez')),
         const SizedBox(height: 12),
         const Text('Comment intervenez-vous ?', style: TextStyle(fontWeight: FontWeight.w600)),
         CheckboxListTile(contentPadding: EdgeInsets.zero, value: _paid, title: const Text('Prestations payantes'), onChanged: (value) => setState(() => _paid = value ?? false)),
         CheckboxListTile(contentPadding: EdgeInsets.zero, value: _volunteer, title: const Text('Bénévolat'), onChanged: (value) => setState(() => _volunteer = value ?? false)),
         CheckboxListTile(contentPadding: EdgeInsets.zero, value: _mentoring, title: const Text('Mentorat'), onChanged: (value) => setState(() => _mentoring = value ?? false)),
-        const Text('Un profil payant ou de mentorat est visible des autres après la vérification de votre identité.', style: TextStyle(fontSize: 12, color: Colors.black54)),
+        const Text('Un profil payant ou de mentorat est visible des autres après la vérification de votre identité.', style: TextStyle(fontSize: 12, color: muted)),
         const SizedBox(height: 12),
-        TextField(controller: _rate, decoration: const InputDecoration(labelText: 'Tarif indicatif (si payant)', hintText: 'Ex. : 25 000 FCFA la séance', border: OutlineInputBorder())),
+        TextField(controller: _rate, decoration: const InputDecoration(labelText: 'Tarif indicatif (si payant)', hintText: 'Ex. : 25 000 FCFA la séance')),
         if (_editing) ...[
           SwitchListTile(contentPadding: EdgeInsets.zero, value: _primary, title: const Text('Profil principal'), onChanged: (value) => setState(() => _primary = value)),
           SwitchListTile(contentPadding: EdgeInsets.zero, value: _active, title: const Text('Profil actif'), onChanged: (value) => setState(() => _active = value)),

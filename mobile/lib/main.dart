@@ -5,7 +5,7 @@ import 'src/screens/home_shell.dart';
 import 'src/screens/login_screen.dart';
 import 'src/screens/terms_screen.dart';
 import 'src/session.dart';
-import 'src/widgets.dart';
+import 'src/theme.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,7 +30,7 @@ class IdeeApp extends StatelessWidget {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      theme: ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: brand, primary: brand, secondary: brandLight, primaryContainer: brandTint), useMaterial3: true, scaffoldBackgroundColor: const Color(0xFFFAFAF9)),
+      theme: ideeTheme(),
       home: ListenableBuilder(
         listenable: session,
         builder: (context, _) {

@@ -97,7 +97,7 @@ class _AccompanimentScreenState extends State<AccompanimentScreen> {
                 child: const Text('J\'accepte de l\'accompagner'),
               ),
               const SizedBox(height: 12),
-              TextField(controller: _text, decoration: const InputDecoration(labelText: 'Ou déclinez, avec un mot d\'explication', border: OutlineInputBorder())),
+              TextField(controller: _text, decoration: const InputDecoration(labelText: 'Ou déclinez, avec un mot d\'explication')),
               TextButton(onPressed: _busy ? null : () => _act('respond', {'accepted': false, 'reason': _text.text}), child: const Text('Décliner')),
             ],
             if (status == 'demandee' && !isCoach)
@@ -113,7 +113,7 @@ class _AccompanimentScreenState extends State<AccompanimentScreen> {
             ],
             if (status == 'en_cours') ...[
               const SizedBox(height: 8),
-              TextField(controller: _text, maxLines: 3, decoration: const InputDecoration(labelText: 'Noter la séance d\'aujourd\'hui', border: OutlineInputBorder())),
+              TextField(controller: _text, maxLines: 3, decoration: const InputDecoration(labelText: 'Noter la séance d\'aujourd\'hui')),
               const SizedBox(height: 8),
               FilledButton(
                 style: FilledButton.styleFrom(backgroundColor: brand, minimumSize: const Size.fromHeight(48)),
@@ -132,7 +132,7 @@ class _AccompanimentScreenState extends State<AccompanimentScreen> {
                     onPressed: () => setState(() => _rating = star),
                   ),
               ]),
-              TextField(controller: _text, maxLines: 3, decoration: const InputDecoration(labelText: 'Votre avis (facultatif)', border: OutlineInputBorder())),
+              TextField(controller: _text, maxLines: 3, decoration: const InputDecoration(labelText: 'Votre avis (facultatif)')),
               const SizedBox(height: 8),
               FilledButton(
                 style: FilledButton.styleFrom(backgroundColor: brand, minimumSize: const Size.fromHeight(48)),

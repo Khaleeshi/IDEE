@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'api.dart';
 import 'models.dart';
@@ -15,6 +16,161 @@ const brandGradient = LinearGradient(
   end: Alignment.bottomRight,
   colors: [brandDark, brand, Color(0xFF6D28D9)],
 );
+
+/// Tons pierre du site : fond, traits, textes.
+const canvas = Color(0xFFFAFAF9);
+const canvasDeep = Color(0xFFF5F5F4);
+const line = Color(0xFFE7E5E4);
+const lineStrong = Color(0xFFD6D3D1);
+const ink = Color(0xFF1C1917);
+const inkSoft = Color(0xFF57534E);
+const muted = Color(0xFF78716C);
+
+/// Ambre des besoins (« Cherche : … »), comme sur le site.
+const needTint = Color(0xFFFFFBEB);
+const needInk = Color(0xFF78350F);
+
+/// Largeur de lecture : au-delà, sur tablette, le contenu reste centré.
+const readableWidth = 720.0;
+
+/// Marges d'une page : 16 sur téléphone, davantage sur tablette pour centrer le contenu.
+EdgeInsets pagePadding(BuildContext context, {double top = 16, double bottom = 24}) {
+  final width = MediaQuery.sizeOf(context).width;
+  final side = width > readableWidth + 32 ? (width - readableWidth) / 2 : 16.0;
+  return EdgeInsets.fromLTRB(side, top, side, bottom);
+}
+
+/// Limite la largeur d'un bloc et le centre.
+class Readable extends StatelessWidget {
+  const Readable({super.key, required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(child: ConstrainedBox(constraints: const BoxConstraints(maxWidth: readableWidth), child: child));
+  }
+}
+
+/// Le nom IDEE, en blanc sur fond violet ou en dégradé sur fond clair.
+class IdeeLogo extends StatelessWidget {
+  const IdeeLogo({super.key, this.size = 22, this.onDark = false});
+
+  final double size;
+  final bool onDark;
+
+  @override
+  Widget build(BuildContext context) {
+    final text = Text('IDEE', style: TextStyle(fontSize: size, fontWeight: FontWeight.w800, letterSpacing: -0.5, color: Colors.white));
+    if (onDark) return text;
+    return ShaderMask(shaderCallback: (bounds) => const LinearGradient(colors: [brandDark, brandLight]).createShader(bounds), child: text);
+  }
+}
+
+/// En-tête violet des pages principales : logo, titre, phrase d'accroche et,
+/// au besoin, un champ (la recherche par exemple).
+class BrandHeader extends StatelessWidget {
+  const BrandHeader({super.key, required this.title, this.subtitle, this.child});
+
+  final String title;
+  final String? subtitle;
+  final Widget? child;
+
+  @override
+  Widget build(BuildContext context) {
+    final side = pagePadding(context).left + 4;
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.light,
+      child: Container(
+        decoration: const BoxDecoration(gradient: brandGradient, borderRadius: BorderRadius.vertical(bottom: Radius.circular(28))),
+        child: SafeArea(
+          bottom: false,
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(side, 12, side, 20),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              const IdeeLogo(size: 18, onDark: true),
+              const SizedBox(height: 14),
+              Text(title, style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w800, color: Colors.white, letterSpacing: -0.5)),
+              if (subtitle != null) ...[
+                const SizedBox(height: 4),
+                Text(subtitle!, style: TextStyle(fontSize: 15, height: 1.35, color: Colors.white.withValues(alpha: 0.82))),
+              ],
+              if (child != null) ...[const SizedBox(height: 16), child!],
+            ]),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Pastille de texte : secteur, étape, région…
+class Tag extends StatelessWidget {
+  const Tag(this.text, {super.key, this.icon, this.background = canvasDeep, this.foreground = inkSoft});
+
+  /// Besoin d'un projet, en ambre comme sur le site.
+  const Tag.need(this.text, {super.key, this.icon}) : background = needTint, foreground = needInk;
+
+  /// Secteur ou statut, en violet clair.
+  const Tag.brand(this.text, {super.key, this.icon}) : background = brandTint, foreground = brand;
+
+  final String text;
+  final IconData? icon;
+  final Color background;
+  final Color foreground;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(color: background, borderRadius: BorderRadius.circular(20)),
+      child: Row(mainAxisSize: MainAxisSize.min, children: [
+        if (icon != null) ...[Icon(icon, size: 14, color: foreground), const SizedBox(width: 4)],
+        Flexible(child: Text(text, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: foreground))),
+      ]),
+    );
+  }
+}
+
+/// Initiales d'un membre dans un rond violet clair.
+class Avatar extends StatelessWidget {
+  const Avatar(this.name, {super.key, this.size = 40});
+
+  final String name;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    final initials = name.trim().split(RegExp(r'\s+')).where((part) => part.isNotEmpty && RegExp(r'[A-Za-zÀ-ÿ]').hasMatch(part[0])).take(2).map((part) => part[0].toUpperCase()).join();
+    return CircleAvatar(
+      radius: size / 2,
+      backgroundColor: brandTint,
+      child: Text(initials.isEmpty ? '?' : initials, style: TextStyle(fontSize: size * 0.38, fontWeight: FontWeight.w700, color: brand)),
+    );
+  }
+}
+
+/// Titre d'une partie de page.
+class SectionTitle extends StatelessWidget {
+  const SectionTitle(this.text, {super.key});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 24, bottom: 8),
+      child: Text(text, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: ink)),
+    );
+  }
+}
+
+/// Montant en FCFA avec les milliers séparés : 1 500 000 FCFA.
+String formatFcfa(int amount) {
+  final digits = amount.toString();
+  final grouped = digits.replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (_) => ' ');
+  return '$grouped FCFA';
+}
 
 /// Charge des données et affiche le chargement, l'erreur ou le résultat.
 class Loader<T> extends StatefulWidget {
@@ -69,23 +225,29 @@ class StatusChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-      decoration: BoxDecoration(color: brand.withValues(alpha: 0.08), borderRadius: BorderRadius.circular(20)),
-      child: Text(status.label, style: const TextStyle(fontSize: 12, color: brand, fontWeight: FontWeight.w600)),
-    );
+    return Tag.brand(status.label);
   }
 }
 
 class EmptyState extends StatelessWidget {
-  const EmptyState(this.message, {super.key});
+  const EmptyState(this.message, {super.key, this.icon = Icons.inbox_outlined});
 
   final String message;
+  final IconData icon;
 
   @override
   Widget build(BuildContext context) {
-    return ListView(children: [
-      Padding(padding: const EdgeInsets.all(32), child: Text(message, textAlign: TextAlign.center, style: const TextStyle(color: Colors.black54))),
+    return ListView(padding: const EdgeInsets.fromLTRB(32, 56, 32, 32), children: [
+      Center(
+        child: Container(
+          width: 72,
+          height: 72,
+          decoration: const BoxDecoration(color: brandTint, shape: BoxShape.circle),
+          child: Icon(icon, size: 32, color: brand),
+        ),
+      ),
+      const SizedBox(height: 16),
+      Text(message, textAlign: TextAlign.center, style: const TextStyle(fontSize: 15, height: 1.4, color: inkSoft)),
     ]);
   }
 }

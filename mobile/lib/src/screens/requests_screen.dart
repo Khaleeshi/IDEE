@@ -87,7 +87,7 @@ class RequestScreen extends StatelessWidget {
             const SizedBox(height: 12),
             Text(request.message, style: const TextStyle(fontSize: 16)),
             const SizedBox(height: 8),
-            Text('Envoyée le ${formatDate(request.createdAt)}', style: const TextStyle(fontSize: 12, color: Colors.black54)),
+            Text('Envoyée le ${formatDate(request.createdAt)}', style: const TextStyle(fontSize: 12, color: muted)),
             const SizedBox(height: 20),
             if (isRecipient && request.isPending) ...[
               const Text('Votre réponse', style: TextStyle(fontWeight: FontWeight.bold)),
@@ -186,10 +186,10 @@ class _ConversationScreenState extends State<ConversationScreen> {
                           margin: const EdgeInsets.only(bottom: 8),
                           padding: const EdgeInsets.all(10),
                           constraints: const BoxConstraints(maxWidth: 300),
-                          decoration: BoxDecoration(color: mine ? brand : Colors.white, borderRadius: BorderRadius.circular(14), border: Border.all(color: Colors.black12)),
+                          decoration: BoxDecoration(color: mine ? brand : Colors.white, borderRadius: BorderRadius.circular(14), border: Border.all(color: mine ? brand : line)),
                           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                             Text(message.body ?? (message.attachmentName != null ? '📎 ${message.attachmentName}' : ''),
-                                style: TextStyle(color: mine ? Colors.white : Colors.black87)),
+                                style: TextStyle(height: 1.35, color: mine ? Colors.white : ink)),
                             if (!mine && message.scamAlert) const ScamAlert(),
                           ]),
                         ),
@@ -202,7 +202,7 @@ class _ConversationScreenState extends State<ConversationScreen> {
           child: Padding(
             padding: const EdgeInsets.all(8),
             child: Row(children: [
-              Expanded(child: TextField(controller: _body, minLines: 1, maxLines: 4, decoration: const InputDecoration(hintText: 'Votre message…', border: OutlineInputBorder()))),
+              Expanded(child: TextField(controller: _body, minLines: 1, maxLines: 4, decoration: const InputDecoration(hintText: 'Votre message…'))),
               IconButton(
                 icon: const Icon(Icons.send, color: brand),
                 tooltip: 'Envoyer',

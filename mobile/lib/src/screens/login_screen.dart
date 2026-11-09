@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../countries.dart';
@@ -127,78 +128,143 @@ class _LoginScreenState extends State<LoginScreen> {
     });
   }
 
+  /// Où le code est parti : l'e-mail, ou le numéro avec son indicatif.
+  String get _destination => _isEmail ? _identifier.text.trim() : '${_country.dialCode} ${_identifier.text.trim()}';
+
+  Widget _channelTile(String value, String title, IconData icon) {
+    final selected = _channel == value;
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: RadioListTile<String>(
+        value: value,
+        title: Text(title, style: const TextStyle(fontWeight: FontWeight.w500)),
+        secondary: Icon(icon, color: selected ? brand : muted),
+        selected: selected,
+        controlAffinity: ListTileControlAffinity.leading,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 8),
+        tileColor: Colors.white,
+        selectedTileColor: brandTint.withValues(alpha: 0.6),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14), side: BorderSide(color: selected ? brandLight : line)),
+      ),
+    );
+  }
+
+  /// Bandeau d'information, en violet clair.
+  Widget _notice(String text, IconData icon) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(color: brandTint.withValues(alpha: 0.6), borderRadius: BorderRadius.circular(14)),
+      child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Icon(icon, size: 20, color: brand),
+        const SizedBox(width: 10),
+        Expanded(child: Text(text, style: const TextStyle(color: brandDark, height: 1.35))),
+      ]),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final waitingForPayment = _purchase != null && !_codeSent;
+    final editing = !_codeSent && !waitingForPayment;
 
     return Scaffold(
-      body: SafeArea(
+      body: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: SystemUiOverlayStyle.light,
         child: ListView(
-          padding: const EdgeInsets.all(24),
+          padding: EdgeInsets.zero,
           children: [
-            const SizedBox(height: 32),
-            // Logo en dégradé, du violet foncé au violet clair.
-            ShaderMask(
-              shaderCallback: (bounds) => const LinearGradient(colors: [brandDark, brandLight]).createShader(bounds),
-              child: const Text('IDEE', style: TextStyle(fontSize: 36, fontWeight: FontWeight.bold, color: Colors.white)),
-            ),
-            const SizedBox(height: 8),
-            const Text('Le réseau où les projets trouvent les personnes qui les font avancer.', style: TextStyle(fontSize: 16, color: Colors.black54)),
-            const SizedBox(height: 32),
-            DropdownButtonFormField<Country>(
-              initialValue: _country,
-              isExpanded: true,
-              decoration: const InputDecoration(labelText: 'Pays', border: OutlineInputBorder()),
-              items: [for (final country in countries) DropdownMenuItem(value: country, child: Text(country.label))],
-              onChanged: _codeSent || waitingForPayment ? null : (country) => setState(() => _country = country ?? countries.first),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _identifier,
-              enabled: !_codeSent && !waitingForPayment,
-              keyboardType: TextInputType.emailAddress,
-              onChanged: (_) => setState(() {}),
-              decoration: const InputDecoration(labelText: 'Numéro de téléphone ou e-mail', hintText: '77 123 45 67', border: OutlineInputBorder()),
-            ),
-            if (!_codeSent && !waitingForPayment && !_isEmail) ...[
-              const SizedBox(height: 12),
-              const Text('Recevoir le code par', style: TextStyle(fontWeight: FontWeight.w600)),
-              RadioGroup<String>(
-                groupValue: _channel,
-                onChanged: (value) => setState(() => _channel = value ?? 'whatsapp'),
-                child: Column(children: [
-                  const RadioListTile<String>(contentPadding: EdgeInsets.zero, value: 'whatsapp', title: Text('WhatsApp · gratuit')),
-                  if (_smsAvailable)
-                    RadioListTile<String>(contentPadding: EdgeInsets.zero, value: 'sms', title: Text('SMS · $_smsPrice FCFA, payés avant l\'envoi')),
-                ]),
+            // En-tête violet : le nom et la promesse d'IDEE.
+            Container(
+              decoration: const BoxDecoration(gradient: brandGradient),
+              child: SafeArea(
+                bottom: false,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(28, 28, 28, 60),
+                  child: Readable(
+                    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                      const IdeeLogo(size: 34, onDark: true),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Le réseau où les projets trouvent les personnes qui les font avancer.',
+                        style: TextStyle(fontSize: 16, height: 1.35, color: Colors.white.withValues(alpha: 0.85)),
+                      ),
+                    ]),
+                  ),
+                ),
               ),
-            ],
-            if (waitingForPayment) ...[
-              const SizedBox(height: 16),
-              if (_purchase!['instructions'] != null) Text(_purchase!['instructions'] as String),
-              if (_purchase!['payment_url'] != null)
-                TextButton(onPressed: () => widget.openUrl(Uri.parse(_purchase!['payment_url'] as String)), child: const Text('Ouvrir à nouveau le paiement')),
-              if (_info != null) Text(_info!, style: const TextStyle(color: brand)),
-            ],
-            if (_codeSent) ...[
-              const SizedBox(height: 16),
-              if (_info != null) Text(_info!, style: const TextStyle(color: brand)),
-              const SizedBox(height: 8),
-              TextField(
-                controller: _code,
-                keyboardType: TextInputType.number,
-                maxLength: 6,
-                decoration: const InputDecoration(labelText: 'Code reçu', border: OutlineInputBorder()),
-              ),
-              TextField(
-                controller: _name,
-                decoration: const InputDecoration(labelText: 'Votre nom (première connexion seulement)', border: OutlineInputBorder()),
-              ),
-            ],
-            const SizedBox(height: 24),
-            FilledButton(
-              style: FilledButton.styleFrom(backgroundColor: brand, minimumSize: const Size.fromHeight(52)),
-              onPressed: _busy
+            ),
+            // Formulaire dans une carte posée à cheval sur l'en-tête.
+            Transform.translate(
+              offset: const Offset(0, -36),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Readable(
+                  child: Card(
+                    margin: EdgeInsets.zero,
+                    child: Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                        Text(_codeSent ? 'Entrez votre code' : 'Se connecter', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: ink)),
+                        const SizedBox(height: 4),
+                        Text(
+                          editing ? 'Sans mot de passe : un code vous est envoyé.' : 'Pour $_destination',
+                          style: const TextStyle(color: muted),
+                        ),
+                        const SizedBox(height: 20),
+                        if (editing) ...[
+                          DropdownButtonFormField<Country>(
+                            initialValue: _country,
+                            isExpanded: true,
+                            decoration: const InputDecoration(labelText: 'Pays'),
+                            items: [for (final country in countries) DropdownMenuItem(value: country, child: Text(country.label))],
+                            onChanged: (country) => setState(() => _country = country ?? countries.first),
+                          ),
+                          const SizedBox(height: 12),
+                          TextField(
+                            controller: _identifier,
+                            keyboardType: TextInputType.emailAddress,
+                            onChanged: (_) => setState(() {}),
+                            decoration: const InputDecoration(labelText: 'Numéro de téléphone ou e-mail', hintText: '77 123 45 67'),
+                          ),
+                          if (!_isEmail) ...[
+                            const SizedBox(height: 16),
+                            const Text('Recevoir le code par', style: TextStyle(fontWeight: FontWeight.w600, color: ink)),
+                            RadioGroup<String>(
+                              groupValue: _channel,
+                              onChanged: (value) => setState(() => _channel = value ?? 'whatsapp'),
+                              child: Column(children: [
+                                _channelTile('whatsapp', 'WhatsApp · gratuit', Icons.chat_outlined),
+                                if (_smsAvailable) _channelTile('sms', 'SMS · $_smsPrice FCFA, payés avant l\'envoi', Icons.sms_outlined),
+                              ]),
+                            ),
+                          ],
+                        ],
+                        if (waitingForPayment) ...[
+                          if (_purchase!['instructions'] != null) Text(_purchase!['instructions'] as String),
+                          if (_purchase!['payment_url'] != null)
+                            TextButton(onPressed: () => widget.openUrl(Uri.parse(_purchase!['payment_url'] as String)), child: const Text('Ouvrir à nouveau le paiement')),
+                          if (_info != null) _notice(_info!, Icons.info_outline),
+                        ],
+                        if (_codeSent) ...[
+                          if (_info != null) ...[_notice(_info!, Icons.mark_chat_read_outlined), const SizedBox(height: 16)],
+                          TextField(
+                            controller: _code,
+                            keyboardType: TextInputType.number,
+                            maxLength: 6,
+                            style: const TextStyle(fontSize: 22, letterSpacing: 6, fontWeight: FontWeight.w600),
+                            decoration: const InputDecoration(labelText: 'Code reçu'),
+                          ),
+                          const SizedBox(height: 4),
+                          TextField(
+                            controller: _name,
+                            textCapitalization: TextCapitalization.words,
+                            decoration: const InputDecoration(labelText: 'Votre nom (première connexion seulement)'),
+                          ),
+                        ],
+                        const SizedBox(height: 20),
+                        FilledButton(
+                          style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(52)),
+                          onPressed: _busy
                   ? null
                   : () => _run(() async {
                         if (_codeSent) {
@@ -209,28 +275,69 @@ class _LoginScreenState extends State<LoginScreen> {
                           await _sendCode();
                         }
                       }),
-              child: Text(_codeSent
-                  ? 'Me connecter'
-                  : waitingForPayment
-                      ? 'J\'ai payé : recevoir mon code'
-                      : !_isEmail && _channel == 'sms'
-                          ? 'Payer $_smsPrice FCFA et recevoir le code'
-                          : 'Recevoir mon code'),
-            ),
-            if (_codeSent || waitingForPayment)
-              TextButton(
-                onPressed: _busy
-                    ? null
-                    : () => setState(() {
-                          _codeSent = false;
-                          _purchase = null;
-                          _info = null;
-                        }),
-                child: const Text('Changer de numéro'),
+                          child: Text(_codeSent
+                              ? 'Me connecter'
+                              : waitingForPayment
+                                  ? 'J\'ai payé : recevoir mon code'
+                                  : !_isEmail && _channel == 'sms'
+                                      ? 'Payer $_smsPrice FCFA et recevoir le code'
+                                      : 'Recevoir mon code'),
+                        ),
+                        if (!editing)
+                          TextButton(
+                            onPressed: _busy
+                                ? null
+                                : () => setState(() {
+                                      _codeSent = false;
+                                      _purchase = null;
+                                      _info = null;
+                                    }),
+                            child: const Text('Changer de numéro'),
+                          ),
+                      ]),
+                    ),
+                  ),
+                ),
               ),
+            ),
+            // Ce que l'on trouve sur IDEE, sous le formulaire.
+            Padding(
+              padding: const EdgeInsets.fromLTRB(28, 0, 28, 32),
+              child: Readable(
+                child: Column(children: const [
+                  _Benefit(Icons.handshake_outlined, 'Trouvez des associés, des mentors, des compétences ou un financement pour votre projet.'),
+                  _Benefit(Icons.route_outlined, 'Suivez des parcours guidés pour créer et faire grandir votre activité.'),
+                  _Benefit(Icons.lock_outline, 'Votre téléphone et votre e-mail ne sont jamais montrés aux autres membres.'),
+                ]),
+              ),
+            ),
           ],
         ),
       ),
+    );
+  }
+}
+
+class _Benefit extends StatelessWidget {
+  const _Benefit(this.icon, this.text);
+
+  final IconData icon;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14),
+      child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Container(
+          width: 36,
+          height: 36,
+          decoration: const BoxDecoration(color: brandTint, shape: BoxShape.circle),
+          child: Icon(icon, size: 18, color: brand),
+        ),
+        const SizedBox(width: 12),
+        Expanded(child: Padding(padding: const EdgeInsets.only(top: 8), child: Text(text, style: const TextStyle(color: inkSoft, height: 1.35)))),
+      ]),
     );
   }
 }
