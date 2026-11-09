@@ -26,10 +26,12 @@ return new class extends Migration
         });
 
         // Type d'apport d'une réponse à un besoin : « Je peux aider » ou « Je connais quelqu'un » (FC-03).
+        // Sous MySQL, l'index unique sert aussi à la clé étrangère de need_id :
+        // le nouvel index doit exister avant que l'ancien disparaisse.
         Schema::table('help_offers', function (Blueprint $table) {
             $table->string('kind', 20)->default('aide')->after('user_id');
-            $table->dropUnique(['need_id', 'user_id']);
             $table->unique(['need_id', 'user_id', 'kind']);
+            $table->dropUnique(['need_id', 'user_id']);
         });
     }
 
@@ -39,8 +41,8 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('help_offers', function (Blueprint $table) {
-            $table->dropUnique(['need_id', 'user_id', 'kind']);
             $table->unique(['need_id', 'user_id']);
+            $table->dropUnique(['need_id', 'user_id', 'kind']);
             $table->dropColumn('kind');
         });
 
